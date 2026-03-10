@@ -3,8 +3,17 @@ const Incidente = require("../models/incidenteModel");
 
 exports.registrarLeitura = (req, res) => {
 
-  const { sensor_id, temperatura, umidade } = req.body;
+  const { sensor_id } = req.body;
 
+  const temperatura = Number(req.body.temperatura);
+  const umidade = Number(req.body.umidade);
+
+  if (!sensor_id || temperatura === undefined || umidade === undefined) {
+    return res.status(400).json({ erro: "Dados inválidos" });
+  }
+
+  console.log(`Sensor ${sensor_id} → Temp: ${temperatura}°C`);
+  
   Leitura.criarLeitura(sensor_id, temperatura, umidade, (err) => {
 
     if (err) return res.status(500).send(err);
@@ -15,6 +24,10 @@ exports.registrarLeitura = (req, res) => {
 
       if (err) return res.status(500).send(err);
 
+      if (result.length === 0) {
+        return res.status(404).json({ erro: "Sensor não encontrado" });
+      }
+
       const sala = result[0];
 
       const foraDoPadrao =
@@ -23,15 +36,13 @@ exports.registrarLeitura = (req, res) => {
 
       if (foraDoPadrao) {
 
-        /* verificar se já existe incidente aberto */
+        /* verificar incidente aberto */
 
         Incidente.existeAberto(sala.id_sala, (err, incidente) => {
 
           if (err) return res.status(500).send(err);
 
           if (incidente.length === 0) {
-
-            /* cria incidente apenas se não existir */
 
             Incidente.criar(sala.id_sala, () => {
               console.log("🚨 Incidente criado!");
@@ -43,7 +54,7 @@ exports.registrarLeitura = (req, res) => {
 
       } else {
 
-        /* se voltou ao normal, fechar incidente */
+        /* fechar incidente se voltou ao normal */
 
         Incidente.fecharAutomatico(sala.id_sala, () => {
           console.log("✅ Incidente fechado automaticamente");
@@ -51,7 +62,7 @@ exports.registrarLeitura = (req, res) => {
 
       }
 
-      res.json({ mensagem: "Leitura registrada" });
+      res.json({ mensagem: "Leitura registrada com sucesso" });
 
     });
 

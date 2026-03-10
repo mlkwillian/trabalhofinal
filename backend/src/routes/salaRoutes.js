@@ -8,4 +8,8 @@ router.get("/salas", auth, salaController.listarSalas);
 
 router.post("/salas", auth, salaController.criarSala);
 
+router.put("/salas/:id", auth, salaController.atualizarSala);
+
+router.delete("/salas/:id", auth, salaController.deletarSala);
+
 module.exports = router;

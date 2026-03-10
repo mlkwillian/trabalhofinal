@@ -1,15 +1,20 @@
 const Usuario = require("../models/usuarioModel");
-const Usuario = require("../models/usuarioModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const SECRET = "termoguard_secret";
 
+
+/* listar usuarios */
+
 exports.listarUsuarios = (req, res) => {
 
   Usuario.listar((err, result) => {
 
-    if (err) return res.status(500).send(err);
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ erro: "Erro ao buscar usuários" });
+    }
 
     res.json(result);
 
@@ -18,9 +23,16 @@ exports.listarUsuarios = (req, res) => {
 };
 
 
+
+/* criar usuario */
+
 exports.criarUsuario = async (req, res) => {
 
   const { nome, email, senha, tipo_usuario } = req.body;
+
+  if (!nome || !email || !senha) {
+    return res.status(400).json({ erro: "Campos obrigatórios não informados" });
+  }
 
   try {
 
@@ -28,7 +40,10 @@ exports.criarUsuario = async (req, res) => {
 
     Usuario.criar(nome, email, senhaHash, tipo_usuario, (err) => {
 
-      if (err) return res.status(500).send(err);
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ erro: "Erro ao criar usuário" });
+      }
 
       res.json({ mensagem: "Usuário criado com sucesso" });
 
@@ -43,16 +58,23 @@ exports.criarUsuario = async (req, res) => {
 };
 
 
+
+/* login */
+
 exports.login = (req, res) => {
 
   const { email, senha } = req.body;
+
+  if (!email || !senha) {
+    return res.status(400).json({ erro: "Email e senha são obrigatórios" });
+  }
 
   Usuario.buscarPorEmail(email, async (err, result) => {
 
     if (err) return res.status(500).send(err);
 
     if (result.length === 0) {
-      return res.status(404).json({ mensagem: "Usuário não encontrado" });
+      return res.status(401).json({ mensagem: "Credenciais inválidas" });
     }
 
     const usuario = result[0];
@@ -60,7 +82,7 @@ exports.login = (req, res) => {
     const senhaValida = await bcrypt.compare(senha, usuario.senha);
 
     if (!senhaValida) {
-      return res.status(401).json({ mensagem: "Senha incorreta" });
+      return res.status(401).json({ mensagem: "Credenciais inválidas" });
     }
 
     const token = jwt.sign(
