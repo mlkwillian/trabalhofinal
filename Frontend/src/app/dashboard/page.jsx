@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Thermometer, Shield, AlertTriangle, CheckCircle2, Plus,
   Activity, Bell, Clock, User, FileText, BarChart3,
@@ -70,6 +70,106 @@ const alertMeta = {
   offline: { color: P.muted,    bg: "#120820", border: P.faint,   label: "Offline" },
 };
 
+// ── Snow Effect Hook ─────────────────────────────────────────────────────────
+const useSnowEffect = (canvasRef, active) => {
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const particles = [];
+    let animId = null;
+    let running = true;
+
+    const spawn = () => ({
+      x: Math.random() * canvas.width,
+      y: -10,
+      r: Math.random() * 2.8 + 0.8,
+      speed: Math.random() * 1.1 + 0.3,
+      drift: (Math.random() - 0.5) * 0.5,
+      opacity: Math.random() * 0.75 + 0.25,
+      spin: Math.random() * Math.PI * 2,
+      spinSpeed: (Math.random() - 0.5) * 0.035,
+    });
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (active && Math.random() < 0.4) {
+        particles.push(spawn());
+      }
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.y += p.speed;
+        p.x += p.drift;
+        p.spin += p.spinSpeed;
+
+        if (p.y > canvas.height + 10) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.spin);
+
+        if (p.r > 1.8) {
+          // 6-arm snowflake
+          ctx.strokeStyle = "#bae6fd";
+          ctx.lineWidth = 0.7;
+          for (let a = 0; a < 6; a++) {
+            ctx.save();
+            ctx.rotate(a * Math.PI / 3);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, -p.r * 2.8);
+            ctx.stroke();
+            // small branch arms
+            ctx.beginPath();
+            ctx.moveTo(0, -p.r * 1.2);
+            ctx.lineTo(-p.r * 0.7, -p.r * 1.8);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(0, -p.r * 1.2);
+            ctx.lineTo(p.r * 0.7, -p.r * 1.8);
+            ctx.stroke();
+            ctx.restore();
+          }
+          ctx.beginPath();
+          ctx.arc(0, 0, p.r * 0.5, 0, Math.PI * 2);
+          ctx.fillStyle = "#e0f2fe";
+          ctx.fill();
+        } else {
+          // small dot
+          ctx.beginPath();
+          ctx.arc(0, 0, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = "#bae6fd";
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+
+      if (running || particles.length > 0) {
+        animId = requestAnimationFrame(draw);
+      } else {
+        animId = null;
+      }
+    };
+
+    if (active) {
+      draw();
+    }
+
+    return () => {
+      running = false;
+      if (animId) cancelAnimationFrame(animId);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    };
+  }, [active, canvasRef]);
+};
+
 // ── PulsingDot ───────────────────────────────────────────────────────────────
 const PulsingDot = ({ color = P.purple }) => (
   <span className="relative flex h-2 w-2">
@@ -99,61 +199,178 @@ const StatCard = ({ label, value, icon: Icon, accentColor }) => (
 
 // ── EnvironmentCard ──────────────────────────────────────────────────────────
 const EnvironmentCard = ({ env, selected, onClick }) => {
+  const isCold = env.icon === "snowflake";
+  const canvasRef = useRef(null);
+  useSnowEffect(canvasRef, selected && isCold);
+
   const isAlert = env.status === "alert" || env.status === "danger";
-  const tempColor = isAlert ? P.yellow : P.purpleL;
+
+  // When a cold card is selected, shift colors to icy blue
+  const tempColor = selected && isCold
+    ? "#bae6fd"
+    : isAlert ? P.yellow : P.purpleL;
+
+  const borderColor = selected && isCold
+    ? "#7dd3fc"
+    : selected ? P.purple
+    : isAlert ? P.yellowDim
+    : P.border;
+
+  const boxShadow = selected && isCold
+    ? "0 0 0 1px #7dd3fc55, 0 8px 32px #38bdf822"
+    : selected ? `0 0 0 1px ${P.purple}55, 0 8px 32px #7c3aed22`
+    : "none";
 
   return (
-    <button onClick={onClick}
-      className="w-full text-left rounded-2xl border p-4 transition-all duration-200 hover:scale-[1.02] group"
+    <button
+      onClick={onClick}
+      className="w-full text-left rounded-2xl border p-4 transition-all duration-300 hover:scale-[1.02] group"
       style={{
-        background: selected ? "#1f0d35" : P.card,
-        borderColor: selected ? P.purple : isAlert ? P.yellowDim : P.border,
-        boxShadow: selected ? `0 0 0 1px ${P.purple}55, 0 8px 32px #7c3aed22` : "none",
-      }}>
+        background: selected ? (isCold ? "#0d1f2e" : "#1f0d35") : P.card,
+        borderColor,
+        boxShadow,
+        position: "relative",
+        overflow: "hidden",
+        transition: "background 0.5s, border-color 0.4s, box-shadow 0.4s, transform 0.2s",
+      }}
+    >
+      {/* Snow canvas — only for cold chambers */}
+      {isCold && (
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            borderRadius: 16,
+            zIndex: 1,
+          }}
+          width={260}
+          height={280}
+        />
+      )}
 
-      {/* top row */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="h-10 w-10 rounded-xl flex items-center justify-center"
-          style={{ background: `${tempColor}15`, border: `1px solid ${tempColor}30` }}>
-          <span style={{ color: tempColor }}>{envIcon(env.icon)}</span>
+      {/* Ice overlay — appears when cold card is selected */}
+      {isCold && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: 16,
+            pointerEvents: "none",
+            zIndex: 0,
+            opacity: selected ? 1 : 0,
+            transition: "opacity 0.7s ease",
+            background: "linear-gradient(135deg, #bae6fd08 0%, #0ea5e915 50%, #38bdf808 100%)",
+          }}
+        />
+      )}
+
+      {/* Frost border dashed ring — appears when cold card is selected */}
+      {isCold && selected && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 2,
+            borderRadius: 14,
+            pointerEvents: "none",
+            zIndex: 0,
+            border: "1px dashed #7dd3fc33",
+          }}
+        />
+      )}
+
+      {/* Frost crack lines SVG — appears when cold card is selected */}
+      {isCold && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            zIndex: 0,
+            opacity: selected ? 0.25 : 0,
+            transition: "opacity 1s ease 0.3s",
+          }}
+        >
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style={{ position: "absolute", inset: 0 }}>
+            <path d="M15 0 L40 55 L25 85 L65 175" stroke="#bae6fd" strokeWidth="0.7" fill="none" />
+            <path d="M40 55 L70 38" stroke="#bae6fd" strokeWidth="0.4" fill="none" />
+            <path d="M165 5 L138 62 L155 118 L115 210" stroke="#bae6fd" strokeWidth="0.7" fill="none" />
+            <path d="M138 62 L102 48" stroke="#bae6fd" strokeWidth="0.4" fill="none" />
+            <path d="M75 195 L105 155 L85 115 L125 75" stroke="#bae6fd" strokeWidth="0.5" fill="none" />
+          </svg>
         </div>
-        <div className="flex items-center gap-1.5">
-          {env.online
-            ? <PulsingDot color={isAlert ? P.yellow : P.purple} />
-            : <WifiOff className="h-3 w-3" style={{ color: P.faint }} />}
+      )}
+
+      {/* Card content — z-index above effects */}
+      <div style={{ position: "relative", zIndex: 2 }}>
+        {/* top row */}
+        <div className="flex items-start justify-between mb-3">
+          <div
+            className="h-10 w-10 rounded-xl flex items-center justify-center"
+            style={{
+              background: `${tempColor}15`,
+              border: `1px solid ${tempColor}30`,
+              transition: "background 0.5s, border-color 0.5s",
+            }}
+          >
+            <span style={{ color: tempColor, transition: "color 0.5s" }}>
+              {envIcon(env.icon)}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            {env.online
+              ? <PulsingDot color={selected && isCold ? "#38bdf8" : isAlert ? P.yellow : P.purple} />
+              : <WifiOff className="h-3 w-3" style={{ color: P.faint }} />}
+          </div>
         </div>
-      </div>
 
-      <p className="text-xs font-semibold uppercase tracking-wider truncate"
-        style={{ color: P.muted, fontFamily: "var(--font-syne)" }}>
-        {env.name}
-      </p>
-      <p className="text-4xl font-bold mt-1 tabular-nums"
-        style={{ color: tempColor, fontFamily: "var(--font-dm-mono)", letterSpacing: "-0.02em" }}>
-        {env.temp != null ? `${env.temp}°` : "—"}
-      </p>
+        <p
+          className="text-xs font-semibold uppercase tracking-wider truncate"
+          style={{
+            color: selected && isCold ? "#7dd3fc" : P.muted,
+            fontFamily: "var(--font-syne)",
+            transition: "color 0.5s",
+          }}
+        >
+          {env.name}
+        </p>
+        <p
+          className="text-4xl font-bold mt-1 tabular-nums"
+          style={{
+            color: tempColor,
+            fontFamily: "var(--font-dm-mono)",
+            letterSpacing: "-0.02em",
+            transition: "color 0.5s",
+          }}
+        >
+          {env.temp != null ? `${env.temp}°` : "—"}
+        </p>
 
-      <div className="flex items-center justify-between mt-2 text-[10px]"
-        style={{ color: P.faint, fontFamily: "var(--font-dm-mono)" }}>
-        <span>{env.minTemp}° mín</span>
-        <span>{env.humidity}% UR</span>
-        <span>{env.maxTemp}° máx</span>
-      </div>
+        <div
+          className="flex items-center justify-between mt-2 text-[10px]"
+          style={{ color: selected && isCold ? "#38bdf855" : P.faint, fontFamily: "var(--font-dm-mono)", transition: "color 0.5s" }}
+        >
+          <span>{env.minTemp}° mín</span>
+          <span>{env.humidity}% UR</span>
+          <span>{env.maxTemp}° máx</span>
+        </div>
 
-      {/* sparkline */}
-      <div className="mt-3 h-10 opacity-60 group-hover:opacity-90 transition-opacity">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={env.history.slice(-14)}>
-            <defs>
-              <linearGradient id={`sg${env.id}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={tempColor} stopOpacity={0.3} />
-                <stop offset="100%" stopColor={tempColor} stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <Area type="monotone" dataKey="temp" stroke={tempColor} strokeWidth={1.5}
-              fill={`url(#sg${env.id})`} dot={false} />
-          </AreaChart>
-        </ResponsiveContainer>
+        {/* sparkline */}
+        <div className="mt-3 h-10 opacity-60 group-hover:opacity-90 transition-opacity">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={env.history.slice(-14)}>
+              <defs>
+                <linearGradient id={`sg${env.id}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={tempColor} stopOpacity={0.3} />
+                  <stop offset="100%" stopColor={tempColor} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <Area type="monotone" dataKey="temp" stroke={tempColor} strokeWidth={1.5}
+                fill={`url(#sg${env.id})`} dot={false} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </button>
   );
