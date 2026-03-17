@@ -48,7 +48,7 @@ export function LandingHero() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-8 py-4 border border-purple-500/50 rounded-xl hover:bg-purple-500/10 transition-all"
+                className="px-8 py-4 border border-purple-500/50 rounded-xl text-purple-200 hover:bg-purple-500/10 transition-all"
               >
                 Saiba Mais
               </motion.button>

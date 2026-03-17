@@ -17,7 +17,7 @@ export function LandingFooter() {
               <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/30 to-violet-500/30">
                 <Thermometer className="h-6 w-6 text-purple-400" />
               </div>
-              <span className="text-xl text-purple-100">TempControl</span>
+              <span className="text-xl text-purple-100">TermoGuard</span>
             </motion.div>
             <p className="text-purple-300 text-sm leading-relaxed">
               Soluções inteligentes para monitoramento de temperatura industrial e corporativa.
@@ -66,7 +66,7 @@ export function LandingFooter() {
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-purple-300 text-sm">
                 <Mail className="h-4 w-4" />
-                <span>contato@tempcontrol.com</span>
+                <span>contato@termoguard.com</span>
               </li>
               <li className="flex items-center gap-2 text-purple-300 text-sm">
                 <Phone className="h-4 w-4" />
@@ -88,7 +88,7 @@ export function LandingFooter() {
           className="pt-8 border-t border-purple-500/30 text-center"
         >
           <p className="text-purple-400 text-sm">
-            © 2026 TempControl. Todos os direitos reservados.
+            © 2026 TermoGuard. Todos os direitos reservados.
           </p>
         </motion.div>
       </div>
