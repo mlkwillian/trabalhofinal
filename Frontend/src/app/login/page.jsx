@@ -43,7 +43,7 @@ export default function LoginPage() {
         >
           <div className="flex items-center gap-2 text-purple-400 mb-4">
             <Thermometer className="w-8 h-8" />
-            <span className="text-2xl font-bold tracking-tight text-white">ThermoGuard</span>
+            <span className="text-2xl font-bold tracking-tight text-white">TermoGuard</span>
           </div>
           <h2 className="text-5xl font-extrabold text-white leading-tight">
             Precisão absoluta no <br />
@@ -95,7 +95,7 @@ export default function LoginPage() {
                 <h3 className="text-2xl font-semibold bg-clip-text text-transparent bg-gradient-to-b from-white to-purple-200">
                   Bem-vindo!
                 </h3>
-                <p className="text-sm text-purple-300/60">
+                <p className="text-sm text-purple-300">
                   Acesse sua conta para continuar.
                 </p>
               </div>
@@ -105,7 +105,7 @@ export default function LoginPage() {
                   <Label className="text-purple-200">Email</Label>
                   <Input
                     placeholder="seu@email.com"
-                    className="bg-black/60 border-purple-900/30 focus:border-purple-500 h-11 text-white placeholder:text-white/10"
+                    className="bg-black/60 border-purple-900/30 focus:border-purple-500 h-11 text-white placeholder:text-gray-400"
                   />
                 </div>
 
@@ -117,7 +117,7 @@ export default function LoginPage() {
                   <Input
                     type="password"
                     placeholder="********"
-                    className="bg-black/60 border-purple-900/30 focus:border-purple-500 h-11 text-white placeholder:text-white/10"
+                    className="bg-black/60 border-purple-900/30 focus:border-purple-500 h-11 text-white placeholder:text-gray-400"
                   />
                 </div>
               </div>
@@ -126,8 +126,8 @@ export default function LoginPage() {
                 Entrar no Sistema
               </Button>
 
-              <p className="text-center text-xs text-purple-300/40">
-                &copy; 2026 ThermoGuard - Todos os direitos reservados.
+              <p className="text-center text-shadow-xs text-purple-300">
+                &copy; 2026 TermoGuard - Todos os direitos reservados.
               </p>
             </CardContent>
           </Card>
