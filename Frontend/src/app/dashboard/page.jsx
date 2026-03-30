@@ -3,39 +3,72 @@ import { useState, useRef, useEffect } from "react";
 import {
   Thermometer, Shield, AlertTriangle, CheckCircle2, Plus,
   Activity, Bell, Clock, User, FileText, BarChart3,
-  Wifi, WifiOff, Snowflake, Flame, Droplets, Wind, Zap
+  Wifi, WifiOff, Snowflake, Flame, Droplets, Wind, Sun, Moon,
+  TrendingUp, TrendingDown, RefreshCw, Zap
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Area, AreaChart
 } from "recharts";
 import { toast } from "sonner";
 
-// ── palette tokens ──────────────────────────────────────────────────────────
-const P = {
-  bg:       "#0d0618",
-  surface:  "#130920",
-  card:     "#1a0d2e",
-  border:   "#2d1a4a",
-  purple:   "#7c3aed",
-  purpleL:  "#a855f7",
-  purpleDim:"#3b1a6b",
-  yellow:   "#f5c518",
-  yellowDim:"#78600a",
-  text:     "#e8d5ff",
-  muted:    "#7b5ea7",
-  faint:    "#3d2660",
+// ── Theme tokens ─────────────────────────────────────────────────────────────
+const themes = {
+  dark: {
+    bg:         "#080612",
+    bgGrad:     "radial-gradient(ellipse 80% 50% at 10% -10%, #2a0e5522 0%, transparent 55%), radial-gradient(ellipse 60% 40% at 90% 110%, #f5c51806 0%, transparent 50%)",
+    surface:    "#100a1e",
+    card:       "#140c24",
+    cardHover:  "#1c1230",
+    border:     "#251840",
+    borderSoft: "#1a1030",
+    purple:     "#7c3aed",
+    purpleL:    "#a78bfa",
+    purpleDim:  "#2d1560",
+    accent:     "#f5c518",
+    accentDim:  "#5a420a",
+    accentSoft: "#f5c51812",
+    blue:       "#38bdf8",
+    green:      "#34d399",
+    red:        "#f87171",
+    text:       "#ede9fe",
+    textSub:    "#a393c8",
+    muted:      "#6b5c8a",
+    faint:      "#2e2050",
+    glass:      "rgba(20,12,36,0.85)",
+    shadow:     "0 8px 32px rgba(0,0,0,0.6)",
+    cold:       { bg: "#060f1a", border: "#1a4060", text: "#7dd3fc", overlay: "#38bdf808" },
+  },
+  light: {
+    bg:         "#f5f0ff",
+    bgGrad:     "radial-gradient(ellipse 80% 50% at 10% -10%, #ede9fe 0%, transparent 55%), radial-gradient(ellipse 60% 40% at 90% 110%, #fef3c7 0%, transparent 50%)",
+    surface:    "#faf8ff",
+    card:       "#ffffff",
+    cardHover:  "#f5f0ff",
+    border:     "#e2d9f3",
+    borderSoft: "#ede9fe",
+    purple:     "#7c3aed",
+    purpleL:    "#6d28d9",
+    purpleDim:  "#ede9fe",
+    accent:     "#d97706",
+    accentDim:  "#fde68a",
+    accentSoft: "#fef3c710",
+    blue:       "#0284c7",
+    green:      "#059669",
+    red:        "#dc2626",
+    text:       "#1e1233",
+    textSub:    "#5b4d7a",
+    muted:      "#7c6fa0",
+    faint:      "#c4b5d8",
+    glass:      "rgba(250,248,255,0.92)",
+    shadow:     "0 8px 32px rgba(100,60,180,0.1)",
+    cold:       { bg: "#f0f9ff", border: "#bae6fd", text: "#0369a1", overlay: "#e0f2fe40" },
+  }
 };
 
-// ── mock data ───────────────────────────────────────────────────────────────
+// ── Mock data ────────────────────────────────────────────────────────────────
 const generateHistory = (base, variance, points = 24) =>
   Array.from({ length: points }, (_, i) => ({
     time: `${String(i).padStart(2, "0")}:00`,
@@ -50,12 +83,12 @@ const initialEnvs = [
 ];
 
 const initialAlerts = [
-  { id: "a1", envId: "2", envName: "Câmara Fria B", type: "high",    message: "Temperatura acima do limite máximo", temp: -14.1, time: "14:32", verified: false, verifiedBy: null, observation: null },
-  { id: "a2", envId: "1", envName: "Câmara Fria A", type: "sensor",  message: "Sensor de umidade sem resposta",     temp: -18.2, time: "13:15", verified: true,  verifiedBy: "Operador", observation: "Sensor substituído." },
-  { id: "a3", envId: "4", envName: "Estufa 01",     type: "offline", message: "Dispositivo offline",               temp: null,  time: "11:00", verified: false, verifiedBy: null, observation: null },
+  { id: "a1", envId: "2", envName: "Câmara Fria B", type: "high",    message: "Temperatura acima do limite máximo", temp: -14.1, time: "14:32", verified: false, verifiedBy: null },
+  { id: "a2", envId: "1", envName: "Câmara Fria A", type: "sensor",  message: "Sensor de umidade sem resposta",     temp: -18.2, time: "13:15", verified: true,  verifiedBy: "Operador" },
+  { id: "a3", envId: "4", envName: "Estufa 01",     type: "offline", message: "Dispositivo offline",               temp: null,  time: "11:00", verified: false, verifiedBy: null },
 ];
 
-// ── helpers ─────────────────────────────────────────────────────────────────
+// ── Helpers ──────────────────────────────────────────────────────────────────
 const envIcon = (icon, cls = "h-5 w-5") => {
   if (icon === "snowflake") return <Snowflake className={cls} />;
   if (icon === "flame")     return <Flame className={cls} />;
@@ -64,13 +97,13 @@ const envIcon = (icon, cls = "h-5 w-5") => {
 };
 
 const alertMeta = {
-  high:    { color: P.yellow,   bg: "#1a1400", border: "#4a3800", label: "Alta" },
-  low:     { color: "#60a5fa",  bg: "#001020", border: "#003060", label: "Baixa" },
-  sensor:  { color: P.purpleL,  bg: "#1a0a30", border: "#4a1a80", label: "Sensor" },
-  offline: { color: P.muted,    bg: "#120820", border: P.faint,   label: "Offline" },
+  high:    { label: "Alta",    getColor: (T) => ({ color: T.accent,  bg: T.accentSoft, border: T.accentDim }) },
+  low:     { label: "Baixa",   getColor: (T) => ({ color: T.blue,    bg: `${T.blue}10`, border: `${T.blue}30` }) },
+  sensor:  { label: "Sensor",  getColor: (T) => ({ color: T.purpleL, bg: T.purpleDim,  border: T.border }) },
+  offline: { label: "Offline", getColor: (T) => ({ color: T.muted,   bg: T.borderSoft, border: T.border }) },
 };
 
-// ── Snow Effect Hook ─────────────────────────────────────────────────────────
+// ── Snow Effect ──────────────────────────────────────────────────────────────
 const useSnowEffect = (canvasRef, active) => {
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -81,87 +114,45 @@ const useSnowEffect = (canvasRef, active) => {
     let running = true;
 
     const spawn = () => ({
-      x: Math.random() * canvas.width,
-      y: -10,
+      x: Math.random() * canvas.width, y: -10,
       r: Math.random() * 2.8 + 0.8,
-      speed: Math.random() * 1.1 + 0.3,
-      drift: (Math.random() - 0.5) * 0.5,
-      opacity: Math.random() * 0.75 + 0.25,
+      speed: Math.random() * 0.9 + 0.3,
+      drift: (Math.random() - 0.5) * 0.4,
+      opacity: Math.random() * 0.6 + 0.2,
       spin: Math.random() * Math.PI * 2,
-      spinSpeed: (Math.random() - 0.5) * 0.035,
+      spinSpeed: (Math.random() - 0.5) * 0.03,
     });
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (active && Math.random() < 0.4) {
-        particles.push(spawn());
-      }
-
+      if (active && Math.random() < 0.3) particles.push(spawn());
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
-        p.y += p.speed;
-        p.x += p.drift;
-        p.spin += p.spinSpeed;
-
-        if (p.y > canvas.height + 10) {
-          particles.splice(i, 1);
-          continue;
-        }
-
+        p.y += p.speed; p.x += p.drift; p.spin += p.spinSpeed;
+        if (p.y > canvas.height + 10) { particles.splice(i, 1); continue; }
         ctx.save();
         ctx.globalAlpha = p.opacity;
         ctx.translate(p.x, p.y);
         ctx.rotate(p.spin);
-
         if (p.r > 1.8) {
-          // 6-arm snowflake
-          ctx.strokeStyle = "#bae6fd";
-          ctx.lineWidth = 0.7;
+          ctx.strokeStyle = "#bae6fd"; ctx.lineWidth = 0.6;
           for (let a = 0; a < 6; a++) {
-            ctx.save();
-            ctx.rotate(a * Math.PI / 3);
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(0, -p.r * 2.8);
-            ctx.stroke();
-            // small branch arms
-            ctx.beginPath();
-            ctx.moveTo(0, -p.r * 1.2);
-            ctx.lineTo(-p.r * 0.7, -p.r * 1.8);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(0, -p.r * 1.2);
-            ctx.lineTo(p.r * 0.7, -p.r * 1.8);
-            ctx.stroke();
+            ctx.save(); ctx.rotate(a * Math.PI / 3);
+            ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -p.r * 2.8); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, -p.r * 1.2); ctx.lineTo(-p.r * 0.7, -p.r * 1.8); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, -p.r * 1.2); ctx.lineTo(p.r * 0.7, -p.r * 1.8); ctx.stroke();
             ctx.restore();
           }
-          ctx.beginPath();
-          ctx.arc(0, 0, p.r * 0.5, 0, Math.PI * 2);
-          ctx.fillStyle = "#e0f2fe";
-          ctx.fill();
         } else {
-          // small dot
-          ctx.beginPath();
-          ctx.arc(0, 0, p.r, 0, Math.PI * 2);
-          ctx.fillStyle = "#bae6fd";
-          ctx.fill();
+          ctx.beginPath(); ctx.arc(0, 0, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = "#bae6fd"; ctx.fill();
         }
-
         ctx.restore();
       }
-
-      if (running || particles.length > 0) {
-        animId = requestAnimationFrame(draw);
-      } else {
-        animId = null;
-      }
+      if (running || particles.length > 0) animId = requestAnimationFrame(draw);
     };
 
-    if (active) {
-      draw();
-    }
-
+    if (active) draw();
     return () => {
       running = false;
       if (animId) cancelAnimationFrame(animId);
@@ -170,199 +161,156 @@ const useSnowEffect = (canvasRef, active) => {
   }, [active, canvasRef]);
 };
 
-// ── PulsingDot ───────────────────────────────────────────────────────────────
-const PulsingDot = ({ color = P.purple }) => (
+// ── PulsingDot ────────────────────────────────────────────────────────────────
+const PulsingDot = ({ color }) => (
   <span className="relative flex h-2 w-2">
-    <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
-      style={{ backgroundColor: color }} />
-    <span className="relative inline-flex rounded-full h-2 w-2"
-      style={{ backgroundColor: color }} />
+    <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-50" style={{ backgroundColor: color }} />
+    <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: color }} />
   </span>
 );
 
-// ── StatCard ─────────────────────────────────────────────────────────────────
-const StatCard = ({ label, value, icon: Icon, accentColor }) => (
-  <div className="rounded-2xl border p-4 flex items-center gap-4 transition-all hover:scale-[1.02]"
-    style={{ background: P.card, borderColor: P.border }}>
-    <div className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0"
-      style={{ background: `${accentColor}18`, border: `1px solid ${accentColor}33` }}>
+// ── StatCard ──────────────────────────────────────────────────────────────────
+const StatCard = ({ label, value, icon: Icon, accentColor, T, trend }) => (
+  <div
+    className="rounded-2xl border p-5 flex items-center gap-4 transition-all duration-300 hover:scale-[1.02] cursor-default group"
+    style={{ background: T.card, borderColor: T.border, boxShadow: T.shadow }}
+  >
+    <div
+      className="h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110"
+      style={{ background: `${accentColor}15`, border: `1.5px solid ${accentColor}30` }}
+    >
       <Icon className="h-5 w-5" style={{ color: accentColor }} />
     </div>
-    <div>
-      <p className="text-2xl font-bold leading-none" style={{ color: P.text, fontFamily: "var(--font-dm-mono)" }}>
+    <div className="flex-1 min-w-0">
+      <p className="text-3xl font-black leading-none tabular-nums" style={{ color: T.text, fontFamily: "'Space Mono', monospace" }}>
         {value}
       </p>
-      <p className="text-xs mt-1" style={{ color: P.muted, fontFamily: "var(--font-syne)" }}>{label}</p>
+      <p className="text-[11px] mt-1 font-semibold uppercase tracking-widest truncate" style={{ color: T.muted }}>
+        {label}
+      </p>
     </div>
+    {trend !== undefined && (
+      <div className="shrink-0">
+        {trend >= 0
+          ? <TrendingUp className="h-4 w-4" style={{ color: T.green }} />
+          : <TrendingDown className="h-4 w-4" style={{ color: T.red }} />
+        }
+      </div>
+    )}
   </div>
 );
 
-// ── EnvironmentCard ──────────────────────────────────────────────────────────
-const EnvironmentCard = ({ env, selected, onClick }) => {
+// ── EnvironmentCard ───────────────────────────────────────────────────────────
+const EnvironmentCard = ({ env, selected, onClick, T }) => {
   const isCold = env.icon === "snowflake";
   const canvasRef = useRef(null);
   useSnowEffect(canvasRef, selected && isCold);
 
   const isAlert = env.status === "alert" || env.status === "danger";
 
-  // When a cold card is selected, shift colors to icy blue
-  const tempColor = selected && isCold
-    ? "#bae6fd"
-    : isAlert ? P.yellow : P.purpleL;
+  const tempColor = selected && isCold ? T.cold.text
+    : isAlert ? T.accent : T.purpleL;
 
-  const borderColor = selected && isCold
-    ? "#7dd3fc"
-    : selected ? P.purple
-    : isAlert ? P.yellowDim
-    : P.border;
+  const borderColor = selected && isCold ? T.cold.border
+    : selected ? T.purple
+    : isAlert ? T.accentDim
+    : T.border;
 
-  const boxShadow = selected && isCold
-    ? "0 0 0 1px #7dd3fc55, 0 8px 32px #38bdf822"
-    : selected ? `0 0 0 1px ${P.purple}55, 0 8px 32px #7c3aed22`
-    : "none";
+  const bgColor = selected && isCold ? T.cold.bg
+    : selected ? T.cardHover : T.card;
+
+  const boxShadow = selected
+    ? (isCold
+        ? `0 0 0 1.5px ${T.cold.border}, 0 12px 40px rgba(56,189,248,0.12)`
+        : `0 0 0 1.5px ${T.purple}60, 0 12px 40px rgba(124,58,237,0.15)`)
+    : T.shadow;
 
   return (
     <button
       onClick={onClick}
-      className="w-full text-left rounded-2xl border p-4 transition-all duration-300 hover:scale-[1.02] group"
+      className="w-full text-left rounded-2xl border p-4 group"
       style={{
-        background: selected ? (isCold ? "#0d1f2e" : "#1f0d35") : P.card,
-        borderColor,
-        boxShadow,
-        position: "relative",
-        overflow: "hidden",
-        transition: "background 0.5s, border-color 0.4s, box-shadow 0.4s, transform 0.2s",
+        background: bgColor, borderColor,
+        boxShadow, position: "relative", overflow: "hidden",
+        transition: "all 0.35s cubic-bezier(0.4,0,0.2,1)",
       }}
     >
-      {/* Snow canvas — only for cold chambers */}
       {isCold && (
-        <canvas
-          ref={canvasRef}
-          style={{
-            position: "absolute",
-            inset: 0,
-            pointerEvents: "none",
-            borderRadius: 16,
-            zIndex: 1,
-          }}
-          width={260}
-          height={280}
-        />
+        <canvas ref={canvasRef}
+          style={{ position: "absolute", inset: 0, pointerEvents: "none", borderRadius: 16, zIndex: 1 }}
+          width={260} height={280} />
       )}
 
-      {/* Ice overlay — appears when cold card is selected */}
-      {isCold && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            borderRadius: 16,
-            pointerEvents: "none",
-            zIndex: 0,
-            opacity: selected ? 1 : 0,
-            transition: "opacity 0.7s ease",
-            background: "linear-gradient(135deg, #bae6fd08 0%, #0ea5e915 50%, #38bdf808 100%)",
-          }}
-        />
-      )}
-
-      {/* Frost border dashed ring — appears when cold card is selected */}
       {isCold && selected && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 2,
-            borderRadius: 14,
-            pointerEvents: "none",
-            zIndex: 0,
-            border: "1px dashed #7dd3fc33",
-          }}
-        />
+        <div style={{
+          position: "absolute", inset: 0, borderRadius: 16, pointerEvents: "none", zIndex: 0,
+          background: `linear-gradient(135deg, ${T.cold.overlay} 0%, transparent 100%)`,
+        }} />
       )}
 
-      {/* Frost crack lines SVG — appears when cold card is selected */}
-      {isCold && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            pointerEvents: "none",
-            zIndex: 0,
-            opacity: selected ? 0.25 : 0,
-            transition: "opacity 1s ease 0.3s",
-          }}
-        >
-          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style={{ position: "absolute", inset: 0 }}>
-            <path d="M15 0 L40 55 L25 85 L65 175" stroke="#bae6fd" strokeWidth="0.7" fill="none" />
-            <path d="M40 55 L70 38" stroke="#bae6fd" strokeWidth="0.4" fill="none" />
-            <path d="M165 5 L138 62 L155 118 L115 210" stroke="#bae6fd" strokeWidth="0.7" fill="none" />
-            <path d="M138 62 L102 48" stroke="#bae6fd" strokeWidth="0.4" fill="none" />
-            <path d="M75 195 L105 155 L85 115 L125 75" stroke="#bae6fd" strokeWidth="0.5" fill="none" />
-          </svg>
-        </div>
-      )}
-
-      {/* Card content — z-index above effects */}
       <div style={{ position: "relative", zIndex: 2 }}>
-        {/* top row */}
         <div className="flex items-start justify-between mb-3">
           <div
-            className="h-10 w-10 rounded-xl flex items-center justify-center"
-            style={{
-              background: `${tempColor}15`,
-              border: `1px solid ${tempColor}30`,
-              transition: "background 0.5s, border-color 0.5s",
-            }}
+            className="h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-300"
+            style={{ background: `${tempColor}15`, border: `1.5px solid ${tempColor}25` }}
           >
-            <span style={{ color: tempColor, transition: "color 0.5s" }}>
-              {envIcon(env.icon)}
-            </span>
+            <span style={{ color: tempColor }}>{envIcon(env.icon)}</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             {env.online
-              ? <PulsingDot color={selected && isCold ? "#38bdf8" : isAlert ? P.yellow : P.purple} />
-              : <WifiOff className="h-3 w-3" style={{ color: P.faint }} />}
+              ? <><PulsingDot color={selected && isCold ? T.blue : isAlert ? T.accent : T.purple} />
+                  <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: T.muted }}>online</span></>
+              : <><WifiOff className="h-3 w-3" style={{ color: T.faint }} />
+                  <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: T.faint }}>offline</span></>
+            }
           </div>
         </div>
 
-        <p
-          className="text-xs font-semibold uppercase tracking-wider truncate"
-          style={{
-            color: selected && isCold ? "#7dd3fc" : P.muted,
-            fontFamily: "var(--font-syne)",
-            transition: "color 0.5s",
-          }}
-        >
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] truncate" style={{ color: T.muted }}>
           {env.name}
         </p>
         <p
-          className="text-4xl font-bold mt-1 tabular-nums"
-          style={{
-            color: tempColor,
-            fontFamily: "var(--font-dm-mono)",
-            letterSpacing: "-0.02em",
-            transition: "color 0.5s",
-          }}
+          className="text-4xl font-black mt-1 tabular-nums leading-none"
+          style={{ color: tempColor, fontFamily: "'Space Mono', monospace", letterSpacing: "-0.02em" }}
         >
           {env.temp != null ? `${env.temp}°` : "—"}
         </p>
 
-        <div
-          className="flex items-center justify-between mt-2 text-[10px]"
-          style={{ color: selected && isCold ? "#38bdf855" : P.faint, fontFamily: "var(--font-dm-mono)", transition: "color 0.5s" }}
-        >
-          <span>{env.minTemp}° mín</span>
-          <span>{env.humidity}% UR</span>
-          <span>{env.maxTemp}° máx</span>
+        {/* range bar */}
+        <div className="mt-3 relative">
+          <div className="h-1 rounded-full overflow-hidden" style={{ background: T.borderSoft }}>
+            {env.temp != null && (() => {
+              const range = env.maxTemp - env.minTemp;
+              const pct = Math.min(100, Math.max(0, ((env.temp - env.minTemp) / range) * 100));
+              const inRange = env.temp >= env.minTemp && env.temp <= env.maxTemp;
+              return (
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${pct}%`,
+                    background: inRange
+                      ? `linear-gradient(90deg, ${T.blue}80, ${T.purple})`
+                      : `linear-gradient(90deg, ${T.accent}, ${T.red})`,
+                  }}
+                />
+              );
+            })()}
+          </div>
+          <div className="flex items-center justify-between mt-1.5 text-[9px]"
+            style={{ color: T.faint, fontFamily: "'Space Mono', monospace" }}>
+            <span>{env.minTemp}°</span>
+            <span style={{ color: T.muted }}>{env.humidity}% UR</span>
+            <span>{env.maxTemp}°</span>
+          </div>
         </div>
 
         {/* sparkline */}
-        <div className="mt-3 h-10 opacity-60 group-hover:opacity-90 transition-opacity">
+        <div className="mt-3 h-10 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={env.history.slice(-14)}>
               <defs>
                 <linearGradient id={`sg${env.id}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={tempColor} stopOpacity={0.3} />
+                  <stop offset="0%" stopColor={tempColor} stopOpacity={0.4} />
                   <stop offset="100%" stopColor={tempColor} stopOpacity={0} />
                 </linearGradient>
               </defs>
@@ -376,15 +324,15 @@ const EnvironmentCard = ({ env, selected, onClick }) => {
   );
 };
 
-// ── TemperatureChart ─────────────────────────────────────────────────────────
-const TemperatureChart = ({ env }) => {
+// ── TemperatureChart ──────────────────────────────────────────────────────────
+const TemperatureChart = ({ env, T }) => {
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
     return (
-      <div className="rounded-xl px-3 py-2 text-xs border"
-        style={{ background: P.surface, borderColor: P.border }}>
-        <p style={{ color: P.muted, fontFamily: "var(--font-syne)" }}>{label}</p>
-        <p className="font-bold mt-0.5" style={{ color: P.yellow, fontFamily: "var(--font-dm-mono)", fontSize: 14 }}>
+      <div className="rounded-xl px-3 py-2.5 text-xs border backdrop-blur-md"
+        style={{ background: T.glass, borderColor: T.border, boxShadow: T.shadow }}>
+        <p style={{ color: T.muted, fontFamily: "'Space Mono', monospace", fontSize: 10 }}>{label}</p>
+        <p className="font-black mt-0.5" style={{ color: T.accent, fontFamily: "'Space Mono', monospace", fontSize: 16 }}>
           {payload[0].value}°C
         </p>
       </div>
@@ -392,132 +340,265 @@ const TemperatureChart = ({ env }) => {
   };
 
   return (
-    <div className="rounded-2xl border p-5 h-full" style={{ background: P.card, borderColor: P.border }}>
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-2">
-          <Activity className="h-4 w-4" style={{ color: P.purple }} />
-          <span className="text-sm font-semibold" style={{ color: P.text, fontFamily: "var(--font-syne)" }}>
-            {env.name}
-          </span>
-          <span className="text-xs px-2 py-0.5 rounded-full"
-            style={{ background: P.purpleDim, color: P.purpleL, fontFamily: "var(--font-syne)" }}>
-            24h
-          </span>
+    <div className="rounded-2xl border p-6 h-full" style={{ background: T.card, borderColor: T.border, boxShadow: T.shadow }}>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: `${T.purple}15` }}>
+            <Activity className="h-4 w-4" style={{ color: T.purpleL }} />
+          </div>
+          <div>
+            <span className="text-sm font-black" style={{ color: T.text }}>{env.name}</span>
+            <p className="text-[9px] font-bold uppercase tracking-widest mt-0.5" style={{ color: T.muted }}>Histórico 24h</p>
+          </div>
         </div>
-        <span className="text-[10px]" style={{ color: P.muted, fontFamily: "var(--font-dm-mono)" }}>
-          ao vivo
-        </span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-full"
+            style={{ background: T.borderSoft, color: T.muted }}>
+            <div className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: T.green }} />
+            Ao vivo
+          </div>
+        </div>
       </div>
 
       <ResponsiveContainer width="100%" height={220}>
-        <AreaChart data={env.history} margin={{ top: 10, right: 16, left: -20, bottom: 0 }}>
+        <AreaChart data={env.history} margin={{ top: 10, right: 20, left: -18, bottom: 0 }}>
           <defs>
-            <linearGradient id="tempGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={P.purple} stopOpacity={0.4} />
-              <stop offset="100%" stopColor={P.purple} stopOpacity={0} />
+            <linearGradient id="tempGradMain" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={T.purple} stopOpacity={0.35} />
+              <stop offset="100%" stopColor={T.purple} stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke={P.faint} strokeOpacity={0.5} />
-          <XAxis dataKey="time" tick={{ fontSize: 9, fill: P.faint, fontFamily: "var(--font-dm-mono)" }}
+          <CartesianGrid strokeDasharray="3 3" stroke={T.borderSoft} strokeOpacity={0.8} />
+          <XAxis dataKey="time"
+            tick={{ fontSize: 9, fill: T.faint, fontFamily: "'Space Mono', monospace" }}
             tickLine={false} axisLine={false} interval={3} />
-          <YAxis tick={{ fontSize: 9, fill: P.faint, fontFamily: "var(--font-dm-mono)" }}
+          <YAxis
+            tick={{ fontSize: 9, fill: T.faint, fontFamily: "'Space Mono', monospace" }}
             tickLine={false} axisLine={false} />
-          <Tooltip content={<CustomTooltip />} />
-          <ReferenceLine y={env.maxTemp} stroke={P.yellow} strokeDasharray="4 2" strokeOpacity={0.7}
-            label={{ value: "máx", fontSize: 8, fill: P.yellow, position: "right" }} />
-          <ReferenceLine y={env.minTemp} stroke="#60a5fa" strokeDasharray="4 2" strokeOpacity={0.7}
-            label={{ value: "mín", fontSize: 8, fill: "#60a5fa", position: "right" }} />
-          <Area type="monotone" dataKey="temp" stroke={P.purpleL} strokeWidth={2}
-            fill="url(#tempGrad)" dot={false}
-            activeDot={{ r: 5, fill: P.yellow, strokeWidth: 2, stroke: P.bg }} />
+          <Tooltip content={<CustomTooltip />} cursor={{ stroke: T.border, strokeWidth: 1 }} />
+          <ReferenceLine y={env.maxTemp} stroke={T.accent} strokeDasharray="5 3" strokeOpacity={0.8}
+            label={{ value: "máx", fontSize: 9, fill: T.accent, position: "right" }} />
+          <ReferenceLine y={env.minTemp} stroke={T.blue} strokeDasharray="5 3" strokeOpacity={0.8}
+            label={{ value: "mín", fontSize: 9, fill: T.blue, position: "right" }} />
+          <Area type="monotone" dataKey="temp" stroke={T.purpleL} strokeWidth={2.5}
+            fill="url(#tempGradMain)" dot={false}
+            activeDot={{ r: 6, fill: T.accent, strokeWidth: 2.5, stroke: T.card }} />
         </AreaChart>
       </ResponsiveContainer>
     </div>
   );
 };
 
-// ── AlertsList ───────────────────────────────────────────────────────────────
-const AlertsList = ({ alerts, onVerify }) => (
-  <div className="rounded-2xl border h-full flex flex-col" style={{ background: P.card, borderColor: P.border }}>
-    <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: P.border }}>
-      <div className="flex items-center gap-2">
-        <Bell className="h-4 w-4" style={{ color: P.purple }} />
-        <span className="text-sm font-semibold" style={{ color: P.text, fontFamily: "var(--font-syne)" }}>
-          Alertas
-        </span>
-      </div>
-      <span className="text-xs px-2 py-0.5 rounded-full font-bold"
-        style={{ background: `${P.yellow}22`, color: P.yellow, fontFamily: "var(--font-dm-mono)" }}>
-        {alerts.filter(a => !a.verified).length} pendentes
-      </span>
-    </div>
+// ── Alert type configs ────────────────────────────────────────────────────────
+const alertConfig = {
+  high:    { label: "Temperatura Alta", icon: Flame,         getStyle: (T) => ({ color: "#f97316", glow: "#f9731630", border: "#f9731640", bg: "#f9731608", stripe: "#f9731615" }) },
+  low:     { label: "Temperatura Baixa",icon: Snowflake,     getStyle: (T) => ({ color: T.blue,    glow: `${T.blue}30`, border: `${T.blue}40`, bg: `${T.blue}08`, stripe: `${T.blue}15` }) },
+  sensor:  { label: "Falha de Sensor",  icon: Zap,           getStyle: (T) => ({ color: T.purpleL, glow: `${T.purpleL}30`, border: `${T.purpleL}40`, bg: `${T.purpleL}08`, stripe: `${T.purpleL}15` }) },
+  offline: { label: "Dispositivo Offline", icon: WifiOff,   getStyle: (T) => ({ color: T.muted,   glow: `${T.muted}20`, border: T.border, bg: T.borderSoft, stripe: `${T.muted}10` }) },
+};
 
-    <ScrollArea className="flex-1 px-4 py-3">
-      <div className="space-y-2">
-        {alerts.map(alert => {
-          const meta = alertMeta[alert.type] ?? alertMeta.offline;
-          return (
-            <div key={alert.id}
-              className="rounded-xl border p-3 transition-all"
-              style={{
-                background: meta.bg,
-                borderColor: meta.border,
-                opacity: alert.verified ? 0.45 : 1,
-              }}>
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded"
-                      style={{ background: `${meta.color}20`, color: meta.color, fontFamily: "var(--font-syne)" }}>
-                      {meta.label}
-                    </span>
-                  </div>
-                  <p className="text-xs font-semibold truncate" style={{ color: P.text, fontFamily: "var(--font-syne)" }}>
-                    {alert.envName}
-                  </p>
-                  <p className="text-[10px] mt-0.5 leading-snug" style={{ color: P.muted }}>
-                    {alert.message}
-                  </p>
-                  <div className="flex items-center gap-2 mt-1.5 text-[9px]" style={{ color: P.faint, fontFamily: "var(--font-dm-mono)" }}>
-                    <Clock className="h-2.5 w-2.5" />{alert.time}
-                    {alert.verified && <><User className="h-2.5 w-2.5 ml-1" />{alert.verifiedBy}</>}
-                  </div>
-                </div>
-                {!alert.verified ? (
-                  <button
-                    className="text-[10px] px-2.5 py-1 rounded-lg font-semibold transition-all hover:scale-105 shrink-0"
-                    style={{ background: `${P.yellow}20`, color: P.yellow, border: `1px solid ${P.yellowDim}`, fontFamily: "var(--font-syne)" }}
-                    onClick={() => onVerify(alert.id)}>
-                    OK
-                  </button>
-                ) : (
-                  <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" style={{ color: P.purple }} />
-                )}
-              </div>
+// ── AlertCard ─────────────────────────────────────────────────────────────────
+const AlertCard = ({ alert, onVerify, T }) => {
+  const cfg = alertConfig[alert.type] ?? alertConfig.offline;
+  const s = cfg.getStyle(T);
+  const Icon = cfg.icon;
+  const pending = !alert.verified;
+
+  return (
+    <div
+      className="relative rounded-2xl overflow-hidden transition-all duration-300"
+      style={{
+        border: `1.5px solid ${s.border}`,
+        background: T.card,
+        boxShadow: pending ? `0 0 0 0px ${s.glow}, 0 4px 20px ${s.glow}` : "none",
+        opacity: alert.verified ? 0.55 : 1,
+      }}
+    >
+      {/* colored left bar */}
+      <div style={{
+        position: "absolute", left: 0, top: 0, bottom: 0, width: 4,
+        background: pending
+          ? `linear-gradient(180deg, ${s.color}, ${s.color}88)`
+          : T.border,
+        borderRadius: "2px 0 0 2px",
+      }} />
+
+      {/* subtle background tint */}
+      <div style={{
+        position: "absolute", inset: 0,
+        background: `linear-gradient(135deg, ${s.stripe} 0%, transparent 60%)`,
+        pointerEvents: "none",
+      }} />
+
+      <div className="relative pl-5 pr-4 py-4">
+        <div className="flex items-start gap-3">
+
+          {/* icon bubble */}
+          <div
+            className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+            style={{
+              background: `${s.color}18`,
+              border: `1.5px solid ${s.color}35`,
+              boxShadow: pending ? `0 0 12px ${s.color}25` : "none",
+            }}
+          >
+            <Icon className="h-4.5 w-4.5" style={{ color: s.color, width: 18, height: 18 }} />
+          </div>
+
+          {/* content */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <span
+                className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md"
+                style={{ background: `${s.color}20`, color: s.color, border: `1px solid ${s.color}30` }}
+              >
+                {cfg.label}
+              </span>
+              <span className="text-[10px] tabular-nums shrink-0" style={{ color: T.muted, fontFamily: "'Space Mono', monospace" }}>
+                {alert.time}
+              </span>
             </div>
-          );
-        })}
-      </div>
-    </ScrollArea>
-  </div>
-);
 
-// ── AuditReport ──────────────────────────────────────────────────────────────
-const AuditReport = ({ alerts }) => (
-  <div className="rounded-2xl border" style={{ background: P.card, borderColor: P.border }}>
-    <div className="flex items-center gap-2 px-5 py-4 border-b" style={{ borderColor: P.border }}>
-      <FileText className="h-4 w-4" style={{ color: P.purple }} />
-      <span className="text-sm font-semibold" style={{ color: P.text, fontFamily: "var(--font-syne)" }}>
-        Relatório de Auditoria
-      </span>
+            <p className="text-sm font-black leading-tight" style={{ color: T.text }}>
+              {alert.envName}
+            </p>
+            <p className="text-[11px] mt-1 leading-snug" style={{ color: T.textSub }}>
+              {alert.message}
+            </p>
+
+            {/* footer row */}
+            <div className="flex items-center justify-between mt-3 gap-2">
+              {alert.verified && alert.verifiedBy ? (
+                <div className="flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg"
+                  style={{ background: `${T.green}15`, color: T.green, border: `1px solid ${T.green}30` }}>
+                  <CheckCircle2 className="h-3 w-3" />
+                  <span className="font-bold">Verificado por {alert.verifiedBy}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 text-[10px]" style={{ color: T.muted }}>
+                  <div className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: s.color }} />
+                  <span>Aguardando verificação</span>
+                </div>
+              )}
+
+              {pending && (
+                <button
+                  onClick={() => onVerify(alert.id)}
+                  className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-xl font-black transition-all duration-200 hover:scale-105 shrink-0"
+                  style={{
+                    background: `${s.color}22`,
+                    color: s.color,
+                    border: `1.5px solid ${s.color}50`,
+                    boxShadow: `0 2px 8px ${s.color}20`,
+                  }}
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Verificar
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── AlertsList ────────────────────────────────────────────────────────────────
+const AlertsList = ({ alerts, onVerify, T }) => {
+  const pending = alerts.filter(a => !a.verified);
+  const resolved = alerts.filter(a => a.verified);
+
+  return (
+    <div className="rounded-2xl border h-full flex flex-col" style={{ background: T.card, borderColor: T.border, boxShadow: T.shadow }}>
+
+      {/* Header */}
+      <div className="px-5 pt-5 pb-4 border-b" style={{ borderColor: T.border }}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-xl flex items-center justify-center relative"
+              style={{ background: `${T.accent}18`, border: `1.5px solid ${T.accent}35` }}>
+              <Bell className="h-4 w-4" style={{ color: T.accent }} />
+              {pending.length > 0 && (
+                <span
+                  className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full flex items-center justify-center text-[8px] font-black"
+                  style={{ background: T.accent, color: "#fff" }}
+                >
+                  {pending.length}
+                </span>
+              )}
+            </div>
+            <div>
+              <span className="text-sm font-black" style={{ color: T.text }}>Central de Alertas</span>
+              <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: T.muted }}>Monitoramento ativo</p>
+            </div>
+          </div>
+        </div>
+
+        {/* summary pills */}
+        <div className="flex gap-2">
+          <div className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-full font-bold flex-1 justify-center"
+            style={{ background: `${T.accent}15`, color: T.accent, border: `1px solid ${T.accent}30` }}>
+            <AlertTriangle className="h-3 w-3" />
+            {pending.length} pendente{pending.length !== 1 ? "s" : ""}
+          </div>
+          <div className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-full font-bold flex-1 justify-center"
+            style={{ background: `${T.green}15`, color: T.green, border: `1px solid ${T.green}30` }}>
+            <CheckCircle2 className="h-3 w-3" />
+            {resolved.length} resolvido{resolved.length !== 1 ? "s" : ""}
+          </div>
+        </div>
+      </div>
+
+      {/* Alerts list */}
+      <ScrollArea className="flex-1 px-4 py-4">
+        <div className="space-y-3">
+          {pending.length > 0 && (
+            <>
+              <p className="text-[9px] font-black uppercase tracking-[0.2em] px-1" style={{ color: T.accent }}>
+                ● Pendentes
+              </p>
+              {pending.map(alert => (
+                <AlertCard key={alert.id} alert={alert} onVerify={onVerify} T={T} />
+              ))}
+            </>
+          )}
+
+          {resolved.length > 0 && (
+            <>
+              <p className="text-[9px] font-black uppercase tracking-[0.2em] px-1 mt-4" style={{ color: T.green }}>
+                ✓ Resolvidos
+              </p>
+              {resolved.map(alert => (
+                <AlertCard key={alert.id} alert={alert} onVerify={onVerify} T={T} />
+              ))}
+            </>
+          )}
+        </div>
+      </ScrollArea>
+    </div>
+  );
+};
+
+// ── AuditReport ───────────────────────────────────────────────────────────────
+const AuditReport = ({ alerts, T }) => (
+  <div className="rounded-2xl border" style={{ background: T.card, borderColor: T.border, boxShadow: T.shadow }}>
+    <div className="flex items-center gap-3 px-6 py-4 border-b" style={{ borderColor: T.border }}>
+      <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: `${T.purpleL}15` }}>
+        <FileText className="h-4 w-4" style={{ color: T.purpleL }} />
+      </div>
+      <div>
+        <span className="text-sm font-black" style={{ color: T.text }}>Relatório de Auditoria</span>
+        <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: T.muted }}>Registro de eventos</p>
+      </div>
     </div>
     <div className="overflow-x-auto">
       <table className="w-full text-xs">
         <thead>
-          <tr style={{ borderBottom: `1px solid ${P.border}` }}>
+          <tr style={{ borderBottom: `1px solid ${T.border}`, background: T.borderSoft }}>
             {["Ambiente", "Tipo", "Mensagem", "Horário", "Status", "Operador"].map(h => (
-              <th key={h} className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-[10px]"
-                style={{ color: P.muted, fontFamily: "var(--font-syne)" }}>
+              <th key={h} className="px-5 py-3 text-left font-black uppercase tracking-wider text-[10px]"
+                style={{ color: T.muted }}>
                 {h}
               </th>
             ))}
@@ -526,24 +607,32 @@ const AuditReport = ({ alerts }) => (
         <tbody>
           {alerts.map((a, i) => {
             const meta = alertMeta[a.type] ?? alertMeta.offline;
+            const { color, border } = meta.getColor(T);
             return (
               <tr key={a.id}
-                style={{ borderBottom: `1px solid ${P.faint}55`, background: i % 2 === 0 ? "transparent" : "#ffffff04" }}>
-                <td className="px-4 py-3 font-medium" style={{ color: P.text, fontFamily: "var(--font-syne)" }}>{a.envName}</td>
-                <td className="px-4 py-3">
-                  <span className="text-[9px] font-bold uppercase px-2 py-1 rounded"
-                    style={{ background: `${meta.color}18`, color: meta.color, border: `1px solid ${meta.border}` }}>
+                className="transition-colors duration-150 hover:bg-opacity-50"
+                style={{ borderBottom: `1px solid ${T.borderSoft}`, background: i % 2 === 0 ? "transparent" : T.borderSoft + "40" }}>
+                <td className="px-5 py-3.5 font-bold" style={{ color: T.text }}>{a.envName}</td>
+                <td className="px-5 py-3.5">
+                  <span className="text-[9px] font-black uppercase px-2 py-1 rounded-md"
+                    style={{ background: `${color}15`, color, border: `1px solid ${border}` }}>
                     {meta.label}
                   </span>
                 </td>
-                <td className="px-4 py-3 max-w-[200px] truncate" style={{ color: P.muted }}>{a.message}</td>
-                <td className="px-4 py-3" style={{ color: P.faint, fontFamily: "var(--font-dm-mono)" }}>{a.time}</td>
-                <td className="px-4 py-3">
+                <td className="px-5 py-3.5 max-w-[200px] truncate" style={{ color: T.muted }}>{a.message}</td>
+                <td className="px-5 py-3.5" style={{ color: T.faint, fontFamily: "'Space Mono', monospace" }}>{a.time}</td>
+                <td className="px-5 py-3.5">
                   {a.verified
-                    ? <span className="flex items-center gap-1" style={{ color: P.purpleL }}><CheckCircle2 className="h-3 w-3" />Verificado</span>
-                    : <span className="flex items-center gap-1" style={{ color: P.yellow }}><AlertTriangle className="h-3 w-3" />Pendente</span>}
+                    ? <span className="flex items-center gap-1.5 font-bold" style={{ color: T.green }}>
+                        <CheckCircle2 className="h-3.5 w-3.5" />Verificado
+                      </span>
+                    : <span className="flex items-center gap-1.5 font-bold" style={{ color: T.accent }}>
+                        <AlertTriangle className="h-3.5 w-3.5" />Pendente
+                      </span>}
                 </td>
-                <td className="px-4 py-3" style={{ color: P.faint, fontFamily: "var(--font-dm-mono)" }}>{a.verifiedBy ?? "—"}</td>
+                <td className="px-5 py-3.5" style={{ color: T.faint, fontFamily: "'Space Mono', monospace" }}>
+                  {a.verifiedBy ?? "—"}
+                </td>
               </tr>
             );
           })}
@@ -553,43 +642,42 @@ const AuditReport = ({ alerts }) => (
   </div>
 );
 
-// ── AddEnvironmentDialog ─────────────────────────────────────────────────────
-const AddEnvironmentDialog = () => {
+// ── AddEnvironmentDialog ──────────────────────────────────────────────────────
+const AddEnvironmentDialog = ({ T }) => {
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl font-semibold transition-all hover:scale-105"
-          style={{ background: `${P.purple}25`, color: P.purpleL, border: `1px solid ${P.purpleDim}`, fontFamily: "var(--font-syne)" }}>
+        <button
+          className="flex items-center gap-2 text-xs px-4 py-2 rounded-xl font-black transition-all duration-200 hover:scale-105"
+          style={{
+            background: `${T.purple}20`, color: T.purpleL,
+            border: `1.5px solid ${T.purpleDim}`,
+          }}>
           <Plus className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Novo Ambiente</span>
         </button>
       </DialogTrigger>
-      <DialogContent className="max-w-sm border" style={{ background: P.card, borderColor: P.border }}>
+      <DialogContent className="max-w-sm border" style={{ background: T.card, borderColor: T.border }}>
         <DialogHeader>
-          <DialogTitle className="text-sm font-bold" style={{ color: P.text, fontFamily: "var(--font-syne)" }}>
+          <DialogTitle className="text-sm font-black" style={{ color: T.text }}>
             Adicionar Ambiente
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-3 mt-2">
+        <div className="space-y-4 mt-3">
           {[["Nome", "ex: Câmara Fria C"], ["Temp. Mínima (°C)", "-22"], ["Temp. Máxima (°C)", "-15"]].map(([label, placeholder]) => (
-            <div key={label} className="space-y-1.5">
-              <label className="text-xs font-medium" style={{ color: P.muted, fontFamily: "var(--font-syne)" }}>
-                {label}
-              </label>
+            <div key={label} className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider" style={{ color: T.muted }}>{label}</label>
               <input placeholder={placeholder}
-                className="w-full h-8 px-3 rounded-lg text-xs outline-none transition-all"
-                style={{
-                  background: P.surface, border: `1px solid ${P.border}`,
-                  color: P.text, fontFamily: "var(--font-dm-mono)",
-                }} />
+                className="w-full h-9 px-3 rounded-xl text-xs outline-none transition-all"
+                style={{ background: T.surface, border: `1.5px solid ${T.border}`, color: T.text, fontFamily: "'Space Mono', monospace" }} />
             </div>
           ))}
           <button
-            className="w-full h-9 rounded-xl text-xs font-bold transition-all hover:scale-[1.02] mt-1"
-            style={{ background: P.purple, color: "#fff", fontFamily: "var(--font-syne)" }}
+            className="w-full h-10 rounded-xl text-xs font-black transition-all hover:scale-[1.02] mt-2"
+            style={{ background: T.purple, color: "#fff" }}
             onClick={() => setOpen(false)}>
-            Adicionar
+            Adicionar Ambiente
           </button>
         </div>
       </DialogContent>
@@ -597,108 +685,127 @@ const AddEnvironmentDialog = () => {
   );
 };
 
-// ── INDEX PAGE ───────────────────────────────────────────────────────────────
+// ── ThemeToggle ───────────────────────────────────────────────────────────────
+const ThemeToggle = ({ isDark, onToggle, T }) => (
+  <button
+    onClick={onToggle}
+    className="h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110"
+    style={{ background: T.borderSoft, border: `1.5px solid ${T.border}`, color: T.muted }}
+    title={isDark ? "Modo claro" : "Modo escuro"}
+  >
+    {isDark
+      ? <Sun className="h-4 w-4" style={{ color: T.accent }} />
+      : <Moon className="h-4 w-4" style={{ color: T.purpleL }} />}
+  </button>
+);
+
+// ── INDEX PAGE ────────────────────────────────────────────────────────────────
 export default function Index() {
+  const [isDark, setIsDark]           = useState(true);
   const [selectedEnv, setSelectedEnv] = useState(initialEnvs[0]);
   const [alertsData, setAlertsData]   = useState(initialAlerts);
 
+  const T = isDark ? themes.dark : themes.light;
+
   const handleVerify = (alertId) => {
     setAlertsData(prev =>
-      prev.map(a =>
-        a.id === alertId
-          ? { ...a, verified: true, verifiedBy: "Operador", observation: "Verificado no local." }
-          : a
-      )
+      prev.map(a => a.id === alertId
+        ? { ...a, verified: true, verifiedBy: "Operador" }
+        : a)
     );
-    toast.success("Alerta verificado!", {
-      style: { background: P.card, border: `1px solid ${P.border}`, color: P.text }
+    toast.success("Alerta verificado com sucesso!", {
+      style: { background: T.card, border: `1px solid ${T.border}`, color: T.text }
     });
   };
 
-  const stats = {
-    total:  initialEnvs.length,
-    online: initialEnvs.filter(e => e.online).length,
-    alerts: alertsData.filter(a => !a.verified).length,
-    ok:     initialEnvs.filter(e => e.status === "ok").length,
-  };
+  const stats = [
+    { label: "Ambientes",      value: initialEnvs.length,                              icon: BarChart3,     accentColor: T.purpleL },
+    { label: "Online",         value: initialEnvs.filter(e => e.online).length,        icon: Wifi,          accentColor: T.green },
+    { label: "Alertas Ativos", value: alertsData.filter(a => !a.verified).length,      icon: AlertTriangle, accentColor: T.accent },
+    { label: "Normais",        value: initialEnvs.filter(e => e.status === "ok").length,icon: CheckCircle2, accentColor: T.blue },
+  ];
 
   return (
-    <div className="min-h-screen" style={{
-      background: P.bg,
-      backgroundImage: `
-        radial-gradient(ellipse 60% 40% at 20% 0%, #3b1a6b33 0%, transparent 60%),
-        radial-gradient(ellipse 40% 30% at 80% 100%, #f5c51808 0%, transparent 50%)
-      `,
-      fontFamily: "var(--font-syne)",
-    }}>
+    <div
+      className="min-h-screen transition-colors duration-500"
+      style={{ background: T.bg, backgroundImage: T.bgGrad }}
+    >
+      {/* Google Fonts */}
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');`}</style>
 
-      {/* ── header ── */}
-      <header className="border-b sticky top-0 z-50 backdrop-blur-xl"
-        style={{ background: `${P.bg}cc`, borderColor: P.border }}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between h-14 px-5">
+      {/* ── Header ── */}
+      <header
+        className="border-b sticky top-0 z-50 backdrop-blur-xl transition-colors duration-500"
+        style={{ background: T.glass, borderColor: T.border }}
+      >
+        <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl flex items-center justify-center"
-              style={{ background: `${P.purple}20`, border: `1px solid ${P.purple}40` }}>
-              <Thermometer className="h-4 w-4" style={{ color: P.purpleL }} />
+            <div
+              className="h-10 w-10 rounded-2xl flex items-center justify-center"
+              style={{ background: `${T.purple}20`, border: `1.5px solid ${T.purple}40` }}
+            >
+              <Thermometer className="h-5 w-5" style={{ color: T.purpleL }} />
             </div>
             <div>
-              <h1 className="text-sm font-extrabold leading-none tracking-tight" style={{ color: P.text }}>
+              <h1 className="text-base font-black leading-none tracking-tight" style={{ color: T.text, fontFamily: "'Space Mono', monospace" }}>
                 ThermoGuard
               </h1>
-              <span className="text-[9px] uppercase tracking-widest" style={{ color: P.faint }}>
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em]" style={{ color: T.muted }}>
                 Controle de Temperatura
               </span>
             </div>
           </div>
+
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-1.5 text-xs" style={{ color: P.muted }}>
-              <PulsingDot color={P.purple} />
-              <span>Sistema Ativo</span>
+            <div className="hidden sm:flex items-center gap-2 text-xs px-3 py-1.5 rounded-full"
+              style={{ background: T.borderSoft, color: T.muted }}>
+              <PulsingDot color={T.green} />
+              <span className="font-semibold">Sistema Ativo</span>
             </div>
-            <div className="h-4 w-px" style={{ background: P.border }} />
-            <AddEnvironmentDialog />
+            <div className="h-5 w-px" style={{ background: T.border }} />
+            <ThemeToggle isDark={isDark} onToggle={() => setIsDark(d => !d)} T={T} />
+            <AddEnvironmentDialog T={T} />
           </div>
         </div>
       </header>
 
-      {/* ── main ── */}
-      <main className="max-w-7xl mx-auto px-4 py-6 space-y-5">
+      {/* ── Main ── */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-7 space-y-6">
 
-        {/* stats */}
+        {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatCard label="Ambientes"      value={stats.total}  icon={BarChart3}     accentColor={P.purpleL} />
-          <StatCard label="Online"         value={stats.online} icon={Wifi}          accentColor={P.purple} />
-          <StatCard label="Alertas Ativos" value={stats.alerts} icon={AlertTriangle} accentColor={P.yellow} />
-          <StatCard label="Normais"        value={stats.ok}     icon={CheckCircle2}  accentColor="#a78bfa" />
+          {stats.map(s => (
+            <StatCard key={s.label} T={T} {...s} />
+          ))}
         </div>
 
-        {/* environments */}
+        {/* Environments */}
         <section>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-3" style={{ color: P.faint }}>
+          <p className="text-[10px] font-black uppercase tracking-[0.22em] mb-3" style={{ color: T.faint }}>
             Ambientes Monitorados
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {initialEnvs.map(env => (
-              <EnvironmentCard key={env.id} env={env}
+              <EnvironmentCard key={env.id} env={env} T={T}
                 selected={selectedEnv.id === env.id}
                 onClick={() => setSelectedEnv(env)} />
             ))}
           </div>
         </section>
 
-        {/* chart + alerts */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ minHeight: 300 }}>
+        {/* Chart + Alerts */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ minHeight: 320 }}>
           <div className="lg:col-span-2">
-            <TemperatureChart env={selectedEnv} />
+            <TemperatureChart env={selectedEnv} T={T} />
           </div>
-          <AlertsList alerts={alertsData} onVerify={handleVerify} />
+          <AlertsList alerts={alertsData} onVerify={handleVerify} T={T} />
         </div>
 
-        {/* audit */}
-        <AuditReport alerts={alertsData} />
+        {/* Audit */}
+        <AuditReport alerts={alertsData} T={T} />
 
-        {/* footer */}
-        <p className="text-center text-[10px] pb-4" style={{ color: P.faint, fontFamily: "var(--font-dm-mono)" }}>
+        {/* Footer */}
+        <p className="text-center text-[10px] pb-6 font-bold" style={{ color: T.faint, fontFamily: "'Space Mono', monospace" }}>
           ThermoGuard © 2025 — Monitoramento em tempo real
         </p>
       </main>
