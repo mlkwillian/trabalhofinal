@@ -1,5 +1,6 @@
 import { Syne, DM_Mono } from "next/font/google";
 import "./globals.css";
+import Sidebar from "@/components/Sidebar";
 
 const syne = Syne({
   subsets: ["latin"],
@@ -22,6 +23,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="pt-BR">
       <body className={`${syne.variable} ${dmMono.variable} antialiased`}>
+        <Sidebar/>
         {children}
       </body>
     </html>
