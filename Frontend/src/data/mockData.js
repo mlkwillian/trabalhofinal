@@ -1,7 +1,9 @@
-export const generateHistory = (base, variance, points = 24) => { Array.from({ length: points }, (_, i) => ({
+export const generateHistory = (base, variance, points = 24) => {
+  return Array.from({ length: points }, (_, i) => ({
     time: `${String(i).padStart(2, "0")}:00`,
     temp: +(base + (Math.random() - 0.5) * variance * 2).toFixed(1),
-  }))}  
+  }));
+};
 
 export const initialEnvs = [   { id: "1", name: "Câmara Fria A", icon: "snowflake", temp: -18.2, minTemp: -22, maxTemp: -15, humidity: 68, status: "ok",    online: true,  history: generateHistory(-18, 2) },
   { id: "2", name: "Câmara Fria B", icon: "snowflake", temp: -14.1, minTemp: -22, maxTemp: -15, humidity: 71, status: "alert", online: true,  history: generateHistory(-14, 3) },

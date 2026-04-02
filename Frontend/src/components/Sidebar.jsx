@@ -1,8 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Sun,
+  Moon,
+  User,
+  Settings,
+  LogOut,
+  Menu,
+} from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: "grid" },
@@ -13,7 +24,6 @@ const navItems = [
   { label: "Configurações", href: "/dashboard/configuracoes", icon: "settings" },
 ];
 
-// Ícones simplificados
 function Icon({ type }) {
   const common = {
     width: 18,
@@ -22,53 +32,18 @@ function Icon({ type }) {
     fill: "none",
     stroke: "currentColor",
     strokeWidth: "2",
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
   };
 
-  switch (type) {
-    case "grid":
-      return (
-        <svg {...common}>
-          <rect x="3" y="3" width="7" height="7" />
-          <rect x="14" y="3" width="7" height="7" />
-          <rect x="3" y="14" width="7" height="7" />
-          <rect x="14" y="14" width="7" height="7" />
-        </svg>
-      );
-    case "home":
-      return (
-        <svg {...common}>
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-        </svg>
-      );
-    case "bell":
-      return (
-        <svg {...common}>
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-        </svg>
-      );
-    case "activity":
-      return (
-        <svg {...common}>
-          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-        </svg>
-      );
-    case "file":
-      return (
-        <svg {...common}>
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12" />
-        </svg>
-      );
-    case "settings":
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="12" r="3" />
-        </svg>
-      );
-    default:
-      return null;
-  }
+  const icons = {
+    grid: <rect x="3" y="3" width="7" height="7" />,
+    home: <path d="M3 9l9-7 9 7v11H3z" />,
+    bell: <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18" />,
+    activity: <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />,
+    file: <path d="M14 2H6v20h12" />,
+    settings: <circle cx="12" cy="12" r="3" />,
+  };
+
+  return <svg {...common}>{icons[type]}</svg>;
 }
 
 export default function Sidebar() {
@@ -76,156 +51,132 @@ export default function Sidebar() {
   const router = useRouter();
 
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [dark, setDark] = useState(true);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const user = {
-    name: "Admin ThermoGuard",
-    email: "admin@thermoguard.com",
-    initials: "AT",
-  };
+  useEffect(() => {
+    const saved = localStorage.getItem("sidebar-collapsed");
+    if (saved) setCollapsed(saved === "true");
+  }, []);
 
-  function isActiveRoute(href) {
-    if (href === "/dashboard") {
-      return pathname === "/dashboard";
-    }
-    return pathname.startsWith(href);
-  }
+  useEffect(() => {
+    localStorage.setItem("sidebar-collapsed", collapsed);
+  }, [collapsed]);
 
-  function handleLogout() {
-    router.push("/login");
-  }
+  const isActive = (href) =>
+    href === "/dashboard" ? pathname === href : pathname.startsWith(href);
 
-  return (
-    <aside
-      style={{
-        width: collapsed ? 64 : 220,
-        minHeight: "100vh",
-        background: "#0f0e1a",
-        borderRight: "1px solid rgba(139,92,246,0.15)",
-        display: "flex",
-        flexDirection: "column",
-        transition: "width .25s",
-      }}
+  const SidebarContent = (
+    <motion.aside
+      animate={{ width: collapsed ? 64 : 240 }}
+      className="h-screen bg-[#0f0e1a] border-r border-purple-900/20 flex flex-col relative"
     >
       {/* Logo */}
-      <div
-        style={{
-          padding: collapsed ? "20px 0" : "20px 16px",
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          justifyContent: collapsed ? "center" : "flex-start",
-        }}
-      >
-        <div
-          style={{
-            width: 30,
-            height: 30,
-            borderRadius: 8,
-            background: "linear-gradient(135deg,#7c3aed,#a855f7)",
-          }}
-        />
-        {!collapsed && <span style={{ color: "#e2d9f3" }}>ThermoGuard</span>}
+      <div className="flex items-center gap-3 p-4">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-purple-400" />
+        {!collapsed && <span className="text-white font-bold">ThermoGuard</span>}
       </div>
 
+      {/* Collapse */}
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className="absolute top-5 -right-3 bg-[#1a1825] p-1 rounded-full border border-purple-900/30"
+      >
+        {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+      </button>
+
       {/* Nav */}
-      <nav style={{ flex: 1, padding: 8 }}>
+      <nav className="flex-1 px-2 space-y-1">
         {navItems.map((item) => {
-          const active = isActiveRoute(item.href);
+          const active = isActive(item.href);
 
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: collapsed ? "10px 0" : "10px 12px",
-                justifyContent: collapsed ? "center" : "flex-start",
-                borderRadius: 8,
-                color: active ? "#c4b5fd" : "#6b5fa0",
-                background: active ? "rgba(139,92,246,0.12)" : "transparent",
-                textDecoration: "none",
-                position: "relative",
-              }}
-            >
-              <Icon type={item.icon} />
+            <Link key={item.href} href={item.href}>
+              <motion.div
+                whileHover={{ scale: 1.03 }}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all
+                  ${active ? "bg-purple-600/20 text-purple-300" : "text-purple-400 hover:bg-purple-600/10"}`}
+              >
+                <Icon type={item.icon} />
+                {!collapsed && <span>{item.label}</span>}
 
-              {!collapsed && <span>{item.label}</span>}
-
-              {!collapsed && item.badge && (
-                <span
-                  style={{
-                    marginLeft: "auto",
-                    background: "#7c3aed",
-                    padding: "2px 6px",
-                    borderRadius: 10,
-                    fontSize: 10,
-                  }}
-                >
-                  {item.badge}
-                </span>
-              )}
+                {!collapsed && item.badge && (
+                  <span className="ml-auto text-xs bg-purple-600 px-2 rounded-full">
+                    {item.badge}
+                  </span>
+                )}
+              </motion.div>
             </Link>
           );
         })}
       </nav>
 
+      {/* Theme */}
+      <button
+        onClick={() => setDark(!dark)}
+        className="flex items-center gap-2 p-3 text-purple-400 hover:bg-purple-600/10"
+      >
+        {dark ? <Sun size={16} /> : <Moon size={16} />}
+        {!collapsed && (dark ? "Modo Claro" : "Modo Escuro")}
+      </button>
+
       {/* User */}
-      <div style={{ padding: 8 }}>
+      <div className="p-2">
         <button
           onClick={() => setShowUserMenu(!showUserMenu)}
-          style={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            padding: 10,
-            borderRadius: 8,
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-          }}
+          className="flex items-center gap-2 w-full p-2 rounded-lg hover:bg-purple-600/10"
         >
-          <div
-            style={{
-              width: 30,
-              height: 30,
-              borderRadius: "50%",
-              background: "#7c3aed",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#fff",
-              fontSize: 12,
-            }}
-          >
-            {user.initials}
+          <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs">
+            AT
           </div>
-
-          {!collapsed && <span style={{ color: "#c4b5fd" }}>{user.name}</span>}
+          {!collapsed && <span className="text-purple-200">Admin</span>}
         </button>
 
         {showUserMenu && (
-          <div style={{ marginTop: 8 }}>
-            <button
-              onClick={handleLogout}
-              style={{
-                width: "100%",
-                padding: 10,
-                borderRadius: 8,
-                background: "transparent",
-                border: "1px solid rgba(239,68,68,0.2)",
-                color: "#f87171",
-                cursor: "pointer",
-              }}
-            >
-              Sair
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-2 bg-[#1a1825] rounded-lg p-2 space-y-1"
+          >
+            <button onClick={() => router.push("/perfil")} className="flex gap-2 p-2 hover:bg-purple-600/10 w-full">
+              <User size={14} /> Perfil
             </button>
-          </div>
+            <button onClick={() => router.push("/dashboard/configuracoes")} className="flex gap-2 p-2 hover:bg-purple-600/10 w-full">
+              <Settings size={14} /> Configurações
+            </button>
+            <button onClick={() => router.push("/login")} className="flex gap-2 p-2 hover:bg-red-500/10 text-red-400 w-full">
+              <LogOut size={14} /> Sair
+            </button>
+          </motion.div>
         )}
       </div>
-    </aside>
+    </motion.aside>
+  );
+
+  return (
+    <>
+      {/* Mobile Button */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="md:hidden fixed top-4 left-4 z-50 bg-purple-600 p-2 rounded-lg"
+      >
+        <Menu />
+      </button>
+
+      {/* Desktop */}
+      <div className="hidden md:block">{SidebarContent}</div>
+
+      {/* Mobile Drawer */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 flex">
+          <div
+            className="absolute inset-0 bg-black/60"
+            onClick={() => setMobileOpen(false)}
+          />
+          <div className="relative z-50">{SidebarContent}</div>
+        </div>
+      )}
+    </>
   );
 }
