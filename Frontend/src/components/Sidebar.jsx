@@ -14,6 +14,7 @@ import {
   LogOut,
   Menu,
 } from "lucide-react";
+import { useLayout } from "@/components/LayoutClient";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: "grid" },
@@ -49,8 +50,8 @@ function Icon({ type }) {
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { collapsed, setCollapsed } = useLayout();
 
-  const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dark, setDark] = useState(true);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -60,9 +61,6 @@ export default function Sidebar() {
     if (saved) setCollapsed(saved === "true");
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("sidebar-collapsed", collapsed);
-  }, [collapsed]);
 
   const isActive = (href) =>
     href === "/dashboard" ? pathname === href : pathname.startsWith(href);
@@ -70,7 +68,7 @@ export default function Sidebar() {
   const SidebarContent = (
     <motion.aside
       animate={{ width: collapsed ? 64 : 240 }}
-      className="h-screen bg-[#0f0e1a] border-r border-purple-900/20 flex flex-col relative"
+      className="fixed left-0 top-0 h-screen bg-[#0f0e1a] border-r border-purple-900/20 flex flex-col z-40"
     >
       {/* Logo */}
       <div className="flex items-center gap-3 p-4">
@@ -124,7 +122,12 @@ export default function Sidebar() {
       {/* User */}
       <div className="p-2">
         <button
-          onClick={() => setShowUserMenu(!showUserMenu)}
+          onClick={() => {
+            if (collapsed) {
+              setCollapsed(false); // abre a sidebar
+            }
+            setShowUserMenu((prev) => !prev);
+          }}
           className="flex items-center gap-2 w-full p-2 rounded-lg hover:bg-purple-600/10"
         >
           <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs">
