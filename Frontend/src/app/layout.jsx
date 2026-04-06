@@ -1,6 +1,7 @@
 import { Syne, DM_Mono } from "next/font/google";
 import "./globals.css";
-import LayoutClient from "@/components/LayoutClient";
+import LayoutWrapper from "@/components/LayoutWrapper";
+
 
 const syne = Syne({
   subsets: ["latin"],
@@ -17,9 +18,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="pt-BR">
       <body className={`${syne.variable} ${dmMono.variable}`}>
-        <LayoutClient>
+        <LayoutWrapper>
           {children}
-        </LayoutClient>
+        </LayoutWrapper>
       </body>
     </html>
   );
