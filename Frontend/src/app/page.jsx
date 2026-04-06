@@ -2,9 +2,12 @@ import { LandingHero } from "../components/LandingHero";
 import { Features } from "../components/Features";
 import { HowItWorks } from "../components/HowItWorks";
 import { LandingFooter } from "../components/LandingFooter";
+import PublicNavbar from "@/components/PublicNavbar";
+
 
 export default function Landing() {
-  return (
+  return (<>
+    <PublicNavbar />
     <div className="dark min-h-screen bg-background">
       {/* Animated background particles */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -44,5 +47,5 @@ export default function Landing() {
         }
       `}</style>
     </div>
-  );
+  </>);
 }
