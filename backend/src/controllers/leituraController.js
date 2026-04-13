@@ -18,8 +18,6 @@ exports.registrarLeitura = (req, res) => {
 
     if (err) return res.status(500).send(err);
 
-    /* buscar limites da sala */
-
     Leitura.buscarLimitesSala(sensor_id, (err, result) => {
 
       if (err) return res.status(500).send(err);
@@ -36,25 +34,19 @@ exports.registrarLeitura = (req, res) => {
 
       if (foraDoPadrao) {
 
-        /* verificar incidente aberto */
-
         Incidente.existeAberto(sala.id_sala, (err, incidente) => {
 
           if (err) return res.status(500).send(err);
 
           if (incidente.length === 0) {
-
             Incidente.criar(sala.id_sala, () => {
               console.log("🚨 Incidente criado!");
             });
-
           }
 
         });
 
       } else {
-
-        /* fechar incidente se voltou ao normal */
 
         Incidente.fecharAutomatico(sala.id_sala, () => {
           console.log("✅ Incidente fechado automaticamente");
@@ -68,4 +60,30 @@ exports.registrarLeitura = (req, res) => {
 
   });
 
+};
+
+
+
+exports.listarLeituras = (req, res) => {
+  const query = `
+    SELECT 
+      l.data_hora as dt,
+      s.nome_sala as env,
+      l.temperatura as temp,
+      s.temperatura_min as min,
+      s.temperatura_max as max
+    FROM leituras l
+    JOIN sensores se ON l.id_sensor = se.id_sensor
+    JOIN salas s ON se.id_sala = s.id_sala
+    ORDER BY l.data_hora DESC
+  `;
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ erro: "Erro ao buscar leituras" });
+    }
+
+    res.json(result);
+  });
 };

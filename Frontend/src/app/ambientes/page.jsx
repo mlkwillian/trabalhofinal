@@ -1,142 +1,190 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { initialEnvs } from "@/data/mockData";
+import { useState, useMemo, useEffect } from "react";
 import EnvironmentCard from "@/components/EnvironmentCard";
 import TemperatureChart from "@/components/TemperatureChart";
 import { themes } from "@/theme/theme";
-import { Search, Activity, AlertTriangle, Thermometer, Wind } from "lucide-react";
+import { Search, Activity, AlertTriangle, Thermometer } from "lucide-react";
+import { api } from "@/services/api";
 
 export default function AmbientesPage() {
-  const [selectedEnv, setSelectedEnv] = useState(initialEnvs[0]);
+  const [salas, setSalas] = useState([]);
+  const [selectedSala, setSelectedSala] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState("");
+
   const T = themes.dark;
 
-  // Filtro de ambientes
-  const filteredEnvs = useMemo(() => {
-    return initialEnvs.filter(env => 
-      env.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // 🔥 BUSCAR SALAS DO BACKEND
+  useEffect(() => {
+    const fetchSalas = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          setErro("Usuário não autenticado");
+          setLoading(false);
+          return;
+        }
+
+        const res = await api.get("/salas", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setSalas(res.data);
+
+        if (res.data.length > 0) {
+          setSelectedSala(res.data[0]);
+        }
+
+      } catch (err) {
+        console.error(err);
+        setErro("Erro ao carregar salas");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSalas();
+  }, []);
+
+  // 🔍 FILTRO
+  const filteredSalas = useMemo(() => {
+    return salas.filter(sala =>
+      sala.nome_sala.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [searchTerm]);
+  }, [salas, searchTerm]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen text-purple-400">
+        Carregando ambientes...
+      </div>
+    );
+  }
+
+  if (salas.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-screen text-purple-400">
+        Nenhuma sala cadastrada
+      </div>
+    );
+  }
+
+  if (erro) {
+    return (
+      <div className="flex items-center justify-center h-screen text-red-400">
+        {erro}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 p-6 min-h-screen bg-[#0a0910]">
-      
-      {/* Cabeçalho e Stats Rápidos */}
+
+      {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Gestão de Ambientes</h1>
-          <p className="text-purple-500 text-sm">Monitoramento em tempo real de múltiplos setores</p>
+          <p className="text-purple-500 text-sm">
+            Monitoramento de salas
+          </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="bg-[#1a1825] border border-purple-900/30 rounded-lg flex items-center px-3 py-2">
-            <Search size={18} className="text-purple-500 mr-2" />
-            <input 
-              type="text" 
-              placeholder="Buscar ambiente..."
-              className="bg-transparent border-none outline-none text-sm text-purple-200 placeholder:text-purple-700 w-48"
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+        <div className="bg-[#1a1825] border border-purple-900/30 rounded-lg flex items-center px-3 py-2">
+          <Search size={18} className="text-purple-500 mr-2" />
+          <input
+            type="text"
+            placeholder="Buscar sala..."
+            className="bg-transparent outline-none text-sm text-purple-200 placeholder:text-purple-700"
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
       </div>
 
-      {/* Grid de Resumo Estatístico */}
+      {/* STATS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-[#1a1825] border border-purple-900/20 p-4 rounded-xl flex items-center gap-4">
-          <div className="p-3 bg-purple-600/10 rounded-lg text-purple-400">
-            <Activity size={20} />
-          </div>
+        <div className="bg-[#1a1825] p-4 rounded-xl flex items-center gap-4">
+          <Activity className="text-purple-400" />
           <div>
-            <p className="text-purple-500 text-xs uppercase font-bold tracking-wider">Sensores Ativos</p>
-            <p className="text-white text-xl font-mono">24 / 24</p>
+            <p className="text-purple-500 text-xs">Salas</p>
+            <p className="text-white text-xl">{salas.length}</p>
           </div>
         </div>
-        <div className="bg-[#1a1825] border border-purple-900/20 p-4 rounded-xl flex items-center gap-4">
-          <div className="p-3 bg-orange-600/10 rounded-lg text-orange-400">
-            <AlertTriangle size={20} />
-          </div>
+
+        <div className="bg-[#1a1825] p-4 rounded-xl flex items-center gap-4">
+          <AlertTriangle className="text-orange-400" />
           <div>
-            <p className="text-purple-500 text-xs uppercase font-bold tracking-wider">Alertas Pendentes</p>
-            <p className="text-white text-xl font-mono">02</p>
+            <p className="text-purple-500 text-xs">Alertas</p>
+            <p className="text-white text-xl">--</p>
           </div>
         </div>
-        <div className="bg-[#1a1825] border border-purple-900/20 p-4 rounded-xl flex items-center gap-4">
-          <div className="p-3 bg-blue-600/10 rounded-lg text-blue-400">
-            <Thermometer size={20} />
-          </div>
+
+        <div className="bg-[#1a1825] p-4 rounded-xl flex items-center gap-4">
+          <Thermometer className="text-blue-400" />
           <div>
-            <p className="text-purple-500 text-xs uppercase font-bold tracking-wider">Média Térmica</p>
-            <p className="text-white text-xl font-mono">21.4°C</p>
+            <p className="text-purple-500 text-xs">Faixa Média</p>
+            <p className="text-white text-xl">--</p>
           </div>
         </div>
       </div>
 
-      {/* Ambientes */}
+      {/* LISTA */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {filteredEnvs.map((env) => (
+        {filteredSalas.map((sala) => (
           <EnvironmentCard
-            key={env.id}
-            env={env}
+            key={sala.id_sala}
+            env={{
+              id: sala.id_sala,
+              name: sala.nome_sala,
+              minTemp: sala.temperatura_min,
+              maxTemp: sala.temperatura_max,
+            }}
             T={T}
-            selected={selectedEnv.id === env.id}
-            onClick={() => setSelectedEnv(env)}
+            selected={selectedSala?.id_sala === sala.id_sala}
+            onClick={() => setSelectedSala(sala)}
           />
         ))}
       </div>
 
-      {/* Gráfico e Detalhes Específicos */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <div className="lg:col-span-3">
-          <div className="bg-[#0f0e1a] border border-purple-900/20 rounded-xl p-4 h-full">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-purple-200 font-semibold flex items-center gap-2">
-                <Activity size={16} className="text-purple-500" />
-                Análise Detalhada: {selectedEnv.name}
-              </h2>
-              <div className="flex gap-2">
-                <span className="text-[10px] bg-purple-900/30 text-purple-300 px-2 py-1 rounded">24h</span>
-                <span className="text-[10px] text-purple-600 px-2 py-1 rounded hover:bg-purple-900/20 cursor-pointer">7d</span>
-              </div>
-            </div>
-            <TemperatureChart env={selectedEnv} T={T} />
+      {/* DETALHE */}
+      {selectedSala && (
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+
+          <div className="lg:col-span-3 bg-[#0f0e1a] p-4 rounded-xl">
+            <h2 className="text-white mb-4">
+              {selectedSala.nome_sala}
+            </h2>
+
+            {/* ⚠️ AINDA MOCK (depois ligamos sensores) */}
+            <TemperatureChart
+              env={{
+                name: selectedSala.nome_sala,
+                minTemp: selectedSala.temperatura_min,
+                maxTemp: selectedSala.temperatura_max,
+                history: [] // depois vem do backend
+              }}
+              T={T}
+            />
           </div>
-        </div>
 
-        {/* Sidebar de Informações do Ambiente Selecionado */}
-        <div className="space-y-4">
-          <div className="bg-[#1a1825] border border-purple-900/20 p-5 rounded-xl">
-            <h3 className="text-white font-bold mb-4 text-sm">Status do Setor</h3>
-            
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-purple-500 text-xs">Umidade</span>
-                <div className="flex items-center gap-2">
-                  <Wind size={14} className="text-blue-400" />
-                  <span className="text-white text-sm font-mono">{selectedEnv.humidity || "45"}%</span>
-                </div>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="text-purple-500 text-xs">Setpoint</span>
-                <span className="text-white text-sm font-mono">18°C - 24°C</span>
-              </div>
+          <div className="bg-[#1a1825] p-4 rounded-xl">
+            <h3 className="text-white mb-3">Configuração</h3>
 
-              <div className="pt-4 border-t border-purple-900/30">
-                <p className="text-[10px] text-purple-600 mb-2 uppercase tracking-tighter font-bold">Última Ocorrência</p>
-                <p className="text-xs text-purple-300 leading-relaxed italic">
-                  "Variação de +2°C detectada às 08:42 devido à abertura de porta."
-                </p>
-              </div>
+            <p className="text-sm text-purple-400">
+              Mín: {selectedSala.temperatura_min}°C
+            </p>
 
-              <button className="w-full py-2 bg-purple-600/10 hover:bg-purple-600/20 text-purple-400 text-xs font-bold rounded-lg border border-purple-600/20 transition-all">
-                GERAR RELATÓRIO PDF
-              </button>
-            </div>
+            <p className="text-sm text-purple-400">
+              Máx: {selectedSala.temperatura_max}°C
+            </p>
           </div>
+
         </div>
-      </div>
+      )}
 
     </div>
   );

@@ -34,7 +34,7 @@ export function LandingHero() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-             <Link href="/dashboard">
+             <Link href="/login">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}

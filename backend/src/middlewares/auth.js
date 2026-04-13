@@ -1,27 +1,19 @@
 const jwt = require("jsonwebtoken");
 
-const SECRET = "termoguard_secret";
+module.exports = (req, res, next) => {
+  const authHeader = req.headers.authorization;
 
-function verificarToken(req, res, next) {
-
-  const token = req.headers["authorization"];
-
-  if (!token) {
-    return res.status(401).json({ mensagem: "Token não fornecido" });
+  if (!authHeader) {
+    return res.status(401).json({ erro: "Token não fornecido" });
   }
 
-  jwt.verify(token, SECRET, (err, decoded) => {
+  const token = authHeader.split(" ")[1];
 
-    if (err) {
-      return res.status(403).json({ mensagem: "Token inválido" });
-    }
-
-    req.usuario = decoded;
-
+  try {
+    const decoded = jwt.verify(token, "SEU_SEGREDO"); // troca depois
+    req.user = decoded;
     next();
-
-  });
-
-}
-
-module.exports = verificarToken;
+  } catch (err) {
+    return res.status(401).json({ erro: "Token inválido" });
+  }
+};

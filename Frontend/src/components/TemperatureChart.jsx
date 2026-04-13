@@ -11,8 +11,37 @@ import {
   Tooltip,
   ReferenceLine,
 } from "recharts";
+import { useEffect, useState } from "react";
+import { api } from "@/services/api";
 
 export default function TemperatureChart({ env, T }) {
+  const [data, setData] = useState([]);
+
+  // 🔥 buscar leituras do backend
+  useEffect(() => {
+    if (!env) return;
+
+    async function loadLeituras() {
+      try {
+        const res = await api.get(`/leituras?sala_id=${env.id}`);
+
+        // 🔥 transforma dados pro formato do gráfico
+        const formatted = res.data.map((item) => ({
+          time: new Date(item.created_at).toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          temp: item.temperatura,
+        }));
+
+        setData(formatted);
+      } catch (err) {
+        console.error("Erro ao buscar leituras", err);
+      }
+    }
+
+    loadLeituras();
+  }, [env]);
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
@@ -49,9 +78,6 @@ export default function TemperatureChart({ env, T }) {
       </div>
     );
   };
-
-  // 🔒 proteção (evita crash)
-  const data = env?.history || [];
 
   return (
     <div
@@ -154,12 +180,6 @@ export default function TemperatureChart({ env, T }) {
               stroke={T.accent}
               strokeDasharray="5 3"
               strokeOpacity={0.8}
-              label={{
-                value: "máx",
-                fontSize: 9,
-                fill: T.accent,
-                position: "right",
-              }}
             />
           )}
 
@@ -169,12 +189,6 @@ export default function TemperatureChart({ env, T }) {
               stroke={T.blue}
               strokeDasharray="5 3"
               strokeOpacity={0.8}
-              label={{
-                value: "mín",
-                fontSize: 9,
-                fill: T.blue,
-                position: "right",
-              }}
             />
           )}
 

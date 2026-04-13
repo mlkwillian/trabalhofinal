@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const salaController = require("../controllers/salaController");
-const auth = require("../middleware/auth");
+const auth = require("../middlewares/auth");
 
 router.get("/salas", auth, salaController.listarSalas);
 

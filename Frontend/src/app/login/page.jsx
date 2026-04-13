@@ -3,18 +3,60 @@
 import React, { useState } from "react"
 import { motion, useMotionValue, useMotionTemplate } from "framer-motion"
 import { Thermometer, Mail, Lock, Eye, EyeOff } from "lucide-react"
-
+import { api } from "@/services/api"
+import { useRouter } from "next/navigation"
 
 
 export default function LoginPage() {
+
   const mouseX = useMotionValue(0)
   const mouseY = useMotionValue(0)
   const [showPassword, setShowPassword] = useState(false)
+
+  const [email, setEmail] = useState("")
+  const [senha, setSenha] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [erro, setErro] = useState("")
+  const router = useRouter()
+
 
   function handleMouseMove({ currentTarget, clientX, clientY }) {
     const { left, top } = currentTarget.getBoundingClientRect()
     mouseX.set(clientX - left)
     mouseY.set(clientY - top)
+  }
+
+  const handleLogin = async (e) => {
+    e?.preventDefault()
+    setLoading(true)
+    setErro("")
+
+    if (!email || !senha) {
+      setErro("Preencha todos os campos")
+      setLoading(false)
+      return
+    }
+
+    try {
+      const res = await api.post("/usuarios/login", {
+        email,
+        senha
+      })
+      localStorage.setItem("token", res.data.token)
+      api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`
+      router.push("/dashboard")
+
+    } catch (err) {
+      console.error(err)
+
+      const mensagem =
+        err.response?.data?.message ||
+        "Email ou senha inválidos"
+
+      setErro(mensagem)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -141,7 +183,13 @@ export default function LoginPage() {
                   </label>
                   <div className="relative">
                     <Mail size={15} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "rgba(190,80,230,0.7)" }} />
-                    <input type="email" placeholder="seu@email.com" className="input-field" />
+                    <input
+                      type="email"
+                      placeholder="seu@email.com"
+                      className="input-field"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
                   </div>
                 </div>
 
@@ -157,6 +205,11 @@ export default function LoginPage() {
                       placeholder="••••••••"
                       className="input-field"
                       style={{ paddingRight: "42px" }}
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleLogin()
+                      }}
                     />
                     <button
                       onClick={() => setShowPassword(!showPassword)}
@@ -181,10 +234,21 @@ export default function LoginPage() {
 
               {/* Botão */}
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.5 }}>
-                <button className="btn-login w-full rounded-xl text-white font-semibold text-[15px] py-3" style={{ letterSpacing: "0.02em" }}>
-                  Entrar
+                <button
+                  onClick={handleLogin}
+                  disabled={loading}
+                  className="btn-login w-full rounded-xl text-white font-semibold text-[15px] py-3"
+                >
+                  {loading ? "Entrando..." : "Entrar"}
                 </button>
               </motion.div>
+
+
+              {erro && (
+                <p className="text-red-400 text-sm text-center">
+                  {erro}
+                </p>
+              )}
 
               {/* Registrar */}
               <motion.p
@@ -207,7 +271,7 @@ export default function LoginPage() {
         </motion.div>
       </div>
 
-      {/* Marca d'água */}
+      {/* Footer */}
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
         className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10"
