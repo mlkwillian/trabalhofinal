@@ -17,6 +17,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useLayout } from "@/components/LayoutClient";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: "grid", category: "Principal" },
@@ -53,9 +54,8 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { collapsed, setCollapsed } = useLayout();
-
+  const { dark, toggleDark } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [dark, setDark] = useState(true);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
@@ -69,12 +69,13 @@ export default function Sidebar() {
   const SidebarContent = (
     <motion.aside
       animate={{ width: collapsed ? 64 : 240 }}
-      className="fixed left-0 top-0 h-screen bg-[#0f0e1a] border-r border-purple-900/20 flex flex-col z-40"
+      className="fixed left-0 top-0 h-screen flex flex-col z-40"
+      style={{ background: "var(--sidebar)", borderColor: "var(--sidebar-border)" }}
     >
       {/* Logo */}
       <div className="flex items-center gap-3 p-4 mb-2">
         <div className="w-8 h-8 flex-shrink-0 rounded-lg bg-gradient-to-br from-purple-600 to-purple-400 flex items-center justify-center">
-            <ShieldCheck size={18} className="text-white" />
+          <ShieldCheck size={18} className="text-white" />
         </div>
         {!collapsed && (
           <div className="flex flex-col">
@@ -129,26 +130,30 @@ export default function Sidebar() {
       {/* System Status (New Info) */}
       {!collapsed && (
         <div className="mx-4 p-3 mb-4 rounded-xl bg-purple-950/20 border border-purple-900/10">
-            <div className="flex items-center gap-2 text-purple-400 mb-2">
-                <Database size={14} />
-                <span className="text-xs font-medium">Status Sensores</span>
+          <div className="flex items-center gap-2 text-purple-400 mb-2">
+            <Database size={14} />
+            <span className="text-xs font-medium">Status Sensores</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-1.5 flex-1 bg-purple-900/30 rounded-full overflow-hidden">
+              <div className="h-full bg-purple-500 w-[85%]" />
             </div>
-            <div className="flex items-center gap-2">
-                <div className="h-1.5 flex-1 bg-purple-900/30 rounded-full overflow-hidden">
-                    <div className="h-full bg-purple-500 w-[85%]" />
-                </div>
-                <span className="text-[10px] text-purple-300">12/14</span>
-            </div>
+            <span className="text-[10px] text-purple-300">12/14</span>
+          </div>
         </div>
       )}
 
       {/* Theme */}
       <button
-        onClick={() => setDark(!dark)}
+        onClick={toggleDark}
         className="flex items-center gap-3 px-5 py-3 text-purple-400 hover:bg-purple-600/10 transition-colors border-t border-purple-900/10"
       >
         {dark ? <Sun size={16} /> : <Moon size={16} />}
-        {!collapsed && <span className="text-sm">{dark ? "Modo Claro" : "Modo Escuro"}</span>}
+        {!collapsed && (
+          <span className="text-sm">
+            {dark ? "Modo Claro" : "Modo Escuro"}
+          </span>
+        )}
       </button>
 
       {/* User */}
