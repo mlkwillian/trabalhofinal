@@ -70,7 +70,10 @@ export default function Sidebar() {
     <motion.aside
       animate={{ width: collapsed ? 64 : 240 }}
       className="fixed left-0 top-0 h-screen flex flex-col z-40"
-      style={{ background: "var(--sidebar)", borderColor: "var(--sidebar-border)" }}
+      style={{
+        background: "var(--sidebar)",
+        borderRight: "1px solid var(--sidebar-border)",
+      }}
     >
       {/* Logo */}
       <div className="flex items-center gap-3 p-4 mb-2">
@@ -79,8 +82,15 @@ export default function Sidebar() {
         </div>
         {!collapsed && (
           <div className="flex flex-col">
-            <span className="text-white font-bold leading-none">ThermoGuard</span>
-            <span className="text-[10px] text-purple-500 font-medium uppercase tracking-wider">Enterprise</span>
+            <span className="font-bold leading-none" style={{ color: "var(--text)" }}>
+              ThermoGuard
+            </span>
+            <span
+              className="text-[10px] font-medium uppercase tracking-wider"
+              style={{ color: "var(--purple)" }}
+            >
+              Enterprise
+            </span>
           </div>
         )}
       </div>
@@ -88,7 +98,12 @@ export default function Sidebar() {
       {/* Collapse Button */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute top-5 -right-3 bg-[#1a1825] p-1 rounded-full border border-purple-900/30 text-purple-400 z-50"
+        className="absolute top-5 -right-3 p-1 rounded-full z-50"
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          color: "var(--purple-l)",
+        }}
       >
         {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
       </button>
@@ -97,26 +112,42 @@ export default function Sidebar() {
       <nav className="flex-1 px-2 space-y-1 overflow-y-auto custom-scrollbar">
         {navItems.map((item, index) => {
           const active = isActive(item.href);
-          const showCategory = !collapsed && (index === 0 || navItems[index - 1].category !== item.category);
+          const showCategory =
+            !collapsed &&
+            (index === 0 || navItems[index - 1].category !== item.category);
 
           return (
             <div key={item.href}>
               {showCategory && (
-                <p className="text-[10px] uppercase text-purple-600 font-semibold px-3 mt-4 mb-1 tracking-widest">
+                <p
+                  className="text-[10px] uppercase font-semibold px-3 mt-4 mb-1 tracking-widest"
+                  style={{ color: "var(--muted)" }}
+                >
                   {item.category}
                 </p>
               )}
               <Link href={item.href}>
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all
-                    ${active ? "bg-purple-600/20 text-purple-300" : "text-purple-400 hover:bg-purple-600/10"}`}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all"
+                  style={{
+                    background: active ? "color-mix(in srgb, var(--purple) 15%, transparent)" : "transparent",
+                    color: active ? "var(--purple-l)" : "var(--text-sub)",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!active) e.currentTarget.style.background = "color-mix(in srgb, var(--purple) 8%, transparent)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!active) e.currentTarget.style.background = "transparent";
+                  }}
                 >
                   <Icon type={item.icon} />
                   {!collapsed && <span className="text-sm">{item.label}</span>}
-
                   {!collapsed && item.badge && (
-                    <span className="ml-auto text-[10px] bg-purple-600 text-white font-bold px-1.5 py-0.5 rounded-full">
+                    <span
+                      className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white"
+                      style={{ background: "var(--purple)" }}
+                    >
                       {item.badge}
                     </span>
                   )}
@@ -127,51 +158,99 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* System Status (New Info) */}
+      {/* System Status */}
       {!collapsed && (
-        <div className="mx-4 p-3 mb-4 rounded-xl bg-purple-950/20 border border-purple-900/10">
-          <div className="flex items-center gap-2 text-purple-400 mb-2">
+        <div
+          className="mx-4 p-3 mb-4 rounded-xl"
+          style={{
+            background: "var(--faint)",
+            border: "1px solid var(--border-soft)",
+          }}
+        >
+          <div className="flex items-center gap-2 mb-2" style={{ color: "var(--text-sub)" }}>
             <Database size={14} />
             <span className="text-xs font-medium">Status Sensores</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="h-1.5 flex-1 bg-purple-900/30 rounded-full overflow-hidden">
-              <div className="h-full bg-purple-500 w-[85%]" />
+            <div
+              className="h-1.5 flex-1 rounded-full overflow-hidden"
+              style={{ background: "var(--border)" }}
+            >
+              <div
+                className="h-full w-[85%] rounded-full"
+                style={{ background: "var(--purple)" }}
+              />
             </div>
-            <span className="text-[10px] text-purple-300">12/14</span>
+            <span className="text-[10px]" style={{ color: "var(--purple-l)" }}>
+              12/14
+            </span>
           </div>
         </div>
       )}
 
-      {/* Theme */}
+      {/* Theme Toggle */}
       <button
         onClick={toggleDark}
-        className="flex items-center gap-3 px-5 py-3 text-purple-400 hover:bg-purple-600/10 transition-colors border-t border-purple-900/10"
+        className="flex items-center gap-3 px-5 py-3 transition-colors"
+        style={{
+          color: "var(--text-sub)",
+          borderTop: "1px solid var(--border-soft)",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "color-mix(in srgb, var(--purple) 8%, transparent)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "transparent";
+        }}
       >
         {dark ? <Sun size={16} /> : <Moon size={16} />}
         {!collapsed && (
-          <span className="text-sm">
-            {dark ? "Modo Claro" : "Modo Escuro"}
-          </span>
+          <span className="text-sm">{dark ? "Modo Claro" : "Modo Escuro"}</span>
         )}
       </button>
 
       {/* User */}
-      <div className="p-2 border-t border-purple-900/10">
+      <div className="p-2" style={{ borderTop: "1px solid var(--border-soft)" }}>
         <button
           onClick={() => {
             if (collapsed) setCollapsed(false);
             setShowUserMenu((prev) => !prev);
           }}
-          className={`flex items-center gap-2 w-full p-2 rounded-lg transition-colors ${showUserMenu ? 'bg-purple-600/10' : 'hover:bg-purple-600/10'}`}
+          className="flex items-center gap-2 w-full p-2 rounded-lg transition-colors"
+          style={{
+            background: showUserMenu
+              ? "color-mix(in srgb, var(--purple) 10%, transparent)"
+              : "transparent",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "color-mix(in srgb, var(--purple) 8%, transparent)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = showUserMenu
+              ? "color-mix(in srgb, var(--purple) 10%, transparent)"
+              : "transparent";
+          }}
         >
-          <div className="w-8 h-8 flex-shrink-0 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-bold border border-purple-400/30">
+          <div
+            className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center text-white text-xs font-bold"
+            style={{
+              background: "var(--purple)",
+              border: "1px solid var(--purple-l)",
+            }}
+          >
             AT
           </div>
           {!collapsed && (
             <div className="flex flex-col items-start overflow-hidden">
-              <span className="text-purple-200 text-sm font-medium truncate w-full text-left">Admin Thermo</span>
-              <span className="text-purple-500 text-[10px] truncate">admin@guard.com</span>
+              <span
+                className="text-sm font-medium truncate w-full text-left"
+                style={{ color: "var(--text)" }}
+              >
+                Admin Thermo
+              </span>
+              <span className="text-[10px] truncate" style={{ color: "var(--muted)" }}>
+                admin@guard.com
+              </span>
             </div>
           )}
         </button>
@@ -180,15 +259,53 @@ export default function Sidebar() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-2 bg-[#1a1825] border border-purple-900/30 rounded-lg p-2 space-y-1 shadow-xl"
+            className="mt-2 rounded-lg p-2 space-y-1 shadow-xl"
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              boxShadow: "var(--shadow)",
+            }}
           >
-            <button onClick={() => router.push("/perfil")} className="flex items-center gap-2 p-2 hover:bg-purple-600/10 w-full text-sm text-purple-300 rounded-md">
+            <button
+              onClick={() => router.push("/perfil")}
+              className="flex items-center gap-2 p-2 w-full text-sm rounded-md transition-colors"
+              style={{ color: "var(--text-sub)" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "color-mix(in srgb, var(--purple) 8%, transparent)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+              }}
+            >
               <User size={14} /> Perfil
             </button>
-            <button onClick={() => router.push("/dashboard/configuracoes")} className="flex items-center gap-2 p-2 hover:bg-purple-600/10 w-full text-sm text-purple-300 rounded-md">
+            <button
+              onClick={() => router.push("/dashboard/configuracoes")}
+              className="flex items-center gap-2 p-2 w-full text-sm rounded-md transition-colors"
+              style={{ color: "var(--text-sub)" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "color-mix(in srgb, var(--purple) 8%, transparent)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+              }}
+            >
               <Settings size={14} /> Preferências
             </button>
-            <button onClick={() => router.push("/login")} className="flex items-center gap-2 p-2 hover:bg-red-500/10 text-red-400 w-full text-sm rounded-md border-t border-purple-900/20 pt-2">
+            <button
+              onClick={() => router.push("/login")}
+              className="flex items-center gap-2 p-2 w-full text-sm rounded-md transition-colors pt-2"
+              style={{
+                color: "var(--red)",
+                borderTop: "1px solid var(--border-soft)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "color-mix(in srgb, var(--red) 8%, transparent)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+              }}
+            >
               <LogOut size={14} /> Sair
             </button>
           </motion.div>
@@ -201,7 +318,8 @@ export default function Sidebar() {
     <>
       <button
         onClick={() => setMobileOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-50 bg-purple-600 text-white p-2 rounded-lg shadow-lg"
+        className="md:hidden fixed top-4 left-4 z-50 text-white p-2 rounded-lg shadow-lg"
+        style={{ background: "var(--purple)" }}
       >
         <Menu size={20} />
       </button>

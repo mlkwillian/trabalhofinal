@@ -77,22 +77,34 @@ export default function RelatorioAuditoria() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080612] px-6 py-8 space-y-6">
+    <div className="min-h-screen px-6 py-8 space-y-6" style={{ background: "var(--bg)" }}>
 
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <button className="w-9 h-9 rounded-xl border border-[#251840] bg-[#140c24] flex items-center justify-center text-[#6b5c8a] hover:text-violet-400 transition-colors">
+          <button
+            className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors"
+            style={{
+              border: "1px solid var(--border)",
+              background: "var(--card)",
+              color: "var(--muted)",
+            }}
+          >
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
-            <h1 className="text-xl font-black text-[#ede9fe] font-mono tracking-tight">Relatório de Auditoria</h1>
-            <p className="text-[11px] text-[#6b5c8a] font-mono mt-0.5">Histórico completo e análise de conformidade</p>
+            <h1 className="text-xl font-black font-mono tracking-tight" style={{ color: "var(--text)" }}>
+              Relatório de Auditoria
+            </h1>
+            <p className="text-[11px] font-mono mt-0.5" style={{ color: "var(--muted)" }}>
+              Histórico completo e análise de conformidade
+            </p>
           </div>
         </div>
         <button
           onClick={exportarCSV}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-black font-mono transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-xs font-black font-mono transition-colors"
+          style={{ background: "var(--purple)" }}
         >
           <Download className="w-3.5 h-3.5" />
           Exportar Relatório
@@ -100,23 +112,38 @@ export default function RelatorioAuditoria() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 px-5 py-3.5 rounded-xl bg-[#140c24] border border-[#251840]">
-        <span className="flex items-center gap-2 text-[#6b5c8a] text-[10px] font-black font-mono uppercase tracking-widest">
+      <div
+        className="flex flex-wrap items-center gap-3 px-5 py-3.5 rounded-xl"
+        style={{ background: "var(--card)", border: "1px solid var(--border)" }}
+      >
+        <span className="flex items-center gap-2 text-[10px] font-black font-mono uppercase tracking-widest" style={{ color: "var(--muted)" }}>
           <Filter className="w-3 h-3" />
           Filtros:
         </span>
         {["Todos os ambientes", "Últimos 7 dias"].map(f => (
-          <button key={f} className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-[#100a1e] border border-[#251840] text-[#ede9fe] text-xs font-mono hover:border-violet-600/60 transition-colors">
+          <button
+            key={f}
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-mono transition-colors"
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              color: "var(--text)",
+            }}
+          >
             {f}
-            <ChevronDown className="w-3 h-3 text-[#6b5c8a]" />
+            <ChevronDown className="w-3 h-3" style={{ color: "var(--muted)" }} />
           </button>
         ))}
-        <span className="ml-auto text-[10px] text-[#2e2050] font-mono">{totalLeituras} leituras</span>
+        <span className="ml-auto text-[10px] font-mono" style={{ color: "var(--faint)" }}>
+          {totalLeituras} leituras
+        </span>
       </div>
 
       {/* Summary cards */}
       <section>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2e2050] font-mono mb-3">Resumo Geral</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] font-mono mb-3" style={{ color: "var(--border)" }}>
+          Resumo Geral
+        </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {[
             { label: "Total de Leituras",    value: totalLeituras, Icon: BarChart3,     tc: "text-violet-400",  hi: false },
@@ -125,10 +152,20 @@ export default function RelatorioAuditoria() {
             { label: "Críticos",             value: totalCrit,     Icon: XCircle,       tc: "text-red-400",     hi: false },
             { label: "Taxa de Conformidade", value: `${taxa}%`,   Icon: TrendingUp,    tc: "text-sky-400",     hi: true  },
           ].map(({ label, value, Icon, tc, hi }) => (
-            <div key={label} className={`p-4 rounded-2xl border ${hi ? "bg-sky-400/5 border-sky-400/20" : "bg-[#140c24] border-[#251840]"}`}>
+            <div
+              key={label}
+              className="p-4 rounded-2xl"
+              style={
+                hi
+                  ? { background: "color-mix(in srgb, var(--blue) 6%, var(--card))", border: "1px solid color-mix(in srgb, var(--blue) 20%, transparent)" }
+                  : { background: "var(--card)", border: "1px solid var(--border)" }
+              }
+            >
               <div className="flex items-center gap-2 mb-3">
                 <Icon className={`w-3.5 h-3.5 ${tc}`} />
-                <span className="text-[10px] text-[#6b5c8a] font-black uppercase tracking-wider font-mono leading-tight">{label}</span>
+                <span className="text-[10px] font-black uppercase tracking-wider font-mono leading-tight" style={{ color: "var(--muted)" }}>
+                  {label}
+                </span>
               </div>
               <p className={`text-2xl font-black font-mono leading-none ${tc}`}>{value}</p>
             </div>
@@ -138,14 +175,18 @@ export default function RelatorioAuditoria() {
 
       {/* Conformidade por ambiente */}
       <section>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2e2050] font-mono mb-3">Conformidade por Ambiente</p>
-        <div className="rounded-2xl border border-[#251840] bg-[#140c24] overflow-hidden">
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] font-mono mb-3" style={{ color: "var(--border)" }}>
+          Conformidade por Ambiente
+        </p>
+        <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--border)", background: "var(--card)" }}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-[#1a1030] border-b border-[#251840]">
+                <tr style={{ background: "var(--surface)", borderBottom: "1px solid var(--border)" }}>
                   {["Ambiente", "Total", "Conformes", "Atenção", "Críticos", "Conformidade"].map(h => (
-                    <th key={h} className="px-5 py-3 text-left text-[10px] font-black uppercase tracking-wider text-[#6b5c8a] font-mono whitespace-nowrap">{h}</th>
+                    <th key={h} className="px-5 py-3 text-left text-[10px] font-black uppercase tracking-wider font-mono whitespace-nowrap" style={{ color: "var(--muted)" }}>
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -154,21 +195,27 @@ export default function RelatorioAuditoria() {
                   const pct = ((d.conformes / d.total) * 100).toFixed(1);
                   const { text, bar } = taxaClasses(pct);
                   return (
-                    <tr key={i} className={`border-b border-[#1a1030] hover:bg-violet-600/5 transition-colors ${i % 2 !== 0 ? "bg-[#1a1030]/40" : ""}`}>
-                      <td className="px-5 py-3.5 text-[#ede9fe] font-semibold">{d.ambiente}</td>
-                      <td className="px-5 py-3.5 text-[#6b5c8a] font-mono">{d.total}</td>
+                    <tr
+                      key={i}
+                      style={{
+                        borderBottom: "1px solid var(--border-soft)",
+                        background: i % 2 !== 0 ? "var(--surface)" : "transparent",
+                      }}
+                    >
+                      <td className="px-5 py-3.5 font-semibold" style={{ color: "var(--text)" }}>{d.ambiente}</td>
+                      <td className="px-5 py-3.5 font-mono" style={{ color: "var(--muted)" }}>{d.total}</td>
                       <td className="px-5 py-3.5">
                         <Pill value={d.conformes} cls="text-emerald-400 bg-emerald-400/10 border-emerald-400/30" />
                       </td>
                       <td className="px-5 py-3.5">
-                        <Pill value={d.atencao}   cls="text-amber-400 bg-amber-400/10 border-amber-400/30" />
+                        <Pill value={d.atencao} cls="text-amber-400 bg-amber-400/10 border-amber-400/30" />
                       </td>
                       <td className="px-5 py-3.5">
-                        <Pill value={d.criticos}  cls="text-red-400 bg-red-400/10 border-red-400/30" />
+                        <Pill value={d.criticos} cls="text-red-400 bg-red-400/10 border-red-400/30" />
                       </td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
-                          <div className="flex-1 h-1.5 rounded-full bg-[#1a1030] overflow-hidden min-w-[50px]">
+                          <div className="flex-1 h-1.5 rounded-full overflow-hidden min-w-[50px]" style={{ background: "var(--border)" }}>
                             <div className={`h-full rounded-full ${bar}`} style={{ width: `${pct}%` }} />
                           </div>
                           <span className={`text-xs font-black font-mono min-w-[40px] ${text}`}>{pct}%</span>
@@ -185,14 +232,18 @@ export default function RelatorioAuditoria() {
 
       {/* Histórico detalhado */}
       <section>
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2e2050] font-mono mb-3">Histórico Detalhado</p>
-        <div className="rounded-2xl border border-[#251840] bg-[#140c24] overflow-hidden">
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] font-mono mb-3" style={{ color: "var(--border)" }}>
+          Histórico Detalhado
+        </p>
+        <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--border)", background: "var(--card)" }}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-[#1a1030] border-b border-[#251840]">
+                <tr style={{ background: "var(--surface)", borderBottom: "1px solid var(--border)" }}>
                   {["Data/Hora", "Ambiente", "Temperatura", "Faixa Aceitável", "Status"].map(h => (
-                    <th key={h} className="px-5 py-3 text-left text-[10px] font-black uppercase tracking-wider text-[#6b5c8a] font-mono whitespace-nowrap">{h}</th>
+                    <th key={h} className="px-5 py-3 text-left text-[10px] font-black uppercase tracking-wider font-mono whitespace-nowrap" style={{ color: "var(--muted)" }}>
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -203,11 +254,17 @@ export default function RelatorioAuditoria() {
                     r.status === "atenção" ? "text-amber-400" :
                     "text-emerald-400";
                   return (
-                    <tr key={i} className={`border-b border-[#1a1030] hover:bg-violet-600/5 transition-colors ${i % 2 !== 0 ? "bg-[#1a1030]/40" : ""}`}>
-                      <td className="px-5 py-3 text-[#2e2050] font-mono whitespace-nowrap">{r.dt}</td>
-                      <td className="px-5 py-3 text-[#ede9fe] font-semibold">{r.env}</td>
+                    <tr
+                      key={i}
+                      style={{
+                        borderBottom: "1px solid var(--border-soft)",
+                        background: i % 2 !== 0 ? "var(--surface)" : "transparent",
+                      }}
+                    >
+                      <td className="px-5 py-3 font-mono whitespace-nowrap" style={{ color: "var(--muted)" }}>{r.dt}</td>
+                      <td className="px-5 py-3 font-semibold" style={{ color: "var(--text)" }}>{r.env}</td>
                       <td className={`px-5 py-3 font-black font-mono ${tempCls}`}>{r.temp}</td>
-                      <td className="px-5 py-3 text-[#6b5c8a] font-mono">{r.faixa}</td>
+                      <td className="px-5 py-3 font-mono" style={{ color: "var(--muted)" }}>{r.faixa}</td>
                       <td className="px-5 py-3"><StatusBadge status={r.status} /></td>
                     </tr>
                   );
@@ -218,7 +275,7 @@ export default function RelatorioAuditoria() {
         </div>
       </section>
 
-      <p className="text-center text-[10px] text-[#2e2050] font-mono pb-2">
+      <p className="text-center text-[10px] font-mono pb-2" style={{ color: "var(--muted)" }}>
         ThermoGuard — Relatório gerado em {new Date().toLocaleString("pt-BR")}
       </p>
     </div>
