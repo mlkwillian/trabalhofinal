@@ -1,5 +1,6 @@
 const Leitura = require("../models/leituraModel");
 const Incidente = require("../models/incidenteModel");
+const db = require("../config/db");
 
 exports.registrarLeitura = (req, res) => {
 
