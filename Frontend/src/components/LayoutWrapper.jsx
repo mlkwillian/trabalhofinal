@@ -9,6 +9,8 @@ export default function LayoutWrapper({ children }) {
   // Se for a página inicial, NÃO usa o layout
   if (pathname === "/" || pathname === "/login") {
     return children;
+  } else if (pathname === "/login") {
+    return children;
   }
 
   return <LayoutClient>{children}</LayoutClient>;

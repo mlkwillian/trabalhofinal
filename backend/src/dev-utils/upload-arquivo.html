@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload de Arquivo</title>
+</head>
+<body>
+    <h1>Upload de Arquivo</h1>
+    <p>Este formulario demonstra o upload de arquivos diversos (PDF, DOC, TXT, etc.)</p>
+    <p><strong>Nota:</strong> Esta e uma demonstracao. Verifique se existe uma rota configurada para receber arquivos na API.</p>
+    
+    <form id="uploadForm">
+        <div>
+            <label for="token">Token JWT (obtenha fazendo login):</label><br>
+            <input type="text" id="token" name="token" placeholder="Cole o token aqui" size="100" required>
+        </div>
+        <br>
+        
+        <div>
+            <label for="arquivo">Selecione o arquivo:</label><br>
+            <input type="file" id="arquivo" name="arquivo" required>
+            <p><small>Aceita: PDF, DOC, DOCX, XLS, XLSX, TXT, CSV, ZIP, RAR</small></p>
+        </div>
+        <br>
+        
+        <div>
+            <label for="descricao">Descricao (opcional):</label><br>
+            <input type="text" id="descricao" name="descricao" placeholder="Descricao do arquivo" size="50">
+        </div>
+        <br>
+        
+        <button type="submit">Enviar Arquivo</button>
+    </form>
+    
+    <div id="resultado" style="margin-top: 20px;"></div>
+    
+    <hr>
+    <h2>Exemplo de como fazer login para obter o token:</h2>
+    <form id="loginForm">
+        <div>
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email" value="admin@produtos.com">
+        </div>
+        <br>
+        <div>
+            <label for="senha">Senha:</label><br>
+            <input type="password" id="senha" name="senha" value="123456">
+        </div>
+        <br>
+        <button type="submit">Fazer Login</button>
+    </form>
+    
+    <div id="loginResultado" style="margin-top: 20px;"></div>
+    
+    <script>
+        // Funcao para fazer login e obter token
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const loginResultadoDiv = document.getElementById('loginResultado');
+            const tokenInput = document.getElementById('token');
+            
+            loginResultadoDiv.innerHTML = '<p>Fazendo login...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, senha })
+                });
+                
+                const data = await response.json();
+                
+                if (data.sucesso) {
+                    tokenInput.value = data.dados.token;
+                    loginResultadoDiv.innerHTML = `
+                        <p style="color: green;"><strong>Login realizado com sucesso!</strong></p>
+                        <p>Token copiado para o campo de token acima.</p>
+                        <p><strong>Usuario:</strong> ${data.dados.usuario.nome} (${data.dados.usuario.email})</p>
+                    `;
+                } else {
+                    loginResultadoDiv.innerHTML = `
+                        <p style="color: red;"><strong>Erro no login:</strong></p>
+                        <p>${data.erro}: ${data.mensagem}</p>
+                    `;
+                }
+            } catch (error) {
+                loginResultadoDiv.innerHTML = `<p style="color: red;">Erro ao fazer login: ${error.message}</p>`;
+            }
+        });
+        
+        // Funcao para upload de arquivo
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = document.getElementById('token').value;
+            const fileInput = document.getElementById('arquivo');
+            const descricao = document.getElementById('descricao').value;
+            const resultadoDiv = document.getElementById('resultado');
+            
+            if (!fileInput.files[0]) {
+                resultadoDiv.innerHTML = '<p style="color: red;">Por favor, selecione um arquivo.</p>';
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('arquivo', fileInput.files[0]);
+            if (descricao) {
+                formData.append('descricao', descricao);
+            }
+            
+            resultadoDiv.innerHTML = '<p>Enviando arquivo...</p>';
+            
+            try {
+                // Nota: Esta rota pode nao existir ainda. Ajuste conforme sua API
+                const response = await fetch('http://localhost:3000/api/arquivos/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.sucesso) {
+                    resultadoDiv.innerHTML = `
+                        <h3>Sucesso!</h3>
+                        <p><strong>Mensagem:</strong> ${data.mensagem}</p>
+                        <p><strong>Nome do arquivo:</strong> ${data.dados.nomeArquivo || 'N/A'}</p>
+                        <p><strong>Caminho:</strong> ${data.dados.caminho || 'N/A'}</p>
+                    `;
+                } else {
+                    resultadoDiv.innerHTML = `
+                        <h3>Erro!</h3>
+                        <p><strong>Erro:</strong> ${data.erro}</p>
+                        <p><strong>Mensagem:</strong> ${data.mensagem}</p>
+                        <p><small>Nota: Se a rota nao existir, voce precisa criar uma rota de upload de arquivos na API.</small></p>
+                    `;
+                }
+            } catch (error) {
+                resultadoDiv.innerHTML = `
+                    <p style="color: red;">Erro ao enviar: ${error.message}</p>
+                    <p><small>Verifique se a rota /api/arquivos/upload existe na sua API. Se nao existir, este e apenas um exemplo de como implementar.</small></p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
+
