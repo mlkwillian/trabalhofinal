@@ -38,20 +38,20 @@ export default function LoginPage() {
     }
 
     try {
-      const res = await api.post("/usuarios/login", {
+      const res = await api.post("/api/login", {
         email,
         senha
       })
       localStorage.setItem("token", res.data.token)
-      api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`
+      localStorage.setItem("usuario", JSON.stringify(res.data.usuario))
       router.push("/dashboard")
 
     } catch (err) {
       console.error(err)
 
       const mensagem =
-        err.response?.data?.message ||
-        "Email ou senha inválidos"
+        err.response?.data?.mensagem ||
+        "Email ou senha inválidos";
 
       setErro(mensagem)
     } finally {

@@ -1,56 +1,57 @@
 USE termoguard;
 
-
--- inserir usuario admin
+-- =========================
+-- USUÁRIOS
+-- =========================
 
 INSERT INTO usuarios (nome, email, senha, tipo_usuario)
-VALUES (
+VALUES 
+(
 'Administrador',
 'admin@termoguard.com',
-'$2b$10$XJzvVhJvX2sP5k2kF3KJ7O0FZ9sZ2OQ2n9jH3cQ1e8wXjX9G5K9mS',
+'$2b$10$tccgBu/hHCUb68hxTl1FceqxwA8oQtJLXjaBK2XRmFoEL8vI0hszG',
 'gestor'
-);
-
-
--- inserir usuario manutencao
-
-INSERT INTO usuarios (nome, email, senha, tipo_usuario)
-VALUES (
+),
+(
 'Tecnico Manutenção',
 'manutencao@termoguard.com',
-'$2b$10$XJzvVhJvX2sP5k2kF3KJ7O0FZ9sZ2OQ2n9jH3cQ1e8wXjX9G5K9mS',
+'$2b$10$tccgBu/hHCUb68hxTl1FceqxwA8oQtJLXjaBK2XRmFoEL8vI0hszG',
 'manutencao'
 );
 
-
--- inserir sala
+-- =========================
+-- SALAS
+-- =========================
 
 INSERT INTO salas (nome_sala, temperatura_min, temperatura_max)
 VALUES
 ('Almoxarifado Principal', 15, 25),
 ('Laboratório Químico', 18, 24);
 
-
--- inserir sensores
+-- =========================
+-- SENSORES
+-- =========================
 
 INSERT INTO sensores (id_sala, nome_sensor)
 VALUES
 (1, 'ESP32 Sensor Almoxarifado'),
 (2, 'ESP32 Sensor Laboratorio');
 
+-- =========================
+-- LEITURAS (CORRIGIDO)
+-- =========================
 
--- inserir leituras exemplo
-
-INSERT INTO leituras (sensor_id, temperatura, umidade)
+INSERT INTO leituras (id_sensor, temperatura, umidade)
 VALUES
 (1, 22.5, 60),
 (1, 23.1, 58),
-(1, 26.8, 55), 
+(1, 26.8, 55), -- fora do limite (vai gerar incidente se tiver trigger)
 (2, 21.2, 50),
 (2, 19.8, 52);
 
-
--- incidente exemplo
+-- =========================
+-- INCIDENTE EXEMPLO
+-- =========================
 
 INSERT INTO incidentes (id_sala, status)
 VALUES (1, 'aberto');

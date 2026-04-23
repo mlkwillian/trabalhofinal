@@ -28,11 +28,7 @@ export default function AmbientesPage() {
           return;
         }
 
-        const res = await api.get("/salas", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await api.get("/api/salas");
 
         setSalas(res.data);
 
