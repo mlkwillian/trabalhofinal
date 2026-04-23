@@ -44,7 +44,6 @@ export default function EnvironmentCard({ env, selected, onClick, T }) {
       : `0 0 0 1.5px ${T.purple}60, 0 12px 40px rgba(124,58,237,0.15)`
     : T.shadow;
 
-  // 🔒 proteção de dados
   const history = env?.history?.slice(-14) || [];
   const hasTemp = env?.temp !== null && env?.temp !== undefined;
 
@@ -70,7 +69,8 @@ export default function EnvironmentCard({ env, selected, onClick, T }) {
         transition: "all 0.35s cubic-bezier(0.4,0,0.2,1)",
       }}
     >
-      {/* ❄️ efeito neve */}
+
+      {/* ❄️ neve */}
       {isCold && (
         <canvas
           ref={canvasRef}
@@ -81,30 +81,15 @@ export default function EnvironmentCard({ env, selected, onClick, T }) {
             borderRadius: 16,
             zIndex: 1,
           }}
-          width={260}
-          height={280}
-        />
-      )}
-
-      {isCold && selected && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            borderRadius: 16,
-            pointerEvents: "none",
-            zIndex: 0,
-            background: `linear-gradient(135deg, ${T.cold.overlay} 0%, transparent 100%)`,
-          }}
         />
       )}
 
       <div style={{ position: "relative", zIndex: 2 }}>
-        
+
         {/* topo */}
-        <div className="flex items-start justify-between mb-3">
+        <div className="flex justify-between mb-3">
           <div
-            className="h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-300"
+            className="h-10 w-10 rounded-xl flex items-center justify-center"
             style={{
               background: `${tempColor}15`,
               border: `1.5px solid ${tempColor}25`,
@@ -118,29 +103,15 @@ export default function EnvironmentCard({ env, selected, onClick, T }) {
           <div className="flex items-center gap-2">
             {env?.online ? (
               <>
-                <PulsingDot
-                  color={
-                    selected && isCold
-                      ? T.blue
-                      : isAlert
-                      ? T.accent
-                      : T.purple
-                  }
-                />
-                <span
-                  className="text-[9px] font-bold uppercase tracking-wider"
-                  style={{ color: T.muted }}
-                >
+                <PulsingDot color={tempColor} />
+                <span className="text-[9px]" style={{ color: T.muted }}>
                   online
                 </span>
               </>
             ) : (
               <>
                 <WifiOff className="h-3 w-3" style={{ color: T.faint }} />
-                <span
-                  className="text-[9px] font-bold uppercase tracking-wider"
-                  style={{ color: T.faint }}
-                >
+                <span className="text-[9px]" style={{ color: T.faint }}>
                   offline
                 </span>
               </>
@@ -149,79 +120,55 @@ export default function EnvironmentCard({ env, selected, onClick, T }) {
         </div>
 
         {/* nome */}
-        <p
-          className="text-[10px] font-black uppercase tracking-[0.18em] truncate"
-          style={{ color: T.muted }}
-        >
+        <p className="text-[10px] uppercase truncate" style={{ color: T.muted }}>
           {env?.name}
         </p>
 
         {/* temperatura */}
-        <p
-          className="text-4xl font-black mt-1 tabular-nums leading-none"
-          style={{
-            color: tempColor,
-            fontFamily: "'Space Mono', monospace",
-            letterSpacing: "-0.02em",
-          }}
-        >
+        <p className="text-4xl font-black mt-1" style={{ color: tempColor }}>
           {hasTemp ? `${env.temp}°` : "—"}
         </p>
 
         {/* barra */}
-        <div className="mt-3 relative">
-          <div
-            className="h-1 rounded-full overflow-hidden"
-            style={{ background: T.borderSoft }}
-          >
+        <div className="mt-3">
+          <div className="h-1 rounded-full overflow-hidden" style={{ background: T.borderSoft }}>
             {hasTemp && (
               <div
-                className="h-full rounded-full transition-all duration-500"
+                className="h-full rounded-full"
                 style={{
                   width: `${pct}%`,
-                  background: inRange
-                    ? `linear-gradient(90deg, ${T.blue}80, ${T.purple})`
-                    : `linear-gradient(90deg, ${T.accent}, ${T.red})`,
+                  background: inRange ? T.blue : T.accent,
                 }}
               />
             )}
           </div>
+        </div>
 
-          <div
-            className="flex items-center justify-between mt-1.5 text-[9px]"
-            style={{
-              color: T.faint,
-              fontFamily: "'Space Mono', monospace",
-            }}
-          >
-            <span>{env?.minTemp}°</span>
-            <span style={{ color: T.muted }}>{env?.humidity}% UR</span>
-            <span>{env?.maxTemp}°</span>
+        {/* 📊 gráfico CORRIGIDO */}
+        {history.length > 0 && (
+          <div className="mt-3 h-[80px] min-h-[80px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={history}>
+                <defs>
+                  <linearGradient id={`sg${env?.id}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={tempColor} stopOpacity={0.4} />
+                    <stop offset="100%" stopColor={tempColor} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+
+                <Area
+                  type="monotone"
+                  dataKey="temp"
+                  stroke={tempColor}
+                  strokeWidth={1.5}
+                  fill={`url(#sg${env?.id})`}
+                  dot={false}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
-        </div>
+        )}
 
-        {/* gráfico */}
-        <div className="mt-3 h-10 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={history}>
-              <defs>
-                <linearGradient id={`sg${env?.id}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={tempColor} stopOpacity={0.4} />
-                  <stop offset="100%" stopColor={tempColor} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-
-              <Area
-                type="monotone"
-                dataKey="temp"
-                stroke={tempColor}
-                strokeWidth={1.5}
-                fill={`url(#sg${env?.id})`}
-                dot={false}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
       </div>
     </button>
   );

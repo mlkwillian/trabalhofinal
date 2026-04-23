@@ -25,7 +25,7 @@ export default function AlertsList({ alerts = [], onVerify, T }) {
       >
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2.5">
-            
+
             <div
               className="h-9 w-9 rounded-xl flex items-center justify-center relative"
               style={{
@@ -65,7 +65,7 @@ export default function AlertsList({ alerts = [], onVerify, T }) {
 
         {/* RESUMO */}
         <div className="flex gap-2">
-          
+
           <div
             className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-full font-bold flex-1 justify-center"
             style={{
@@ -108,7 +108,7 @@ export default function AlertsList({ alerts = [], onVerify, T }) {
 
               {pending.map(alert => (
                 <AlertCard
-                  key={alert.id}
+                  key={alert.id_incidente || alert.id}
                   alert={alert}
                   onVerify={onVerify}
                   T={T}
@@ -128,7 +128,7 @@ export default function AlertsList({ alerts = [], onVerify, T }) {
 
               {resolved.map(alert => (
                 <AlertCard
-                  key={alert.id}
+                  key={alert.id_incidente || alert.id}
                   alert={alert}
                   onVerify={onVerify}
                   T={T}

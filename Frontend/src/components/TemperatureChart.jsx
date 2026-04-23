@@ -23,11 +23,11 @@ export default function TemperatureChart({ env, T }) {
 
     async function loadLeituras() {
       try {
-        const res = await api.get(`/leituras?sala_id=${env.id}`);
+        const res = await api.get(`/api/leituras?sala_id=${env.id}`);
 
         // 🔥 transforma dados pro formato do gráfico
         const formatted = res.data.map((item) => ({
-          time: new Date(item.created_at).toLocaleTimeString("pt-BR", {
+          time: new Date(item.data_leitura).toLocaleTimeString("pt-BR", {
             hour: "2-digit",
             minute: "2-digit",
           }),

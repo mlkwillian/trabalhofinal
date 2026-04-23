@@ -4,22 +4,22 @@ const db = require("../config/db");
 
 exports.registrarLeitura = (req, res) => {
 
-  const { sensor_id } = req.body;
+  const { id_sensor } = req.body;
 
   const temperatura = Number(req.body.temperatura);
   const umidade = Number(req.body.umidade);
 
-  if (!sensor_id || temperatura === undefined || umidade === undefined) {
+  if (!id_sensor || temperatura === undefined || umidade === undefined) {
     return res.status(400).json({ erro: "Dados inválidos" });
   }
 
-  console.log(`Sensor ${sensor_id} → Temp: ${temperatura}°C`);
+  console.log(`Sensor ${id_sensor} → Temp: ${temperatura}°C`);
   
-  Leitura.criarLeitura(sensor_id, temperatura, umidade, (err) => {
+  Leitura.criarLeitura(id_sensor, temperatura, umidade, (err) => {
 
     if (err) return res.status(500).send(err);
 
-    Leitura.buscarLimitesSala(sensor_id, (err, result) => {
+    Leitura.buscarLimitesSala(id_sensor, (err, result) => {
 
       if (err) return res.status(500).send(err);
 
@@ -66,25 +66,36 @@ exports.registrarLeitura = (req, res) => {
 
 
 exports.listarLeituras = (req, res) => {
+
+  const { sala_id } = req.query;
+
+  if (!sala_id) {
+    return res.status(400).json({ erro: "sala_id obrigatório" });
+  }
+
   const query = `
     SELECT 
-      l.data_hora as dt,
-      s.nome_sala as env,
-      l.temperatura as temp,
-      s.temperatura_min as min,
-      s.temperatura_max as max
+      l.id_leitura,
+      l.data_leitura,
+      l.temperatura,
+      l.umidade,
+      s.id_sala
     FROM leituras l
     JOIN sensores se ON l.id_sensor = se.id_sensor
     JOIN salas s ON se.id_sala = s.id_sala
-    ORDER BY l.data_hora DESC
+    WHERE s.id_sala = ?
+    ORDER BY l.data_leitura ASC
   `;
 
-  db.query(query, (err, result) => {
+  db.query(query, [sala_id], (err, result) => {
+
     if (err) {
-      console.error(err);
+      console.error("Erro SQL:", err);
       return res.status(500).json({ erro: "Erro ao buscar leituras" });
     }
 
     res.json(result);
+
   });
+
 };

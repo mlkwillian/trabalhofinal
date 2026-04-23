@@ -50,7 +50,7 @@ function NovoAmbienteModal({ onClose, onSuccess }) {
     try {
       const token = localStorage.getItem("token");
       await api.post(
-        "/salas",
+        "/api/salas",
         {
           nome_sala: form.nome_sala.trim(),
           temperatura_min: parseFloat(form.temperatura_min),

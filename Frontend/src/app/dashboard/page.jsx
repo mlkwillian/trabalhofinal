@@ -9,15 +9,13 @@ import AuditReport from "@/components/AuditReport";
 import { themes } from "@/theme/theme";
 import { api } from "@/services/api";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useRouter } from "next/navigation";
 
 import {
   BarChart3,
   Wifi,
   AlertTriangle,
-  CheckCircle2,
-  Clock,
-  ArrowUpRight,
-  Filter
+  CheckCircle2
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -30,6 +28,16 @@ export default function DashboardPage() {
   const { dark } = useTheme();
   const T = dark ? themes.dark : themes.light;
 
+  const router = useRouter();
+
+  // 🔐 Proteção de rota
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/");
+    }
+  }, []);
+
   useEffect(() => {
     async function loadData() {
       try {
@@ -40,16 +48,13 @@ export default function DashboardPage() {
           api.get("/api/incidentes").catch(() => ({ data: [] }))
         ]);
 
-        const mappedSalas = (salasRes.data || []).map(sala => ({
+        const mappedSalas = (salasRes.data || []).map((sala) => ({
           id: sala.id_sala,
           name: sala.nome_sala,
           minTemp: sala.temperatura_min,
           maxTemp: sala.temperatura_max,
           online: true,
-          history: [
-            { time: "08:00", temp: 22 },
-            { time: "09:00", temp: 23 }
-          ]
+          history: [] // 🔥 agora vai vir do backend depois
         }));
 
         setEnvs(mappedSalas);
@@ -69,17 +74,18 @@ export default function DashboardPage() {
     loadData();
   }, []);
 
+  // 🔥 corrigido (id correto)
   const handleVerify = (alertId) => {
-    setAlertsData(prev =>
-      prev.map(a =>
-        a.id === alertId ? { ...a, verified: true } : a
+    setAlertsData((prev) =>
+      prev.map((a) =>
+        a.id_incidente === alertId ? { ...a, verified: true } : a
       )
     );
   };
 
   const complianceScore = useMemo(() => {
     const total = alertsData.length;
-    const verified = alertsData.filter(a => a.verified).length;
+    const verified = alertsData.filter((a) => a.verified).length;
     return total > 0 ? Math.round((verified / total) * 100) : 100;
   }, [alertsData]);
 
@@ -92,13 +98,13 @@ export default function DashboardPage() {
     },
     {
       label: "Dispositivos Online",
-      value: `${envs.filter(e => e.online).length}/${envs.length}`,
+      value: `${envs.filter((e) => e.online).length}/${envs.length}`,
       icon: Wifi,
       accentColor: "#22c55e",
     },
     {
       label: "Alertas Ativos",
-      value: alertsData.filter(a => !a.verified).length,
+      value: alertsData.filter((a) => !a.verified).length,
       icon: AlertTriangle,
       accentColor: "#f97316",
     },
@@ -122,16 +128,11 @@ export default function DashboardPage() {
     <div className="space-y-6 p-6 min-h-screen" style={{ background: "var(--bg)" }}>
 
       {/* HEADER */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-6"
-        style={{ borderBottom: "1px solid var(--border-soft)" }}>
-        
+      <div className="flex flex-col lg:flex-row justify-between gap-4 pb-6 border-b border-[var(--border-soft)]">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <h1 className="text-2xl font-bold" style={{ color: "var(--text)" }}>
-              Painel de Controle
-            </h1>
-          </div>
+          <h1 className="text-2xl font-bold" style={{ color: "var(--text)" }}>
+            Painel de Controle
+          </h1>
           <p className="text-sm" style={{ color: "var(--purple)" }}>
             Visão geral da integridade térmica
           </p>
@@ -164,7 +165,7 @@ export default function DashboardPage() {
 
       {/* AMBIENTES */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {envs.map(env => (
+        {envs.map((env) => (
           <EnvironmentCard
             key={env.id}
             env={env}
@@ -176,9 +177,11 @@ export default function DashboardPage() {
       </div>
 
       {/* GRÁFICO */}
-      {selectedEnv && (
-        <TemperatureChart env={selectedEnv} T={T} />
-      )}
+      <div className="w-full h-[300px]">
+        {selectedEnv && (
+          <TemperatureChart env={selectedEnv} T={T} />
+        )}
+      </div>
 
       {/* ALERTAS */}
       <AlertsList

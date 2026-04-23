@@ -2,18 +2,18 @@ const db = require("../config/db");
 
 const Leitura = {
 
-  criarLeitura: (sensor_id, temperatura, umidade, callback) => {
+  criarLeitura: (id_sensor, temperatura, umidade, callback) => {
 
     const query = `
       INSERT INTO leituras (id_sensor, temperatura, umidade)
       VALUES (?, ?, ?)
     `;
 
-    db.query(query, [sensor_id, temperatura, umidade], callback);
+    db.query(query, [id_sensor, temperatura, umidade], callback);
   },
 
 
-  buscarLimitesSala: (sensor_id, callback) => {
+  buscarLimitesSala: (id_sensor, callback) => {
 
     const query = `
       SELECT s.id_sala, s.temperatura_min, s.temperatura_max
@@ -22,11 +22,11 @@ const Leitura = {
       WHERE se.id_sensor = ?
     `;
 
-    db.query(query, [sensor_id], callback);
+    db.query(query, [id_sensor], callback);
   },
 
 
-  ultimas24h: (sensor_id, callback) => {
+  ultimas24h: (id_sensor, callback) => {
 
     const query = `
       SELECT temperatura, umidade, data_hora
@@ -36,7 +36,7 @@ const Leitura = {
       ORDER BY data_hora
     `;
 
-    db.query(query, [sensor_id], callback);
+    db.query(query, [id_sensor], callback);
   }
 
 };
