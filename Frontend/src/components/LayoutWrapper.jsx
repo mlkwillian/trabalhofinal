@@ -7,7 +7,7 @@ export default function LayoutWrapper({ children }) {
   const pathname = usePathname();
 
   // Se for a página inicial, NÃO usa o layout
-  if (pathname === "/" || pathname === "/login") {
+  if (pathname === "/" || pathname === "/login" || pathname === "/login/esqueci" || pathname === "/login/criar") {
     return children;
   } else if (pathname === "/login") {
     return children;

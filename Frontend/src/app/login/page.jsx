@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import { motion, useMotionValue, useMotionTemplate } from "framer-motion"
-import { Thermometer, Mail, Lock, Eye, EyeOff } from "lucide-react"
+import { Mail, Lock, Eye, EyeOff } from "lucide-react"
 import { api } from "@/services/api"
 import { useRouter } from "next/navigation"
 
@@ -100,13 +100,13 @@ export default function LoginPage() {
         }
       `}</style>
 
-      {/* ── IMAGEM DE FUNDO ── */}
+     
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url('/imagens/baixados.gif')` }}
       />
 
-      {/* ── OVERLAY ESCURO (gradiente da esquerda para a direita, mais escuro na esquerda) ── */}
+      
       <div
         className="absolute inset-0"
         style={{
@@ -122,7 +122,7 @@ export default function LoginPage() {
         }}
       />
 
-      {/* ── CARD À ESQUERDA ── */}
+      
       <div className="absolute z-10 flex items-center justify-center" style={{ left: 0, top: 0, bottom: 0, width: "45%" }}>
         <motion.div
           initial={{ opacity: 0, x: -30 }}
@@ -131,7 +131,6 @@ export default function LoginPage() {
           onMouseMove={handleMouseMove}
           className="group relative w-full max-w-[360px]"
         >
-          {/* Glow que segue o mouse na borda */}
           <motion.div
             className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition duration-500 rounded-2xl"
             style={{
@@ -145,7 +144,6 @@ export default function LoginPage() {
             }}
           />
 
-          {/* Card */}
           <div
             className="relative rounded-2xl overflow-hidden"
             style={{
@@ -158,7 +156,6 @@ export default function LoginPage() {
           >
             <div className="px-9 py-10 space-y-7">
 
-              {/* Título */}
               <motion.h1
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -169,14 +166,12 @@ export default function LoginPage() {
                 <span style={{ color: "#be50e6", marginLeft: "3px" }}>.</span>
               </motion.h1>
 
-              {/* Campos */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.25, duration: 0.6 }}
                 className="space-y-4"
               >
-                {/* E-mail */}
                 <div className="space-y-1.5">
                   <label style={{ color: "rgba(200,180,230,0.85)", fontSize: "13px", fontWeight: 500 }}>
                     E-mail
@@ -193,7 +188,6 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                {/* Senha */}
                 <div className="space-y-1.5">
                   <label style={{ color: "rgba(200,180,230,0.85)", fontSize: "13px", fontWeight: 500 }}>
                     Senha
@@ -220,19 +214,19 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                {/* Esqueci */}
+                {/* --- LINK CORRIGIDO PARA A PASTA 'ESQUECI' --- */}
                 <div className="text-right">
-                  <a href="#"
-                    style={{ fontSize: "12px", color: "rgba(190,80,230,0.8)", textDecoration: "none" }}
+                  <button 
+                    onClick={() => router.push("/login/esqueci")}
+                    style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12px", color: "rgba(190,80,230,0.8)", textDecoration: "none", padding: 0 }}
                     onMouseEnter={e => e.target.style.color = "rgba(220,130,255,1)"}
                     onMouseLeave={e => e.target.style.color = "rgba(190,80,230,0.8)"}
                   >
                     Esqueci minha senha
-                  </a>
+                  </button>
                 </div>
               </motion.div>
 
-              {/* Botão */}
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.5 }}>
                 <button
                   onClick={handleLogin}
@@ -243,27 +237,27 @@ export default function LoginPage() {
                 </button>
               </motion.div>
 
-
               {erro && (
                 <p className="text-red-400 text-sm text-center">
                   {erro}
                 </p>
               )}
 
-              {/* Registrar */}
+              
               <motion.p
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }}
                 className="text-center"
                 style={{ fontSize: "12.5px", color: "rgba(180,160,210,0.6)" }}
               >
                 Ainda não tenho uma conta{" "}
-                <a href="#"
-                  style={{ color: "rgba(190,80,230,0.85)", textDecoration: "none", fontWeight: 600 }}
+                <button 
+                  onClick={() => router.push("/login/criar")}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(190,80,230,0.85)", textDecoration: "none", fontWeight: 600, padding: 0 }}
                   onMouseEnter={e => e.target.style.color = "rgba(220,130,255,1)"}
                   onMouseLeave={e => e.target.style.color = "rgba(190,80,230,0.85)"}
                 >
                   Registre-se
-                </a>
+                </button>
               </motion.p>
 
             </div>
@@ -271,14 +265,12 @@ export default function LoginPage() {
         </motion.div>
       </div>
 
-      {/* Footer */}
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
         className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10"
-        style={{ color: "rgba(190,80,230,0.4)", fontSize: "12px" }}
+        style={{ color: "rgb(192, 132, 252)", fontSize: "12px" }}
       >
-        <Thermometer size={13} />
-        <span>TermoGuard © 2026</span>
+        <span>© 2026 TermoGuard. Todos os direitos reservados.</span>
       </motion.div>
 
     </div>

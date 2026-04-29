@@ -14,7 +14,7 @@ import {
   LogOut,
   Menu,
   Database,
-  ShieldCheck,
+  ShieldCheck, // Importado para usar no menu
 } from "lucide-react";
 import { useLayout } from "@/components/LayoutClient";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -25,6 +25,8 @@ const navItems = [
   { label: "Alertas", href: "/alertas", icon: "bell", badge: 2, category: "Monitoramento" },
   { label: "Histórico", href: "/historico", icon: "activity", category: "Monitoramento" },
   { label: "Relatórios", href: "/dashboard/relatorios", icon: "file", category: "Dados" },
+  // NOVO ITEM ADICIONADO AQUI:
+  { label: "Administração", href: "/admin", icon: "shield", category: "Sistema" },
   { label: "Configurações", href: "/configuracoes", icon: "settings", category: "Sistema" },
 ];
 
@@ -45,6 +47,8 @@ function Icon({ type }) {
     activity: <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />,
     file: <path d="M14 2H6v20h12" />,
     settings: <circle cx="12" cy="12" r="3" />,
+    // Adicionado o desenho do ícone de escudo para o menu
+    shield: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />,
   };
 
   return <svg {...common}>{icons[type]}</svg>;
@@ -61,7 +65,7 @@ export default function Sidebar() {
   useEffect(() => {
     const saved = localStorage.getItem("sidebar-collapsed");
     if (saved) setCollapsed(saved === "true");
-  }, []);
+  }, [setCollapsed]);
 
   const isActive = (href) =>
     href === "/dashboard" ? pathname === href : pathname.startsWith(href);
@@ -134,12 +138,6 @@ export default function Sidebar() {
                     background: active ? "color-mix(in srgb, var(--purple) 15%, transparent)" : "transparent",
                     color: active ? "var(--purple-l)" : "var(--text-sub)",
                   }}
-                  onMouseEnter={(e) => {
-                    if (!active) e.currentTarget.style.background = "color-mix(in srgb, var(--purple) 8%, transparent)";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!active) e.currentTarget.style.background = "transparent";
-                  }}
                 >
                   <Icon type={item.icon} />
                   {!collapsed && <span className="text-sm">{item.label}</span>}
@@ -196,12 +194,6 @@ export default function Sidebar() {
           color: "var(--text-sub)",
           borderTop: "1px solid var(--border-soft)",
         }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = "color-mix(in srgb, var(--purple) 8%, transparent)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = "transparent";
-        }}
       >
         {dark ? <Sun size={16} /> : <Moon size={16} />}
         {!collapsed && (
@@ -209,7 +201,7 @@ export default function Sidebar() {
         )}
       </button>
 
-      {/* User */}
+      {/* User Section (Mantido conforme original) */}
       <div className="p-2" style={{ borderTop: "1px solid var(--border-soft)" }}>
         <button
           onClick={() => {
@@ -221,14 +213,6 @@ export default function Sidebar() {
             background: showUserMenu
               ? "color-mix(in srgb, var(--purple) 10%, transparent)"
               : "transparent",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "color-mix(in srgb, var(--purple) 8%, transparent)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = showUserMenu
-              ? "color-mix(in srgb, var(--purple) 10%, transparent)"
-              : "transparent";
           }}
         >
           <div
@@ -242,10 +226,7 @@ export default function Sidebar() {
           </div>
           {!collapsed && (
             <div className="flex flex-col items-start overflow-hidden">
-              <span
-                className="text-sm font-medium truncate w-full text-left"
-                style={{ color: "var(--text)" }}
-              >
+              <span className="text-sm font-medium truncate w-full text-left" style={{ color: "var(--text)" }}>
                 Admin Thermo
               </span>
               <span className="text-[10px] truncate" style={{ color: "var(--muted)" }}>
@@ -268,29 +249,17 @@ export default function Sidebar() {
           >
             <button
               onClick={() => router.push("/perfil")}
-              className="flex items-center gap-2 p-2 w-full text-sm rounded-md transition-colors"
+              className="flex items-center gap-2 p-2 w-full text-sm rounded-md hover:bg-white/5 transition-colors"
               style={{ color: "var(--text-sub)" }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "color-mix(in srgb, var(--purple) 8%, transparent)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "transparent";
-              }}
             >
               <User size={14} /> Perfil
             </button>
             <button
-              onClick={() => router.push("/dashboard/configuracoes")}
-              className="flex items-center gap-2 p-2 w-full text-sm rounded-md transition-colors"
+              onClick={() => router.push("/admin")} // Também adicionei aqui por conveniência
+              className="flex items-center gap-2 p-2 w-full text-sm rounded-md hover:bg-white/5 transition-colors"
               style={{ color: "var(--text-sub)" }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "color-mix(in srgb, var(--purple) 8%, transparent)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "transparent";
-              }}
             >
-              <Settings size={14} /> Preferências
+              <ShieldCheck size={14} /> Painel Admin
             </button>
             <button
               onClick={() => router.push("/login")}
@@ -298,12 +267,6 @@ export default function Sidebar() {
               style={{
                 color: "var(--red)",
                 borderTop: "1px solid var(--border-soft)",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "color-mix(in srgb, var(--red) 8%, transparent)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "transparent";
               }}
             >
               <LogOut size={14} /> Sair
