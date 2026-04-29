@@ -9,13 +9,13 @@ VALUES
 (
 'Administrador',
 'admin@termoguard.com',
-'$2b$10$tccgBu/hHCUb68hxTl1FceqxwA8oQtJLXjaBK2XRmFoEL8vI0hszG',
+'$2b$10$oha9AXSWes78cyCtdgOHRe5.VVXT4VZIYQnIn71u.nytsXxFyszNO',
 'gestor'
 ),
 (
 'Tecnico Manutenção',
 'manutencao@termoguard.com',
-'$2b$10$tccgBu/hHCUb68hxTl1FceqxwA8oQtJLXjaBK2XRmFoEL8vI0hszG',
+'$2b$10$oha9AXSWes78cyCtdgOHRe5.VVXT4VZIYQnIn71u.nytsXxFyszNO',
 'manutencao'
 );
 
