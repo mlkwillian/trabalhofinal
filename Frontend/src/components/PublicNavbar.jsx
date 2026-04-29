@@ -31,18 +31,7 @@ export default function PublicNavbar() {
         <h1 className="text-white font-bold text-lg">ThermoGuard</h1>
       </div>
 
-      {/* Navegação */}
-      <nav className="hidden md:flex items-center gap-6 text-sm text-gray-300">
-        <Link href="#features" className="hover:text-white transition">
-          Recursos
-        </Link>
-        <Link href="#about" className="hover:text-white transition">
-          Sobre
-        </Link>
-        <Link href="#contact" className="hover:text-white transition">
-          Contato
-        </Link>
-      </nav>
+      
 
       {/* Ações */}
       <div className="flex items-center gap-3">

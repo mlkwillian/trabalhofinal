@@ -1,136 +1,175 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Thermometer } from "lucide-react";
-import Link from "next/link";
 
 export function LandingHero() {
+  const chips = [
+    { label: "18°C · Sala Fria", color: "#4ade80", pos: "top-[8%] left-[2%]", anim: [0, -8, 0], rot: [-2, 2] },
+    { label: "32°C · Produção", color: "#fb923c", pos: "top-[22%] right-[-4%]", anim: [0, -12, 0], rot: [3, -1] },
+    { label: "22°C · Escritório", color: "#38bdf8", pos: "bottom-[18%] left-[0%]", anim: [0, -6, 0], rot: [-1, 3] },
+    { label: "26°C · Almoxarife", color: "#818cf8", pos: "bottom-[6%] right-[-2%]", anim: [0, -9, 0], rot: [2, -2] },
+  ];
+
   return (
-    <section className="relative overflow-hidden py-20 px-8">
+    <section className="relative overflow-hidden pt-20 pb-32 px-8">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left content */}
+
+          {/* LEFT */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="inline-block mb-4 px-4 py-2 rounded-full bg-purple-500/20 border border-purple-500/30"
-            >
-              <span className="text-purple-300 text-sm">Monitoramento Inteligente</span>
-            </motion.div>
-
             <h1 className="text-5xl md:text-6xl mb-6 bg-gradient-to-r from-purple-200 via-violet-200 to-purple-300 bg-clip-text text-transparent">
               Controle Total da Temperatura
             </h1>
+            <div className="flex items-center gap-4 mt-4">
+             <motion.a
+    href="#planos"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.3 }}
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.97 }}
+    className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-violet-600 text-white font-medium shadow-lg shadow-purple-500/20 border border-purple-400/30"
+  >
+    Nossos Planos
+  </motion.a>
 
-            <p className="text-xl text-purple-200 mb-8 leading-relaxed">
-              Monitore e gerencie a temperatura de todas as áreas da sua empresa em tempo real. 
-              Previna problemas, economize energia e garanta o ambiente ideal para seus processos.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-             <Link href="/login">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="group px-8 py-4 bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl hover:from-purple-500 hover:to-violet-500 transition-all flex items-center gap-2 justify-center"
-                >
-                  <span>Acessar Dashboard</span>
-                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                </motion.button>
-              </Link>
-
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-8 py-4 border border-purple-500/50 rounded-xl text-purple-200 hover:bg-purple-500/10 transition-all"
-              >
-                Saiba Mais
-              </motion.button>
-            </div>
+  <motion.a
+    href="#sobre"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.4 }}
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.97 }}
+    className="px-6 py-3 rounded-xl border border-purple-500/30 text-purple-300 font-medium backdrop-blur-sm bg-white/5 hover:bg-white/10 hover:border-purple-400/50 transition-all duration-300"
+  >
+    Saiba mais
+  </motion.a>
+  </div>
+  
           </motion.div>
 
-          {/* Right content - Animated illustration */}
+          {/* RIGHT */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 0.8 }}
             className="relative"
           >
-            <div className="relative w-full aspect-square max-w-md mx-auto">
-              {/* Central thermometer */}
+            <div className="relative w-full aspect-square max-w-md mx-auto flex items-center justify-center">
+
+              {/* ORBITAS */}
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+                className="absolute w-60 h-60 rounded-full border border-dashed border-purple-500/30"
+              />
+              <motion.div
+                animate={{ rotate: -360 }}
+                transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
+                className="absolute w-[310px] h-[310px] rounded-full border border-dashed border-purple-500/55"
+              />
+
+              {/* 🔥 TERMÔMETRO SVG ANIMADO */}
               <motion.div
                 animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 3, repeat: Infinity }}
+                transition={{ duration: 4, repeat: Infinity }}
                 className="absolute inset-0 flex items-center justify-center"
               >
-                <div className="relative">
-                  <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-3xl" />
-                  <Thermometer className="h-32 w-32 text-purple-400 relative z-10" />
-                </div>
+                <svg
+                  width="110"
+                  height="110"
+                  viewBox="0 0 110 110"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="drop-shadow-[0_0_30px_rgba(167,139,250,0.5)]"
+                >
+                  <defs>
+                    <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor="rgba(167,139,250,0.4)" />
+                      <stop offset="100%" stopColor="rgba(167,139,250,0)" />
+                    </radialGradient>
+                  </defs>
+
+                  {/* glow */}
+                  <ellipse cx="55" cy="55" rx="50" ry="50" fill="url(#glowGrad)" />
+
+                  {/* tubo */}
+                  <rect
+                    x="44"
+                    y="14"
+                    width="22"
+                    height="58"
+                    rx="11"
+                    stroke="#a78bfa"
+                    strokeWidth="2.5"
+                  />
+
+                  {/* líquido animado */}
+                  <rect x="50" y="20" width="10" rx="5" fill="#7c3aed" opacity="0.7">
+                    <animate
+                      attributeName="height"
+                      values="30;42;20;38;30"
+                      dur="6s"
+                      repeatCount="indefinite"
+                    />
+                    <animate
+                      attributeName="fill"
+                      values="#7c3aed;#fb923c;#38bdf8;#7c3aed;#7c3aed"
+                      dur="6s"
+                      repeatCount="indefinite"
+                    />
+                  </rect>
+
+                  {/* bulbo externo */}
+                  <circle
+                    cx="55"
+                    cy="82"
+                    r="16"
+                    stroke="#a78bfa"
+                    strokeWidth="2.5"
+                  />
+
+                  {/* bulbo interno animado */}
+                  <circle cx="55" cy="82" r="11" fill="#7c3aed">
+                    <animate
+                      attributeName="fill"
+                      values="#7c4ad1;#fb923c;#38bdf8;#7c3aed;#7c3aed"
+                      dur="6s"
+                      repeatCount="indefinite"
+                    />
+                  </circle>
+
+                  {/* marcações */}
+                  <line x1="34" y1="35" x2="44" y2="35" stroke="#a78bfa" strokeWidth="1.5" opacity="0.6" />
+                  <line x1="34" y1="50" x2="44" y2="50" stroke="#a78bfa" strokeWidth="1.5" opacity="0.6" />
+                  <line x1="34" y1="65" x2="44" y2="65" stroke="#a78bfa" strokeWidth="1.5" opacity="0.6" />
+                </svg>
               </motion.div>
 
-              {/* Orbiting elements */}
-              {[0, 60, 120, 180, 240, 300].map((angle, i) => (
+             
+               {/* CHIPS */}
+              {chips.map((chip, i) => (
                 <motion.div
                   key={i}
-                  className="absolute top-1/2 left-1/2"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                  }}
-                  animate={{ rotate: 360 }}
-                  transition={{
-                    duration: 20 + i * 2,
-                    repeat: Infinity,
-                    ease: "linear",
-                  }}
+                  animate={{ y: chip.anim, rotate: chip.rot }}
+                  transition={{ duration: 5 + i, repeat: Infinity }}
+                  className={`absolute ${chip.pos} flex items-center gap-2 px-3 py-2 rounded-xl backdrop-blur-sm border border-purple-500/30 bg-[#0e0c1e]/90 text-sm text-white`}
                 >
-                  <div
-                    className="absolute w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500/30 to-violet-500/30 border border-purple-500/50 backdrop-blur-sm flex items-center justify-center"
-                    style={{
-                      transform: `rotate(${angle}deg) translateY(-180px) rotate(-${angle}deg)`,
-                    }}
-                  >
-                    <span className="text-purple-300">{18 + i * 2}°C</span>
-                  </div>
+                  <span
+                    className="w-2 h-2 rounded-full"
+                    style={{ background: chip.color }}
+                  />
+                  {chip.label}
                 </motion.div>
               ))}
 
-              {/* Glow effect */}
-              <motion.div
-                className="absolute inset-0 rounded-full"
-                animate={{
-                  boxShadow: [
-                    "0 0 60px 20px rgba(147, 51, 234, 0.3)",
-                    "0 0 80px 30px rgba(168, 85, 247, 0.4)",
-                    "0 0 60px 20px rgba(147, 51, 234, 0.3)",
-                  ],
-                }}
-                transition={{ duration: 3, repeat: Infinity }}
-              />
             </div>
           </motion.div>
         </div>
-      </div>
-
-      {/* Background decoration */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden -z-10">
-        <motion.div
-          className="absolute top-1/4 -left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 8, repeat: Infinity }}
-        />
-        <motion.div
-          className="absolute bottom-1/4 -right-1/4 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl"
-          animate={{ scale: [1.2, 1, 1.2], opacity: [0.5, 0.3, 0.5] }}
-          transition={{ duration: 8, repeat: Infinity }}
-        />
       </div>
     </section>
   );
