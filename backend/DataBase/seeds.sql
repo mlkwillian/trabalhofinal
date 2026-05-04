@@ -55,3 +55,6 @@ VALUES
 
 INSERT INTO incidentes (id_sala, status)
 VALUES (1, 'aberto');
+
+ALTER TABLE usuarios 
+MODIFY tipo_usuario ENUM('admin','operador','gestor','manutencao','qualidade');

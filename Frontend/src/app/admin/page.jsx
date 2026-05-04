@@ -1,185 +1,309 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import Chatbot from '@/components/Chatbot'
-import { 
-  Users, 
-  MapPin, 
-  Plus, 
-  Pencil, 
-  Trash2, 
-  Search, 
+import Chatbot from "@/components/Chatbot"
+import {
   ShieldCheck,
-  X,
-  User, // Importação que estava faltando
-  Fingerprint,
-  Mail,
-  Lock
+  Plus,
+  Search,
+  Pencil,
+  Trash2,
+  User,
+  X
 } from "lucide-react"
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState("usuarios")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [usuarios, setUsuarios] = useState([])
+  const [search, setSearch] = useState("")
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editando, setEditando] = useState(null)
 
-  // Estados para dados (Iniciando com os mocks das imagens)
-  const [usuarios, setUsuarios] = useState([
-    { id: 1, nome: "Admin Thermo", email: "admin@guard.com", cpf: "123.456.789-00", cargo: "Administrador" },
-    { id: 2, nome: "João Silva", email: "joao@empresa.com", cpf: "987.654.321-11", cargo: "Operador" },
-  ])
+  const [form, setForm] = useState({
+    nome: "",
+    email: "",
+    senha: "",
+    tipo_usuario: "gestor"
+  })
 
-  const [ambientes, setAmbientes] = useState([
-    { id: 1, nome: "Almoxarifado Principal", status: "Monitorado" },
-    { id: 2, nome: "Laboratório Químico", status: "Monitorado" },
-  ])
+  async function carregarUsuarios() {
+    const token = localStorage.getItem("token")
 
-  // Funções de Gerenciamento
-  const handleDeleteUser = (id) => setUsuarios(usuarios.filter(u => u.id !== id))
-  const handleDeleteAmbiente = (id) => setAmbientes(ambientes.filter(a => a.id !== id))
+    const res = await fetch("http://localhost:3000/api/usuarios", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+
+    const data = await res.json()
+    setUsuarios(data)
+  }
+
+  useEffect(() => {
+    carregarUsuarios()
+  }, [])
+
+  function abrirModal(usuario = null) {
+    if (usuario) {
+      setEditando(usuario)
+      setForm(usuario)
+    } else {
+      setEditando(null)
+      setForm({ nome: "", email: "", senha: "", tipo_usuario: "gestor" })
+    }
+    setModalOpen(true)
+  }
+
+  async function salvar() {
+    const token = localStorage.getItem("token")
+
+    if (editando) {
+      await fetch(`http://localhost:3000/api/usuarios/${editando.id_usuario}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(form)
+      })
+    } else {
+      await fetch("http://localhost:3000/api/usuarios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
+      })
+    }
+
+    setModalOpen(false)
+    carregarUsuarios()
+  }
+
+  async function deletar(id) {
+    const token = localStorage.getItem("token")
+
+    await fetch(`http://localhost:3000/api/usuarios/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` }
+    })
+
+    carregarUsuarios()
+  }
+
+  const filtrados = usuarios.filter(u =>
+    u.nome.toLowerCase().includes(search.toLowerCase())
+  )
 
   return (
-    
-    <div className="p-8 min-h-screen text-white bg-[#080516] flex flex-col items-center">
-      <style jsx global>{`
-        .glass-card {
-          background: rgba(255, 255, 255, 0.03);
-          backdrop-filter: blur(12px);
-          border: 1px solid rgba(190, 80, 230, 0.15);
-          border-radius: 16px;
-        }
-        .btn-purple {
-          background: linear-gradient(135deg, #be50e6 0%, #7c3aed 100%);
-          transition: all 0.2s;
-        }
-        .tab-active { color: #be50e6; border-bottom: 2px solid #be50e6; }
-      `}</style>
-
+    <div
+      className="p-8 min-h-screen flex flex-col items-center"
+      style={{ background: "var(--bg)", color: "var(--text)" }}
+    >
       <div className="w-full max-w-6xl">
-        {/* Header Centralizado */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-          <div className="text-center md:text-left">
-            <h1 className="text-3xl font-bold flex items-center justify-center md:justify-start gap-3">
-              <ShieldCheck className="text-purple-500" size={32} />
+
+        {/* HEADER */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-3">
+              <ShieldCheck style={{ color: "var(--purple)" }} />
               Painel Administrativo
             </h1>
-            <p className="text-purple-200/50 mt-1 text-sm">Gerencie usuários e ambientes do sistema TermoGuard.</p>
+            <p style={{ color: "var(--text-sub)" }}>
+              Gerencie usuários do sistema
+            </p>
           </div>
-          
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="btn-purple px-6 py-2.5 rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-purple-500/20"
+
+          <button
+            onClick={() => abrirModal()}
+            className="px-5 py-2 rounded-xl flex items-center gap-2 text-white font-medium"
+            style={{
+              background: "linear-gradient(135deg, var(--purple), var(--purple-l))",
+              boxShadow: "var(--shadow)"
+            }}
           >
-            <Plus size={20} />
-            {activeTab === "usuarios" ? "Novo Usuário" : "Novo Ambiente"}
+            <Plus size={18} />
+            Novo Usuário
           </button>
         </div>
 
-        {/* Barra de Navegação e Busca */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6 glass-card p-4 gap-4">
-          <div className="flex gap-8">
-            <button 
-              onClick={() => setActiveTab("usuarios")}
-              className={`pb-1 font-medium transition-all ${activeTab === "usuarios" ? "tab-active" : "text-gray-400"}`}
-            >
-              Usuários
-            </button>
-            <button 
-              onClick={() => setActiveTab("ambientes")}
-              className={`pb-1 font-medium transition-all ${activeTab === "ambientes" ? "tab-active" : "text-gray-400"}`}
-            >
-              Ambientes
-            </button>
-          </div>
-
-          <div className="relative w-full md:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400/50" size={18} />
-            <input 
-              type="text" 
-              placeholder="Pesquisar registro..." 
-              className="w-full bg-white/5 border border-white/10 rounded-lg py-2 pl-10 pr-4 outline-none focus:border-purple-500/50 transition-all"
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+        {/* SEARCH */}
+        <div
+          className="flex items-center gap-3 p-3 rounded-xl mb-6"
+          style={{
+            background: "var(--card)",
+            border: "1px solid var(--border-soft)"
+          }}
+        >
+          <Search size={18} style={{ color: "var(--muted)" }} />
+          <input
+            placeholder="Buscar usuário..."
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full outline-none bg-transparent"
+          />
         </div>
 
-        {/* Tabela de Dados */}
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-card overflow-x-auto"
+        {/* TABELA */}
+        <div
+          className="rounded-xl overflow-hidden"
+          style={{
+            background: "var(--card)",
+            border: "1px solid var(--border-soft)"
+          }}
         >
-          <table className="w-full text-left min-w-[600px]">
-            <thead className="bg-white/5 text-purple-300/70 text-xs uppercase tracking-wider">
-              <tr>
-                {activeTab === "usuarios" ? (
-                  <>
-                    <th className="px-6 py-4 font-semibold text-center w-16">Avatar</th>
-                    <th className="px-6 py-4 font-semibold">Nome / CPF</th>
-                    <th className="px-6 py-4 font-semibold">E-mail</th>
-                    <th className="px-6 py-4 font-semibold text-right">Ações</th>
-                  </>
-                ) : (
-                  <>
-                    <th className="px-6 py-4 font-semibold">Nome do Ambiente</th>
-                    <th className="px-6 py-4 font-semibold">Status</th>
-                    <th className="px-6 py-4 font-semibold text-right">Ações</th>
-                  </>
-                )}
+          <table className="w-full">
+
+            <thead style={{ background: "var(--surface)" }}>
+              <tr style={{ color: "var(--text-sub)" }}>
+                <th className="p-4 text-left">Usuário</th>
+                <th className="p-4 text-left">Email</th>
+                <th className="p-4 text-left">Tipo</th>
+                <th className="p-4 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 text-sm">
-              {activeTab === "usuarios" ? (
-                usuarios.map((u) => (
-                  <tr key={u.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="w-9 h-9 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 mx-auto border border-purple-500/30">
-                        <User size={18} />
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="font-medium">{u.nome}</div>
-                      <div className="text-xs text-gray-500">{u.cpf}</div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-400">{u.email}</td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button className="p-2 hover:bg-white/5 rounded-lg text-blue-400 transition-colors"><Pencil size={18} /></button>
-                        <button onClick={() => handleDeleteUser(u.id)} className="p-2 hover:bg-red-500/10 rounded-lg text-red-400 transition-colors"><Trash2 size={18} /></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                ambientes.map((amb) => (
-                  <tr key={amb.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="px-6 py-4 flex items-center gap-3">
-                      <MapPin size={18} className="text-purple-400" />
-                      <span className="font-medium">{amb.nome}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="px-2.5 py-1 rounded-full bg-green-500/10 text-green-400 text-[11px] font-bold uppercase tracking-wider border border-green-500/20">
-                        {amb.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button className="p-2 hover:bg-white/5 rounded-lg text-blue-400 transition-colors"><Pencil size={18} /></button>
-                        <button onClick={() => handleDeleteAmbiente(amb.id)} className="p-2 hover:bg-red-500/10 rounded-lg text-red-400 transition-colors"><Trash2 size={18} /></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+
+            <tbody>
+              {filtrados.map(u => (
+                <tr
+                  key={u.id_usuario}
+                  style={{ borderTop: "1px solid var(--border-soft)" }}
+                >
+                  <td className="p-4 flex items-center gap-3">
+                    <div
+                      className="w-9 h-9 rounded-full flex items-center justify-center"
+                      style={{ background: "var(--purple-dim)" }}
+                    >
+                      <User size={16} />
+                    </div>
+                    {u.nome}
+                  </td>
+
+                  <td className="p-4">{u.email}</td>
+
+                  <td className="p-4">
+                    <span
+                      className="px-2 py-1 rounded-full text-xs"
+                      style={{
+                        background: "var(--accent-soft)",
+                        color: "var(--green)"
+                      }}
+                    >
+                      {u.tipo_usuario}
+                    </span>
+                  </td>
+
+                  <td className="p-4 text-right">
+                    <button
+                      onClick={() => abrirModal(u)}
+                      className="mr-2"
+                      style={{ color: "var(--blue)" }}
+                    >
+                      <Pencil size={18} />
+                    </button>
+
+                    <button
+                      onClick={() => deletar(u.id_usuario)}
+                      style={{ color: "var(--red)" }}
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+
+              {filtrados.length === 0 && (
+                <tr>
+                  <td colSpan="4" className="text-center p-6">
+                    Nenhum usuário encontrado
+                  </td>
+                </tr>
               )}
             </tbody>
+
           </table>
-        </motion.div>
+        </div>
       </div>
 
-      {/* Rodapé fixo seguindo o padrão TermoGuard */}
-      <div className="mt-12 text-purple-400/30 text-xs">
-        © 2026 TermoGuard. Acesso restrito ao administrador.
-      </div>
+      {/* MODAL BONITO */}
+      <AnimatePresence>
+        {modalOpen && (
+          <motion.div
+            className="fixed inset-0 flex items-center justify-center z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div
+              className="absolute inset-0 bg-black/60"
+              onClick={() => setModalOpen(false)}
+            />
+
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative p-6 rounded-xl w-full max-w-md"
+              style={{
+                background: "var(--card)",
+                border: "1px solid var(--border)"
+              }}
+            >
+              <div className="flex justify-between mb-4">
+                <h2 className="text-lg font-semibold">
+                  {editando ? "Editar" : "Novo"} Usuário
+                </h2>
+                <X onClick={() => setModalOpen(false)} className="cursor-pointer" />
+              </div>
+
+              <input
+                placeholder="Nome"
+                value={form.nome}
+                onChange={(e) => setForm({ ...form, nome: e.target.value })}
+                className="w-full mb-2 p-2 rounded"
+                style={{ background: "var(--surface)" }}
+              />
+
+              <input
+                placeholder="Email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="w-full mb-2 p-2 rounded"
+                style={{ background: "var(--surface)" }}
+              />
+
+              {!editando && (
+                <input
+                  type="password"
+                  placeholder="Senha"
+                  onChange={(e) => setForm({ ...form, senha: e.target.value })}
+                  className="w-full mb-2 p-2 rounded"
+                  style={{ background: "var(--surface)" }}
+                />
+              )}
+
+              <select
+                value={form.tipo_usuario}
+                onChange={(e) => setForm({ ...form, tipo_usuario: e.target.value })}
+                className="w-full mb-4 p-2 rounded"
+                style={{ background: "var(--surface)" }}
+              >
+                <option value="admin">Admin</option>
+                <option value="operador">Operador</option>
+                <option value="gestor">Gestor</option>
+                <option value="manutencao">Manutenção</option>
+                <option value="qualidade">Qualidade</option>
+              </select>
+
+              <button
+                onClick={salvar}
+                className="w-full p-2 rounded text-white font-medium"
+                style={{
+                  background: "linear-gradient(135deg, var(--purple), var(--purple-l))"
+                }}
+              >
+                Salvar
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Chatbot />
     </div>
   )
