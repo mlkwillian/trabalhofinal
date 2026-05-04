@@ -30,44 +30,27 @@ export default function ChatbotHome() {
   function getBotResponse(msg) {
     const text = msg.toLowerCase()
 
-    // 🏢 EMPRESA
     if (text.includes('empresa') || text.includes('termoguard')) {
-      return '🏢 O TermoGuard é uma plataforma de monitoramento ambiental que acompanha temperatura e umidade em tempo real usando sensores IoT.'
+      return '🏢 O TermoGuard é uma plataforma de monitoramento ambiental com sensores IoT.'
     }
 
-    // 💰 PLANOS
     if (text.includes('plano') || text.includes('preço') || text.includes('preco')) {
-      return `
-💰 Planos do TermoGuard:
+      return `💰 Planos:
 
 🟢 Básico
-- Monitoramento em tempo real
-- 1 ambiente
-- Histórico simples
-
 🟣 Profissional
-- Múltiplas salas
-- Alertas automáticos
-- Dashboard completo
-
-🔴 Empresarial
-- Monitoramento 24/7
-- Relatórios de auditoria
-- Suporte prioritário
-      `
+🔴 Empresarial`
     }
 
-    // ⚙️ COMO FUNCIONA
     if (text.includes('funciona') || text.includes('como')) {
-      return '⚙️ Sensores instalados nos ambientes enviam dados continuamente para a plataforma, que analisa e alerta em caso de problemas.'
+      return '⚙️ Sensores enviam dados em tempo real para o sistema.'
     }
 
-    // 📱 APP
-    if (text.includes('app') || text.includes('celular')) {
-      return '📱 Você recebe alertas direto no celular e pode registrar ocorrências em tempo real.'
+    if (text.includes('app')) {
+      return '📱 Você recebe alertas direto no celular.'
     }
 
-    return 'Posso te ajudar com planos, funcionamento ou sobre a empresa 😊'
+    return 'Posso te ajudar com planos ou funcionamento 😊'
   }
 
   return (
@@ -75,57 +58,68 @@ export default function ChatbotHome() {
       {/* BOTÃO */}
       <button
         onClick={() => setOpen(prev => !prev)}
-        className="fixed bottom-6 right-6 z-[9999] bg-purple-600 text-white p-4 rounded-full shadow-lg"
+        className="fixed bottom-6 right-6 z-[999999] bg-purple-600 text-white p-4 rounded-full shadow-lg"
+        style={{ pointerEvents: 'auto' }}
       >
         💬
       </button>
 
       {/* CHAT */}
       {open && (
-        <div className="fixed bottom-20 right-6 w-80 h-[420px] bg-black border border-purple-500 rounded-xl flex flex-col shadow-2xl">
+        <div
+          className="fixed inset-0 z-[999998] pointer-events-none"
+        >
+          {/* CONTAINER DO CHAT */}
+          <div
+            className="absolute bottom-20 right-6 w-80 h-[420px] bg-black border border-purple-500 rounded-xl flex flex-col shadow-2xl"
+            style={{ pointerEvents: 'auto', zIndex: 999999 }}
+          >
 
-          <div className="bg-purple-600 text-white p-3 rounded-t-xl font-semibold">
-            TermoGuard
-          </div>
+            {/* HEADER */}
+            <div className="bg-purple-600 text-white p-3 rounded-t-xl font-semibold">
+              TermoGuard
+            </div>
 
-          {/* BOTÕES */}
-          <div className="p-2 flex flex-wrap gap-2">
-            <button onClick={() => handleQuick('empresa')} className="bg-gray-800 text-white px-2 py-1 rounded text-xs">🏢 Empresa</button>
-            <button onClick={() => handleQuick('planos')} className="bg-gray-800 text-white px-2 py-1 rounded text-xs">💰 Planos</button>
-            <button onClick={() => handleQuick('como funciona')} className="bg-gray-800 text-white px-2 py-1 rounded text-xs">⚙️ Como funciona</button>
-          </div>
+            {/* BOTÕES */}
+            <div className="p-2 flex flex-wrap gap-2">
+              <button onClick={() => handleQuick('empresa')} className="bg-gray-800 text-white px-2 py-1 rounded text-xs">🏢 Empresa</button>
+              <button onClick={() => handleQuick('planos')} className="bg-gray-800 text-white px-2 py-1 rounded text-xs">💰 Planos</button>
+              <button onClick={() => handleQuick('como funciona')} className="bg-gray-800 text-white px-2 py-1 rounded text-xs">⚙️ Como funciona</button>
+            </div>
 
-          {/* MENSAGENS */}
-          <div className="flex-1 p-3 overflow-y-auto text-sm space-y-2 whitespace-pre-line">
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`p-2 rounded-lg max-w-[80%] ${
-                  msg.from === 'user'
-                    ? 'bg-purple-500 ml-auto text-white'
-                    : 'bg-gray-800 text-gray-200'
-                }`}
+            {/* MENSAGENS */}
+            <div className="flex-1 p-3 overflow-y-auto text-sm space-y-2 whitespace-pre-line">
+              {messages.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`p-2 rounded-lg max-w-[80%] ${
+                    msg.from === 'user'
+                      ? 'bg-purple-500 ml-auto text-white'
+                      : 'bg-gray-800 text-gray-200'
+                  }`}
+                >
+                  {msg.text}
+                </div>
+              ))}
+            </div>
+
+            {/* INPUT */}
+            <div className="p-2 flex gap-2 border-t border-gray-800">
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                placeholder="Pergunte algo..."
+                className="flex-1 p-2 rounded bg-gray-900 text-white outline-none"
+              />
+              <button
+                onClick={() => handleSend()}
+                className="bg-purple-600 px-3 rounded text-white"
               >
-                {msg.text}
-              </div>
-            ))}
-          </div>
+                ➤
+              </button>
+            </div>
 
-          {/* INPUT */}
-          <div className="p-2 flex gap-2 border-t border-gray-800">
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Pergunte algo..."
-              className="flex-1 p-2 rounded bg-gray-900 text-white outline-none"
-            />
-            <button
-              onClick={() => handleSend()}
-              className="bg-purple-600 px-3 rounded text-white"
-            >
-              ➤
-            </button>
           </div>
         </div>
       )}
