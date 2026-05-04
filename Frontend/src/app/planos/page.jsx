@@ -6,224 +6,223 @@ import { useState, useRef, useEffect } from "react";
 
 const plans = [
   {
-    name: "Explorer",
+    name: "Starter",
     price: "R$ 38,99",
     originalPrice: "R$ 54,99",
     discount: "29%",
-    credits: "30 créditos de IA/mês",
+    credits: "Monitoramento de até 3 sensores/mês",
     highlight: false,
     badge: null,
-    domain: "Domínio grátis não incluso",
-    emailBoxes: "1 caixa de e-mail grátis por site durante 1 ano",
+    domain: "Instalação remota não inclusa",
+    emailBoxes: "1 conta de acesso ao painel ThermoGuard por unidade durante 1 ano",
     annualNote:
       "12 meses por apenas R$ 467,88 (preço normal R$ 659,88). Renovação por R$ 38,99/mês.",
     baseFeatures: null,
     features: [
-      "Cria 1 site",
-      "Adicione cadastro de usuários, sistema de login, armazenamento de dados",
-      "Histórico de versões do projeto",
-      "Projetos otimizados para SEO",
-      "Apareça nas ferramentas de IA",
-      "Comandos com texto",
+      "Monitora 1 ambiente",
+      "Alertas de temperatura e umidade em tempo real",
+      "Histórico de registros e relatórios mensais",
+      "Conformidade com normas ANVISA e INMETRO",
+      "Análise inteligente de dados com IA",
+      "Configuração simples pelo painel ThermoGuard",
       "Suporte básico",
     ],
-  },
-  {
-    name: "Starter",
+  },{
+    name: "Profissional",
     price: "R$ 76,99",
     originalPrice: "R$ 109,99",
     discount: "30%",
-    credits: "70 créditos de IA/mês",
+    credits: "Monitoramento de até 15 sensores/mês",
     highlight: true,
     badge: "MAIS POPULAR",
-    domain: "Domínio grátis por 1 ano",
-    emailBoxes: "2 caixas de e-mail grátis por site por 1 ano",
+    domain: "Instalação remota inclusa",
+    emailBoxes: "2 contas de acesso ao painel ThermoGuard por unidade durante 1 ano",
     annualNote:
       "12 meses por apenas R$ 923,88 (preço normal R$ 1.319,88). Renovação por R$ 76,99/mês.",
-    baseFeatures: "Tudo no Explorer, e mais:",
+    baseFeatures: "Tudo no Starter, e mais:",
     features: [
-      "Cria até 25 sites",
+      "Monitora até 5 ambientes",
       "Suporte prioritário 24h",
-      "Venda assinaturas",
-      "Adicione chatbots e outros recursos com IA",
-      "Venda produtos físicos e digitais",
-      "Acompanhe análises dos visitantes do projeto",
-      "Comandos com imagens e voz",
-      "Modo de bate-papo grátis para ajuda e orientação",
-      "Edite texto e imagens sem solicitar a IA",
-      "Recarregue os créditos de IA a qualquer momento",
-      "Colabore em projetos",
+      "Gerencie assinaturas e contratos de clientes",
+      "Chatbot com IA para análise e recomendações térmicas",
+      "Relatórios automáticos para auditorias",
+      "Acompanhe métricas e dashboards em tempo real",
+      "Alertas por voz e imagem via aplicativo",
+      "Assistente ThermoGuard para suporte e orientação",
+      "Edite configurações de limites sem acionar a IA",
+      "Recarregue créditos de monitoramento a qualquer momento",
+      "Colabore com sua equipe técnica nos projetos",
     ],
   },
   {
-    name: "Hobbyist",
+    name: "Empresarial",
     price: "R$ 219,99",
     originalPrice: "R$ 274,99",
     discount: "25%",
-    credits: "200 créditos de IA/mês",
+    credits: "Monitoramento de até 50 sensores/mês",
     highlight: false,
     badge: null,
-    domain: "Domínio grátis por 1 ano",
-    emailBoxes: "5 caixas de e-mail grátis por site por 1 ano",
+    domain: "Instalação remota inclusa",
+    emailBoxes: "5 contas de acesso ao painel ThermoGuard por unidade durante 1 ano",
     annualNote:
       "12 meses por apenas R$ 2.639,88 (preço normal R$ 3.299,88). Renovação por R$ 219,99/mês.",
-    baseFeatures: "Tudo no Starter, e mais:",
+    baseFeatures: "Tudo no Profissional, e mais:",
     features: [
-      "Cria até 50 sites",
-      "Editor de código",
-      "Duplique projetos para usar como modelos",
+      "Monitora até 20 ambientes",
+      "Acesso à API ThermoGuard para integrações",
+      "Duplique configurações de ambientes como modelos reutilizáveis",
     ],
   },
   {
-    name: "Hustler",
+    name: "Enterprise",
     price: "R$ 438,99",
     originalPrice: "R$ 549,99",
     discount: "20%",
-    credits: "400 créditos de IA/mês",
+    credits: "Monitoramento ilimitado de sensores",
     highlight: false,
     badge: null,
-    domain: "Domínio grátis por 1 ano",
-    emailBoxes: "5 caixas de e-mail grátis por site por 1 ano",
+    domain: "Instalação remota e suporte on-site incluso",
+    emailBoxes: "5 contas de acesso ao painel ThermoGuard por unidade durante 1 ano",
     annualNote:
       "12 meses por apenas R$ 5.267,88 (preço normal R$ 6.599,88). Renovação por R$ 438,99/mês.",
-    baseFeatures: "Tudo no Hobbyist, e mais:",
-    features: ["Garanta acesso antecipado a novos recursos"],
+    baseFeatures: "Tudo no Empresarial, e mais:",
+    features: ["Acesso antecipado a novos recursos e sensores ThermoGuard"],
   },
 ];
 
 const testimonialsRow1 = [
   {
-    name: "Ivana Mikleuš",
-    handle: "@ivanamikleus",
-    role: "Especialista digital",
-    text: "A Hostinger Horizons é uma nova e inovadora maneira de criar MVPs e testar ideias antes de investir.",
-    avatar: "IM",
+    name: "Fernanda Oliveira",
+    handle: "@fernanda_ops",
+    role: "Gestora de Qualidade",
+    text: "A ThermoGuard mudou completamente nossa rotina de auditorias. Os relatórios automáticos economizam horas de trabalho toda semana.",
+    avatar: "FO",
     hasX: false,
   },
   {
-    name: "Eric Hill",
-    handle: "@EHillPapercraft",
+    name: "Carlos Mendes",
+    handle: "@carlosmendes_ind",
     role: null,
-    text: "Fiquei impressionado com a facilidade de criar tudo o que preciso para meu site e para meus clientes usando a IA Horizons da Hostinger. É simplesmente fantástica — vale a pena conferir!",
-    avatar: "EH",
+    text: "Fiquei impressionado com a facilidade de configurar os alertas de temperatura. Em menos de uma hora tínhamos todos os ambientes monitorados e a equipe notificada em tempo real.",
+    avatar: "CM",
     hasX: true,
   },
   {
-    name: "Albert Bermejo",
-    handle: "@albertbermejo",
-    role: "Criador de conteúdo",
-    text: "Com a Hostinger Horizons, você transforma aquela ideia que teve em realidade — é só explicar o que quer, e a ferramenta faz acontecer.",
-    avatar: "AB",
+    name: "Patrícia Souza",
+    handle: "@patriciasouza",
+    role: "Farmacêutica Responsável",
+    text: "Com a ThermoGuard, finalmente tenho a segurança de que os medicamentos estão armazenados dentro dos parâmetros exigidos pela ANVISA — sem precisar checar manualmente.",
+    avatar: "PS",
     hasX: false,
   },
   {
-    name: "techmano",
-    handle: "@nice_gamin60974",
+    name: "logística_real",
+    handle: "@log_real_br",
     role: null,
-    text: "Estou adorando o rumo que as coisas estão tomando com a @Hostinger Horizons! A nova atualização de IA tem sido muito divertida de interagir. Foi uma mudança radical não só para mim, mas também para muitas outras pessoas que conheço.",
-    avatar: "TM",
+    text: "Estou adorando a evolução da @ThermoGuard! A nova atualização de alertas inteligentes fez diferença enorme no nosso armazém frigorífico. Recomendo para qualquer operação que leve temperatura a sério.",
+    avatar: "LR",
     hasX: true,
   },
   {
-    name: "mark diantonio",
-    handle: "@markdiantonio",
+    name: "Rafael Teixeira",
+    handle: "@rafateixeira_ti",
     role: null,
-    text: "O Vibe coding reduz o desenvolvimento em 45%, com ferramentas como a Hostinger Horizons transformando linguagem natural em protótipos que funcionam em horas, e não em semanas.",
-    avatar: "MD",
+    text: "A integração via API da ThermoGuard com nosso ERP reduziu em 40% o tempo gasto em registros manuais de temperatura. Simples, rápido e confiável.",
+    avatar: "RT",
     hasX: true,
   },
 ];
 
 const testimonialsRow2 = [
   {
-    name: "Abhihephaestus",
-    handle: "@HephaestusNo1",
+    name: "Andressa Lima",
+    handle: "@andressa_lab",
     role: null,
-    text: "Experimentei a Hostinger Horizons e é fantástica! Em poucos minutos, consegui criar sites e apps incríveis sem precisar programar — a IA cuida do design, do código e até do conteúdo. Vale muito a pena testar!",
-    avatar: "AH",
+    text: "Testei a ThermoGuard no nosso laboratório e superou as expectativas. Em minutos configuramos os limites críticos e já recebemos o primeiro alerta antes que qualquer dano ocorresse.",
+    avatar: "AL",
     hasX: true,
   },
   {
-    name: "Steven Pillow",
-    handle: "@spillow82",
+    name: "Bruno Castilho",
+    handle: "@brunocastilho",
     role: null,
-    text: "É como ter um desenvolvedor profissional do mais alto nível ao seu lado, pronto para criar o que quiser.",
-    avatar: "SP",
+    text: "É como ter um técnico especializado monitorando seus ambientes 24 horas por dia, sem custo de hora extra.",
+    avatar: "BC",
     hasX: true,
   },
   {
-    name: "Brooks Boshears",
-    handle: "@brooksboshears",
-    role: "Empreendedor",
-    text: "Você pode criar coisas bem legais com a Hostinger Horizons. É diferente dos construtores de sites comuns — é muito mais.",
-    avatar: "BB",
+    name: "Mariana Rocha",
+    handle: "@marianarocha",
+    role: "Diretora de Operações",
+    text: "A ThermoGuard vai muito além de um simples termômetro conectado — é uma plataforma completa de gestão de ambientes críticos.",
+    avatar: "MR",
     hasX: false,
   },
   {
-    name: "RameshR",
-    handle: "@rezmeram",
+    name: "TechFood BR",
+    handle: "@techfoodbr",
     role: null,
-    text: "Fico imaginando como a Hostinger criou a Horizons… É impressionante a rapidez com que qualquer pessoa consegue implementar um front e um back end.",
-    avatar: "RR",
+    text: "Fico impressionado como a ThermoGuard consegue entregar conformidade com normas tão rigorosas de forma tão intuitiva. Nossa equipe adotou sem nenhum treinamento especial.",
+    avatar: "TF",
     hasX: true,
   },
   {
-    name: "Zera",
-    handle: "@TheZoyaThinking",
+    name: "Juliana Neves",
+    handle: "@juliana_neves",
     role: null,
-    text: "Não consigo dizer há quanto tempo esse projeto ficou na minha lista de 'um dia eu tiro do papel' ATÉ vocês criarem a IA da Horizons. Não sei nada de programação de web apps. Zero. E ele está lá. Meu projeto dos sonhos está ONLINE. Que demais!",
-    avatar: "ZR",
+    text: "Tinha um projeto de modernização da nossa câmara fria na lista há anos. Com a ThermoGuard, em dois dias estava tudo configurado, monitorando e gerando relatórios. Não acreditei como foi simples!",
+    avatar: "JN",
     hasX: true,
   },
 ];
 
 const faqs = [
   {
-    question: "Quais são as diferenças entre os planos da Hostinger Horizons?",
+    question: "Quais são as diferenças entre os planos da ThermoGuard?",
     answer:
-      "Cada plano oferece uma quantidade diferente de créditos de IA por mês, número de sites que você pode criar, recursos como editor de código, suporte prioritário, domínio grátis e caixas de e-mail. O Explorer é ideal para quem está começando, enquanto o Hustler atende projetos mais robustos.",
+      "Cada plano oferece uma quantidade diferente de sensores monitorados por mês, número de ambientes cobertos, recursos como acesso à API, suporte prioritário e instalação remota. O Starter é ideal para pequenas operações, enquanto o Enterprise atende empresas com grande volume de ambientes e exigências de conformidade.",
   },
   {
-    question: "Como funcionam os créditos de IA?",
+    question: "Como funciona o monitoramento de sensores?",
     answer:
-      "Os créditos de IA são consumidos sempre que você utiliza funcionalidades alimentadas por inteligência artificial, como geração de código, criação de conteúdo e edição de imagens. Cada plano inclui uma cota mensal e você pode recarregar a qualquer momento se precisar de mais.",
+      "Os sensores registram continuamente temperatura e umidade dos ambientes configurados. Os dados são enviados em tempo real ao painel ThermoGuard, onde você pode visualizar leituras, histórico e receber alertas automáticos sempre que os limites definidos forem ultrapassados.",
   },
   {
-    question: "Posso ver quantos créditos de IA meu app utilizou?",
+    question: "Posso ver o histórico de leituras dos meus ambientes?",
     answer:
-      "Sim! No painel da Hostinger Horizons você tem acesso em tempo real ao consumo de créditos de IA do seu projeto, podendo acompanhar o histórico de uso e planejar melhor sua cota mensal.",
-  },
-  {
-    question:
-      "Posso comprar créditos adicionais sem fazer upgrade para um plano superior?",
-    answer:
-      "Sim, é possível adquirir pacotes de créditos avulsos sem precisar mudar de plano. Essa opção é ideal para meses em que você tem projetos mais intensos.",
-  },
-  {
-    question: "Posso contratar a Hostinger Horizons sem hospedagem?",
-    answer:
-      "A Hostinger Horizons é um produto integrado ao ecossistema Hostinger. Para publicar seus projetos, você precisará de um plano que inclua hospedagem, mas pode criar e testar localmente antes de publicar.",
-  },
-  {
-    question: "Que tipos de sites posso publicar com a Hostinger Horizons?",
-    answer:
-      "Você pode criar portfólios, lojas virtuais, landing pages, blogs, apps com autenticação de usuários, sistemas de assinatura e muito mais. A plataforma suporta projetos simples até aplicações web completas.",
-  },
-  {
-    question: "Posso gerar um aplicativo para celular com a Hostinger Horizons?",
-    answer:
-      "No momento, a Hostinger Horizons é focada em aplicações web responsivas. Seus projetos são otimizados para funcionar bem em dispositivos móveis pelo navegador.",
-  },
-  {
-    question: "De quem é a propriedade do código criado com a Hostinger Horizons?",
-    answer:
-      "Todo o código gerado é de sua propriedade. Você tem total liberdade para exportar, editar e utilizar o código criado na plataforma como quiser.",
+      "Sim! No painel ThermoGuard você tem acesso em tempo real e histórico completo de todas as leituras dos seus sensores, podendo exportar relatórios para auditorias e conformidade com normas como ANVISA e INMETRO.",
   },
   {
     question:
-      "É possível integrar APIs ou serviços externos com a Hostinger Horizons?",
+      "Posso adicionar mais sensores sem fazer upgrade para um plano superior?",
     answer:
-      "Sim! A plataforma permite integrar APIs externas, serviços de pagamento, ferramentas de analytics e outros recursos de terceiros diretamente nos seus projetos.",
+      "Sim, é possível adquirir pacotes de sensores adicionais sem precisar mudar de plano. Essa opção é ideal para empresas que precisam expandir o monitoramento pontualmente.",
+  },
+  {
+    question: "Preciso de hardware específico para usar a ThermoGuard?",
+    answer:
+      "A ThermoGuard é compatível com os sensores homologados pela plataforma. Para novos clientes, oferecemos orientação completa na escolha e configuração dos equipamentos, e os planos Profissional em diante incluem instalação remota.",
+  },
+  {
+    question: "Que tipos de ambientes posso monitorar com a ThermoGuard?",
+    answer:
+      "Você pode monitorar câmaras frias, estoque de medicamentos, laboratórios, salas de servidores, indústrias alimentícias, hospitais e qualquer ambiente que exija controle preciso de temperatura e umidade.",
+  },
+  {
+    question: "Consigo acessar o painel ThermoGuard pelo celular?",
+    answer:
+      "Sim! O painel ThermoGuard é totalmente responsivo e pode ser acessado pelo navegador em qualquer dispositivo móvel, permitindo acompanhar os ambientes e receber alertas de onde você estiver.",
+  },
+  {
+    question: "Os dados coletados pelos sensores são de minha propriedade?",
+    answer:
+      "Sim, todos os dados gerados pelos seus sensores são de sua propriedade. Você pode exportá-los, integrá-los a outros sistemas e utilizá-los como quiser, inclusive para relatórios de conformidade.",
+  },
+  {
+    question:
+      "É possível integrar a ThermoGuard com outros sistemas da minha empresa?",
+    answer:
+      "Sim! Os planos Empresarial e Enterprise oferecem acesso à API ThermoGuard, permitindo integração com ERPs, sistemas de qualidade, ferramentas de BI e outros serviços externos utilizados pela sua operação.",
   },
 ];
 
@@ -652,7 +651,7 @@ export default function PlansPage() {
             >
               Desbloqueie a experiência completa
               <br />
-              da Hostinger Horizons
+              da ThermoGuard
             </h1>
           </div>
 
@@ -742,7 +741,7 @@ export default function PlansPage() {
         >
           O que os usuários estão dizendo
           <br />
-          sobre a Hostinger Horizons
+          sobre a ThermoGuard
         </h2>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
