@@ -1,7 +1,7 @@
 import { Syne, DM_Mono } from "next/font/google";
 import "./globals.css";
 import LayoutWrapper from "@/components/LayoutWrapper";
-
+import Chatbot from '@/components/Chatbot'
 
 const syne = Syne({
   subsets: ["latin"],
@@ -20,6 +20,7 @@ export default function RootLayout({ children }) {
       <body className={`${syne.variable} ${dmMono.variable}`}>
         <LayoutWrapper>
           {children}
+           
         </LayoutWrapper>
       </body>
     </html>

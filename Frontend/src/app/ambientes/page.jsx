@@ -6,6 +6,7 @@ import TemperatureChart from "@/components/TemperatureChart";
 import { themes } from "@/theme/theme";
 import { Search, Activity, AlertTriangle, Thermometer } from "lucide-react";
 import { api } from "@/services/api";
+import Chatbot from '@/components/Chatbot'
 
 export default function AmbientesPage() {
   const [salas, setSalas] = useState([]);
@@ -182,6 +183,7 @@ export default function AmbientesPage() {
         </div>
       )}
 
+<Chatbot />
     </div>
   );
 }

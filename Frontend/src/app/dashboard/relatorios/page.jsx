@@ -5,7 +5,7 @@ import {
   CheckCircle2, AlertTriangle, XCircle, Download,
   BarChart3, TrendingUp, ArrowLeft, Filter, ChevronDown
 } from "lucide-react";
-
+import Chatbot from '@/components/Chatbot'
 const dados = [
   { ambiente: "Almoxarifado Principal",  total: 174, conformes: 139, atencao: 28, criticos: 7 },
   { ambiente: "Cozinha Industrial",      total: 174, conformes: 142, atencao: 24, criticos: 8 },
@@ -278,6 +278,7 @@ export default function RelatorioAuditoria() {
       <p className="text-center text-[10px] font-mono pb-2" style={{ color: "var(--muted)" }}>
         ThermoGuard — Relatório gerado em {new Date().toLocaleString("pt-BR")}
       </p>
+      <Chatbot />
     </div>
   );
 }

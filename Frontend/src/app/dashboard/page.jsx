@@ -10,6 +10,7 @@ import { themes } from "@/theme/theme";
 import { api } from "@/services/api";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useRouter } from "next/navigation";
+import Chatbot from '@/components/Chatbot'
 
 import {
   BarChart3,
@@ -192,6 +193,8 @@ export default function DashboardPage() {
 
       {/* RELATÓRIO */}
       <AuditReport alerts={alertsData} T={T} />
+
+      <Chatbot />
 
     </div>
   );

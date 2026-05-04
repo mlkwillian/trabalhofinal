@@ -2,6 +2,7 @@
 
 import React, { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import Chatbot from '@/components/Chatbot'
 import { 
   Users, 
   MapPin, 
@@ -38,6 +39,7 @@ export default function AdminPage() {
   const handleDeleteAmbiente = (id) => setAmbientes(ambientes.filter(a => a.id !== id))
 
   return (
+    
     <div className="p-8 min-h-screen text-white bg-[#080516] flex flex-col items-center">
       <style jsx global>{`
         .glass-card {
@@ -178,6 +180,7 @@ export default function AdminPage() {
       <div className="mt-12 text-purple-400/30 text-xs">
         © 2026 TermoGuard. Acesso restrito ao administrador.
       </div>
+      <Chatbot />
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { initialAlerts } from "@/data/mockData";
 import AlertsList from "@/components/AlertsList";
 import { themes } from "@/theme/theme";
 import { useTheme } from "@/contexts/ThemeContext";
+import Chatbot from '@/components/Chatbot'
 import { 
   Bell, 
   Filter, 
@@ -227,6 +228,7 @@ export default function AlertasPage() {
           </div>
         </div>
       </div>
+      <Chatbot />
     </div>
   );
 }

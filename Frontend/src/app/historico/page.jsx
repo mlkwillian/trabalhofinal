@@ -5,7 +5,7 @@ import {
   ArrowLeft,
   CheckCircle2, AlertTriangle, XCircle,
 } from "lucide-react";
-
+import Chatbot from '@/components/Chatbot'
 const PERIODS = ["hoje", "semana", "mês"];
 
 function statusCfg(status) {
@@ -215,6 +215,7 @@ export default function HistoricoPage() {
       <p className="text-center text-xs font-mono" style={{ color: "var(--muted)" }}>
         ThermoGuard — {data.length} registros em tempo real
       </p>
+      <Chatbot />
     </div>
   );
 }

@@ -99,3 +99,62 @@ exports.listarLeituras = (req, res) => {
   });
 
 };
+
+
+
+exports.ultimasLeituras = (req, res) => {
+
+  const query = `
+    SELECT 
+      sa.nome_sala AS sala,
+      l.temperatura,
+      l.umidade,
+      sa.temperatura_min,
+      sa.temperatura_max,
+      l.data_leitura
+    FROM leituras l
+    JOIN sensores se ON l.id_sensor = se.id_sensor
+    JOIN salas sa ON se.id_sala = sa.id_sala
+    ORDER BY l.data_leitura DESC
+    LIMIT 10
+  `;
+
+  db.query(query, (err, result) => {
+
+    if (err) {
+      console.error("ERRO SQL:", err);
+      return res.status(500).json({ erro: "Erro ao buscar leituras 😢" });
+    }
+
+    res.json(result);
+
+  });
+
+};
+
+
+
+exports.alertasAtivos = (req, res) => {
+
+  const query = `
+    SELECT 
+      i.id_incidente,
+      sa.nome_sala AS sala,
+      i.data_inicio
+    FROM incidentes i
+    JOIN salas sa ON i.id_sala = sa.id_sala
+    WHERE i.status = 'aberto'
+  `;
+
+  db.query(query, (err, result) => {
+
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ erro: "Erro ao buscar alertas 😢" });
+    }
+
+    res.json(result);
+
+  });
+
+};
