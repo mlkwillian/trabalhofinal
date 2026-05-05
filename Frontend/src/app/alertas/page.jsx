@@ -1,120 +1,43 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import StatCard from "@/components/StatCard";
-import EnvironmentCard from "@/components/EnvironmentCard";
-import TemperatureChart from "@/components/TemperatureChart";
+import { useState, useMemo } from "react";
+import { initialAlerts } from "@/data/mockData";
 import AlertsList from "@/components/AlertsList";
-import AuditReport from "@/components/AuditReport";
 import { themes } from "@/theme/theme";
-import { api } from "@/services/api";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useRouter } from "next/navigation";
 import Chatbot from "@/components/Chatbot";
-import { BarChart3, Wifi, AlertTriangle, CheckCircle2 } from "lucide-react";
+import {
+  Bell, Filter, CheckCheck, AlertCircle,
+  History, ShieldAlert, ArrowRight
+} from "lucide-react";
 
-export default function DashboardPage() {
-  const [envs, setEnvs] = useState([]);
-  const [selectedEnv, setSelectedEnv] = useState(null);
-  const [alertsData, setAlertsData] = useState([]);
-  const [timeRange, setTimeRange] = useState("hoje");
-  const [loading, setLoading] = useState(true);
+export default function AlertasPage() {
+  const [alertsData, setAlertsData] = useState(initialAlerts);
+  const [filter, setFilter] = useState("pendentes");
 
   const { dark } = useTheme();
   const T = dark ? themes.dark : themes.light;
-  const router = useRouter();
 
-  // 🔐 Proteção de rota
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) router.push("/");
-  }, []);
-
-  useEffect(() => {
-    async function loadData() {
-      try {
-        setLoading(true);
-        const [salasRes, incidentesRes] = await Promise.all([
-          api.get("/api/salas"),
-          api.get("/api/incidentes").catch(() => ({ data: [] })),
-        ]);
-        const mappedSalas = (salasRes.data || []).map((sala) => ({
-          id: sala.id_sala,
-          name: sala.nome_sala,
-          minTemp: sala.temperatura_min,
-          maxTemp: sala.temperatura_max,
-          online: true,
-          history: [],
-        }));
-        setEnvs(mappedSalas);
-        setAlertsData(incidentesRes.data || []);
-        if (mappedSalas.length > 0) setSelectedEnv(mappedSalas[0]);
-      } catch (err) {
-        console.error("Erro ao carregar dashboard", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, []);
-
-  const handleVerify = (alertId) => {
+  const handleVerify = (id) => {
     setAlertsData((prev) =>
       prev.map((a) =>
-        a.id_incidente === alertId ? { ...a, verified: true } : a
+        a.id === id ? { ...a, verified: true, verifiedAt: new Date().toLocaleTimeString() } : a
       )
     );
   };
 
-  const complianceScore = useMemo(() => {
-    const total = alertsData.length;
-    const verified = alertsData.filter((a) => a.verified).length;
-    return total > 0 ? Math.round((verified / total) * 100) : 100;
-  }, [alertsData]);
+  const filteredAlerts = useMemo(() => {
+    if (filter === "pendentes") return alertsData.filter((a) => !a.verified);
+    if (filter === "verificados") return alertsData.filter((a) => a.verified);
+    return alertsData;
+  }, [alertsData, filter]);
 
-  const stats = [
-    { label: "Ambientes",          value: envs.length,                                          icon: BarChart3,    accentColor: "#7c3aed" },
-    { label: "Dispositivos Online", value: `${envs.filter((e) => e.online).length}/${envs.length}`, icon: Wifi,         accentColor: "#22c55e" },
-    { label: "Alertas Ativos",     value: alertsData.filter((a) => !a.verified).length,          icon: AlertTriangle, accentColor: "#f97316" },
-    { label: "SLA de Resposta",    value: `${complianceScore}%`,                                 icon: CheckCircle2,  accentColor: "#3b82f6" },
-  ];
-
-  if (loading) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ background: "#080516" }}
-      >
-        <style>{`@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');`}</style>
-        <div className="text-center space-y-4">
-          <div
-            className="text-lg tracking-widest"
-            style={{ fontFamily: "'Orbitron', monospace", color: "#a855f7" }}
-          >
-            TERMOGUARD
-          </div>
-          <div className="flex gap-1.5 justify-center">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="w-2 h-2 rounded-full animate-bounce"
-                style={{ background: "#7c3aed", animationDelay: `${i * 0.15}s` }}
-              />
-            ))}
-          </div>
-          <p className="text-xs tracking-widest" style={{ color: "rgba(168,85,247,0.4)" }}>
-            CARREGANDO DADOS...
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const criticalCount = alertsData.filter((a) => !a.verified && a.severity === "high").length;
+  const pendingCount  = alertsData.filter((a) => !a.verified).length;
+  const resolvedCount = alertsData.filter((a) => a.verified).length;
 
   return (
-    <div
-      className="min-h-screen space-y-6 p-6"
-      style={{ background: "#080516" }}
-    >
+    <div className="min-h-screen p-6 space-y-6" style={{ background: "#080516" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap');
 
@@ -147,6 +70,7 @@ export default function DashboardPage() {
           display: flex;
           align-items: center;
           gap: 8px;
+          font-family: 'Orbitron', monospace;
         }
         .tg-section-label::after {
           content: '';
@@ -154,43 +78,20 @@ export default function DashboardPage() {
           height: 1px;
           background: linear-gradient(90deg, rgba(124,58,237,0.3), transparent);
         }
-        .tg-range-btn {
-          padding: 5px 14px;
-          border-radius: 8px;
-          font-size: 11px;
-          font-weight: 600;
-          letter-spacing: 0.5px;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: all 0.2s;
-          border: 1px solid transparent;
-        }
-        .tg-range-btn.active {
-          background: linear-gradient(135deg, rgba(124,58,237,0.4), rgba(168,85,247,0.25));
-          color: #c084fc;
-          border-color: rgba(124,58,237,0.4);
-          box-shadow: 0 0 14px rgba(124,58,237,0.2);
-        }
-        .tg-range-btn:not(.active) {
-          color: rgba(148,163,184,0.6);
-        }
-        .tg-range-btn:not(.active):hover {
-          color: rgba(148,163,184,0.9);
-          background: rgba(255,255,255,0.04);
-        }
       `}</style>
 
       {/* ── HEADER ── */}
-      <div className="tg-glass-header flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 px-6 py-4">
+      <div className="tg-glass-header flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-6 py-4">
         <div className="flex items-center gap-3">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
             style={{
-              background: "linear-gradient(135deg, #7c3aed, #a855f7)",
-              boxShadow: "0 0 20px rgba(124,58,237,0.45)",
+              background: "linear-gradient(135deg, rgba(124,58,237,0.4), rgba(168,85,247,0.25))",
+              border: "1px solid rgba(124,58,237,0.4)",
+              boxShadow: "0 0 16px rgba(124,58,237,0.3)",
             }}
           >
-            🌡️
+            <Bell size={20} style={{ color: "#c084fc" }} />
           </div>
           <div>
             <div
@@ -203,66 +104,90 @@ export default function DashboardPage() {
                 letterSpacing: "1px",
               }}
             >
-              TERMOGUARD
+              CENTRAL DE ALERTAS
             </div>
-            <div style={{ color: "rgba(148,163,184,0.5)", fontSize: "10px", letterSpacing: "2px", textTransform: "uppercase" }}>
-              Painel de Controle Térmico
+            <div style={{ fontSize: "10px", color: "rgba(148,163,184,0.5)", letterSpacing: "2px", textTransform: "uppercase" }}>
+              Gerencie e verifique as ocorrências do sistema
             </div>
           </div>
         </div>
 
-        {/* Time range selector */}
+        {/* Toggle filter */}
         <div
           className="flex gap-1 p-1 rounded-xl"
           style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(124,58,237,0.2)" }}
         >
-          {["hoje", "semana", "mês"].map((range) => (
+          {[
+            { key: "pendentes",   label: `Pendentes (${pendingCount})` },
+            { key: "verificados", label: "Resolvidos" },
+          ].map(({ key, label }) => (
             <button
-              key={range}
-              onClick={() => setTimeRange(range)}
-              className={`tg-range-btn ${timeRange === range ? "active" : ""}`}
+              key={key}
+              onClick={() => setFilter(key)}
+              className="px-4 py-1.5 rounded-lg text-xs font-bold transition-all"
+              style={
+                filter === key
+                  ? {
+                      background: "linear-gradient(135deg, rgba(124,58,237,0.5), rgba(168,85,247,0.3))",
+                      color: "#c084fc",
+                      border: "1px solid rgba(124,58,237,0.4)",
+                    }
+                  : { color: "rgba(148,163,184,0.5)", border: "1px solid transparent" }
+              }
             >
-              {range}
+              {label.toUpperCase()}
             </button>
           ))}
         </div>
       </div>
 
-      {/* ── STATS ── */}
+      {/* ── SUMMARY CARDS ── */}
       <div>
-        <div className="tg-section-label mb-3">Métricas Gerais</div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {stats.map((s, i) => (
+        <div className="tg-section-label mb-3">Resumo de Ocorrências</div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {[
+            {
+              label: "Críticos",
+              value: criticalCount,
+              icon: <ShieldAlert size={18} />,
+              color: "#ef4444",
+              border: "border-l-red-500",
+            },
+            {
+              label: "Advertências",
+              value: pendingCount - criticalCount,
+              icon: <AlertCircle size={18} />,
+              color: "#f97316",
+              border: "border-l-orange-500",
+            },
+            {
+              label: "Resolvidos Hoje",
+              value: resolvedCount,
+              icon: <CheckCheck size={18} />,
+              color: "#22c55e",
+              border: "border-l-green-500",
+            },
+          ].map(({ label, value, icon, color, border }) => (
             <div
-              key={s.label}
-              className="tg-glass p-4 flex items-center gap-4 transition-all duration-300"
-              style={{ animationDelay: `${i * 0.07}s` }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = `${s.accentColor}55`;
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = `0 8px 24px ${s.accentColor}20`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "rgba(124,58,237,0.2)";
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "none";
-              }}
+              key={label}
+              className={`tg-glass border-l-4 ${border} p-4 flex items-center gap-4`}
+              style={{ borderRadius: "0 16px 16px 0" }}
             >
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: `${s.accentColor}18`, border: `1px solid ${s.accentColor}30` }}
+                style={{ background: `${color}15`, border: `1px solid ${color}30`, color }}
               >
-                <s.icon size={18} style={{ color: s.accentColor }} />
+                {icon}
               </div>
               <div>
                 <div
                   className="text-2xl font-bold"
-                  style={{ fontFamily: "'Orbitron', monospace", color: s.accentColor }}
+                  style={{ fontFamily: "'Orbitron', monospace", color }}
                 >
-                  {s.value}
+                  {value}
                 </div>
                 <div style={{ fontSize: "10px", color: "rgba(148,163,184,0.5)", textTransform: "uppercase", letterSpacing: "1px" }}>
-                  {s.label}
+                  {label}
                 </div>
               </div>
             </div>
@@ -270,50 +195,149 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── AMBIENTES ── */}
-      {envs.length > 0 && (
-        <div>
-          <div className="tg-section-label mb-3">Ambientes Monitorados</div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {envs.map((env) => (
-              <EnvironmentCard
-                key={env.id}
-                env={env}
-                selected={selectedEnv?.id === env.id}
-                onClick={() => setSelectedEnv(env)}
-                T={T}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── GRÁFICO ── */}
-      {selectedEnv && (
-        <div>
-          <div className="tg-section-label mb-3">Histórico de Temperatura</div>
-          <div
-            className="tg-glass overflow-hidden"
-            style={{ height: "320px", padding: "0" }}
-          >
-            <TemperatureChart env={selectedEnv} T={T} />
-          </div>
-        </div>
-      )}
-
-      {/* ── ALERTAS + RELATÓRIO ── */}
+      {/* ── MAIN AREA ── */}
       <div>
-        <div className="tg-section-label mb-3">Alertas & Auditoria</div>
-        <div className="space-y-4">
-          <AlertsList alerts={alertsData} onVerify={handleVerify} T={T} />
-          <AuditReport alerts={alertsData} T={T} />
+        <div className="tg-section-label mb-3">Ocorrências</div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
+
+          {/* Lista principal */}
+          <div className="lg:col-span-3">
+            <div className="tg-glass overflow-hidden">
+              {/* sub-header */}
+              <div
+                className="px-5 py-3 flex items-center justify-between"
+                style={{
+                  background: "rgba(124,58,237,0.07)",
+                  borderBottom: "1px solid rgba(124,58,237,0.15)",
+                }}
+              >
+                <span
+                  className="text-xs font-bold flex items-center gap-2"
+                  style={{ color: "rgba(192,132,252,0.7)" }}
+                >
+                  <Filter size={13} />
+                  Exibindo: {filter}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#22c55e" }} />
+                  <span style={{ fontSize: "10px", color: "rgba(148,163,184,0.4)", letterSpacing: "1px", textTransform: "uppercase" }}>
+                    Auto-refresh: 30s
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-3">
+                {filteredAlerts.length > 0 ? (
+                  <AlertsList alerts={filteredAlerts} onVerify={handleVerify} T={T} />
+                ) : (
+                  <div className="py-20 text-center space-y-4">
+                    <div
+                      className="inline-flex p-5 rounded-2xl"
+                      style={{
+                        background: "rgba(124,58,237,0.1)",
+                        border: "1px solid rgba(124,58,237,0.2)",
+                      }}
+                    >
+                      <CheckCheck size={32} style={{ color: "#a855f7" }} />
+                    </div>
+                    <p style={{ color: "rgba(148,163,184,0.5)", fontSize: "13px" }}>
+                      Nenhum alerta <strong style={{ color: "#a855f7" }}>{filter}</strong> encontrado.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="lg:col-span-1 space-y-4">
+
+            {/* Timeline */}
+            <div className="tg-glass p-5">
+              <h3
+                className="font-bold text-sm mb-5 flex items-center gap-2"
+                style={{ color: "#e2e8f0" }}
+              >
+                <div
+                  className="w-6 h-6 rounded-lg flex items-center justify-center"
+                  style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)" }}
+                >
+                  <History size={13} style={{ color: "#a855f7" }} />
+                </div>
+                Últimas Verificações
+              </h3>
+
+              <div className="space-y-4">
+                {alertsData.filter((a) => a.verified).slice(0, 3).map((a, i) => (
+                  <div
+                    key={i}
+                    className="relative pl-4 py-1"
+                    style={{ borderLeft: "1px solid rgba(124,58,237,0.25)" }}
+                  >
+                    <div
+                      className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full"
+                      style={{
+                        background: "#7c3aed",
+                        boxShadow: "0 0 6px rgba(124,58,237,0.6)",
+                      }}
+                    />
+                    <p style={{ fontSize: "10px", color: "rgba(168,85,247,0.6)", fontFamily: "'Orbitron', monospace", letterSpacing: "0.5px" }}>
+                      {a.verifiedAt || "Há pouco"}
+                    </p>
+                    <p className="text-xs truncate mt-0.5" style={{ color: "rgba(148,163,184,0.6)" }}>
+                      {a.msg}
+                    </p>
+                  </div>
+                ))}
+
+                {alertsData.filter((a) => a.verified).length === 0 && (
+                  <p style={{ fontSize: "11px", color: "rgba(148,163,184,0.35)" }} className="text-center py-4">
+                    Nenhuma verificação ainda.
+                  </p>
+                )}
+
+                <button
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg transition-all text-xs font-bold uppercase tracking-widest mt-2"
+                  style={{
+                    color: "rgba(168,85,247,0.5)",
+                    border: "1px solid rgba(124,58,237,0.15)",
+                    background: "rgba(124,58,237,0.05)",
+                    letterSpacing: "1px",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "#a855f7"; e.currentTarget.style.borderColor = "rgba(124,58,237,0.35)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(168,85,247,0.5)"; e.currentTarget.style.borderColor = "rgba(124,58,237,0.15)"; }}
+                >
+                  Ver Log Completo <ArrowRight size={12} />
+                </button>
+              </div>
+            </div>
+
+            {/* Dica */}
+            <div
+              className="p-5 rounded-2xl"
+              style={{
+                background: "linear-gradient(135deg, rgba(124,58,237,0.1), rgba(168,85,247,0.05))",
+                border: "1px solid rgba(124,58,237,0.2)",
+              }}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#a855f7" }} />
+                <p style={{ fontSize: "9px", textTransform: "uppercase", letterSpacing: "2px", color: "#a855f7", fontFamily: "'Orbitron', monospace" }}>
+                  Protocolo
+                </p>
+              </div>
+              <p className="text-xs leading-relaxed italic" style={{ color: "rgba(148,163,184,0.55)" }}>
+                "Alertas críticos não resolvidos em 15 minutos serão escalados automaticamente para o gestor de plantão."
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Footer */}
       <div
         className="text-center py-4 text-[10px] tracking-widest"
-        style={{ fontFamily: "'Orbitron', monospace", color: "rgba(168,85,247,0.25)" }}
+        style={{ fontFamily: "'Orbitron', monospace", color: "rgba(168,85,247,0.2)" }}
       >
         © 2026 TERMOGUARD — SISTEMA DE MONITORAMENTO TÉRMICO
       </div>
