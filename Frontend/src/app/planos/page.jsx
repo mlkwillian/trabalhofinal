@@ -1,5 +1,5 @@
 "use client";
-
+import Navbar from "@/components/Navbar";
 import { useState, useRef, useEffect } from "react";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
@@ -253,8 +253,11 @@ function PlanCard({ plan }) {
   const [hovered, setHovered] = useState(false);
 
   return (
+    
     <div
+    
       style={{
+
         background: plan.highlight
           ? "linear-gradient(180deg, #1a0a3a 0%, #0f0520 100%)"
           : "rgba(255,255,255,0.03)",
@@ -765,7 +768,7 @@ export default function PlansPage() {
           >
             Perguntas frequentes sobre a
             <br />
-            Hostinger Horizons
+            ThermoGuard
           </h2>
 
           <div>
@@ -775,24 +778,8 @@ export default function PlansPage() {
           </div>
         </div>
       </section>
-
-      {/* ── FOOTER ── */}
-      {/* 
-        Substitua o bloco abaixo pelo seu footer existente:
-        import SeuFooter from "@/components/SeuFooter"
-        e use <SeuFooter /> aqui
-      */}
-      <footer
-        style={{
-          borderTop: "1px solid rgba(255,255,255,0.08)",
-          padding: "48px 24px",
-          textAlign: "center",
-          color: "rgba(255,255,255,0.3)",
-          fontSize: 13,
-        }}
-      >
-        <p>Seu footer aqui — importe o componente existente</p>
-      </footer>
+     
     </main>
+    
   );
 }
