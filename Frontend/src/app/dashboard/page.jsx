@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import StatCard from "@/components/StatCard";
 import EnvironmentCard from "@/components/EnvironmentCard";
 import TemperatureChart from "@/components/TemperatureChart";
@@ -15,7 +15,7 @@ import {
   BarChart3,
   Wifi,
   AlertTriangle,
-  CheckCircle2
+  CheckCircle2,
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -24,6 +24,8 @@ export default function DashboardPage() {
   const [alertsData, setAlertsData] = useState([]);
   const [timeRange, setTimeRange] = useState("hoje");
   const [loading, setLoading] = useState(true);
+  const [showBanner, setShowBanner] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview");
 
   const { dark } = useTheme();
   const T = dark ? themes.dark : themes.light;
@@ -65,17 +67,32 @@ export default function DashboardPage() {
     loadData();
   }, []);
 
-  // 🔥 corrigido (id correto)
+  // ✅ Fix 1: handleVerify agora está corretamente fechado com };
   const handleVerify = (alertId) => {
     setAlertsData((prev) =>
-      prev.map((a) => (a.id_incidente === alertId ? { ...a, verified: true } : a))
+      prev.map((a) =>
+        a.id_incidente === alertId ? { ...a, verified: true } : a
+      )
     );
+  };
 
   const complianceScore = useMemo(() => {
     const total = alertsData.length;
     const verified = alertsData.filter((a) => a.verified).length;
     return total > 0 ? Math.round((verified / total) * 100) : 100;
   }, [alertsData]);
+
+  // ✅ Fix 2: isCritical e tabs declarados antes do uso no JSX
+  const isCritical = alertsData.some((a) => !a.verified);
+
+  const tabs = [
+    { key: "overview", label: "Visão Geral", count: 0 },
+    {
+      key: "alerts",
+      label: "Alertas",
+      count: alertsData.filter((a) => !a.verified).length,
+    },
+  ];
 
   const stats = [
     {
@@ -104,7 +121,7 @@ export default function DashboardPage() {
     },
   ];
 
-  /* ─── Loading ─── */
+  // ✅ Fix 3: if (loading) agora está DENTRO do componente, antes do return
   if (loading) {
     return (
       <div className="p-10 text-center text-gray-400">
@@ -113,14 +130,18 @@ export default function DashboardPage() {
     );
   }
 
-  /* ─── Render ─── */
   return (
-    <div className="space-y-6 p-6 min-h-screen" style={{ background: "var(--bg)" }}>
-
+    <div
+      className="space-y-6 p-6 min-h-screen"
+      style={{ background: "var(--bg)" }}
+    >
       {/* HEADER */}
       <div className="flex flex-col lg:flex-row justify-between gap-4 pb-6 border-b border-[var(--border-soft)]">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--text)" }}>
+          <h1
+            className="text-2xl font-bold"
+            style={{ color: "var(--text)" }}
+          >
             Painel de Controle
           </h1>
           <p className="text-sm" style={{ color: "var(--purple)" }}>
@@ -145,31 +166,44 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* ── ALERT BANNER ── */}
+        {/* ALERT BANNER */}
         {showBanner && (
           <div
             className="tg-banner flex items-center gap-3 px-4 py-3 rounded-xl border"
             style={{
-              background: "linear-gradient(135deg,rgba(239,68,68,0.2),rgba(239,68,68,0.08))",
+              background:
+                "linear-gradient(135deg,rgba(239,68,68,0.2),rgba(239,68,68,0.08))",
               borderColor: "rgba(239,68,68,0.5)",
             }}
           >
             <span className="text-xl">🚨</span>
-            <p className="flex-1 text-[13px]" style={{ color: "#fca5a5" }}>
-              <strong style={{ color: "var(--tg-red)" }}>ALERTA CRÍTICO! </strong>
+            <p
+              className="flex-1 text-[13px]"
+              style={{ color: "#fca5a5" }}
+            >
+              <strong style={{ color: "var(--tg-red)" }}>
+                ALERTA CRÍTICO!{" "}
+              </strong>
               Sensor S-04 (Câmara Frigorífica B) atingiu{" "}
               <strong>-32.1°C</strong> — limite inferior excedido.
             </p>
-            <button onClick={() => setShowBanner(false)} className="text-lg" style={{ color: "var(--tg-muted)" }}>
+            <button
+              onClick={() => setShowBanner(false)}
+              className="text-lg"
+              style={{ color: "var(--tg-muted)" }}
+            >
               ✕
             </button>
           </div>
         )}
 
-        {/* ── TABS ── */}
+        {/* TABS */}
         <div
           className="flex gap-1 p-1 rounded-xl"
-          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--tg-border)" }}
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid var(--tg-border)",
+          }}
         >
           {tabs.map((t) => {
             const isAlertsAndCrit = t.key === "alerts" && isCritical;
@@ -186,13 +220,22 @@ export default function DashboardPage() {
                         background: isAlertsAndCrit
                           ? "linear-gradient(135deg,rgba(239,68,68,0.4),rgba(239,68,68,0.2))"
                           : "linear-gradient(135deg,rgba(124,58,237,0.4),rgba(168,85,247,0.25))",
-                        color: isAlertsAndCrit ? "var(--tg-red)" : "var(--tg-purple3)",
-                        border: `1px solid ${isAlertsAndCrit ? "rgba(239,68,68,0.5)" : "rgba(124,58,237,0.3)"}`,
-                        boxShadow: isAlertsAndCrit ? "0 0 16px rgba(239,68,68,0.2)" : "0 0 16px rgba(124,58,237,0.2)",
+                        color: isAlertsAndCrit
+                          ? "var(--tg-red)"
+                          : "var(--tg-purple3)",
+                        border: `1px solid ${
+                          isAlertsAndCrit
+                            ? "rgba(239,68,68,0.5)"
+                            : "rgba(124,58,237,0.3)"
+                        }`,
+                        boxShadow: isAlertsAndCrit
+                          ? "0 0 16px rgba(239,68,68,0.2)"
+                          : "0 0 16px rgba(124,58,237,0.2)",
                       }
                     : isAlertsAndCrit
                     ? {
-                        background: "linear-gradient(135deg,rgba(239,68,68,0.3),rgba(239,68,68,0.15))",
+                        background:
+                          "linear-gradient(135deg,rgba(239,68,68,0.3),rgba(239,68,68,0.15))",
                         color: "var(--tg-red)",
                         border: "1px solid rgba(239,68,68,0.4)",
                       }
@@ -203,7 +246,10 @@ export default function DashboardPage() {
                 {t.count > 0 && (
                   <span
                     className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                    style={{ background: "rgba(239,68,68,0.3)", color: "#fca5a5" }}
+                    style={{
+                      background: "rgba(239,68,68,0.3)",
+                      color: "#fca5a5",
+                    }}
                   >
                     {t.count}
                   </span>
@@ -212,6 +258,7 @@ export default function DashboardPage() {
             );
           })}
         </div>
+      </div>
 
       {/* STATS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -235,21 +282,14 @@ export default function DashboardPage() {
 
       {/* GRÁFICO */}
       <div className="w-full h-[300px]">
-        {selectedEnv && (
-          <TemperatureChart env={selectedEnv} T={T} />
-        )}
+        {selectedEnv && <TemperatureChart env={selectedEnv} T={T} />}
       </div>
 
       {/* ALERTAS */}
-      <AlertsList
-        alerts={alertsData}
-        onVerify={handleVerify}
-        T={T}
-      />
+      <AlertsList alerts={alertsData} onVerify={handleVerify} T={T} />
 
       {/* RELATÓRIO */}
       <AuditReport alerts={alertsData} T={T} />
-
     </div>
   );
 }
