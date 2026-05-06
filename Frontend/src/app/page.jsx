@@ -7,10 +7,11 @@ import { HowItWorks } from "@/components/HowItWorks";
 import { LandingFooter } from "@/components/LandingFooter";
 import { SectionDivider } from "@/components/SectionDivider";
 import PublicNavbar from "@/components/PublicNavbar";
-
+import ChatbotHome from '@/components/ChatbotHome'
 export default function Landing() {
   return (
     <>
+    <ChatbotHome />
       <PublicNavbar />
       <div className="dark min-h-screen bg-background">
         {/* Floating particles */}

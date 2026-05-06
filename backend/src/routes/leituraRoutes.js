@@ -9,4 +9,11 @@ router.post("/leituras", leituraController.registrarLeitura);
 /* listar leituras */
 router.get("/leituras", leituraController.listarLeituras);
 
+
+
+
+router.get("/leituras/ultimas", leituraController.ultimasLeituras);
+router.get("/alertas", leituraController.alertasAtivos);
+
+
 module.exports = router;

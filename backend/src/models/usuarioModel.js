@@ -29,8 +29,37 @@ const Usuario = {
     `;
 
     db.query(query, [email], callback);
+  },
+
+
+  atualizar: (id, nome, email, tipo_usuario) => {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "UPDATE usuarios SET nome=?, email=?, tipo_usuario=? WHERE id_usuario=?",
+        [nome, email, tipo_usuario, id],
+        (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        }
+      );
+    });
+  },
+  
+  deletar: (id) => {
+    return new Promise((resolve, reject) => {
+      db.query(
+        "DELETE FROM usuarios WHERE id_usuario=?",
+        [id],
+        (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        }
+      );
+    });
   }
 
 };
+
+
 
 module.exports = Usuario;

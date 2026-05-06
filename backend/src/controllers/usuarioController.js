@@ -107,3 +107,29 @@ exports.login = (req, res) => {
   });
 
 };
+
+
+exports.atualizarUsuario = async (req, res) => {
+  const { id } = req.params;
+  const { nome, email, tipo_usuario } = req.body;
+
+  try {
+    await Usuario.atualizar(id, nome, email, tipo_usuario);
+    res.json({ mensagem: "Atualizado com sucesso" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao atualizar" });
+  }
+};
+
+exports.deletarUsuario = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await Usuario.deletar(id);
+    res.json({ mensagem: "Deletado com sucesso" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao deletar" });
+  }
+};
