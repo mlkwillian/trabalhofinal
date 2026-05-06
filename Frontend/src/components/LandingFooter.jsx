@@ -3,11 +3,12 @@
 import { motion } from "motion/react";
 import { Thermometer, Mail, Phone, MapPin } from "lucide-react";
 
-export function LandingFooter() {
+export function LandingFooter({ onSupportClick }) {
   return (
     <footer className="relative border-t border-purple-500/30 py-12 px-8">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+
           {/* Brand */}
           <div>
             <motion.div
@@ -19,12 +20,13 @@ export function LandingFooter() {
               </div>
               <span className="text-xl text-purple-100">TermoGuard</span>
             </motion.div>
-            <p className="text-purple-300 text-sm leading-relaxed">
-              Soluções inteligentes para monitoramento de temperatura industrial e corporativa.
+
+            <p className="text-purple-300 text-sm">
+              Soluções inteligentes para monitoramento de temperatura industrial.
             </p>
           </div>
 
-          {/* Quick Links */}
+          {/* Links */}
           <div>
             <h4 className="text-purple-100 mb-4">Links Rápidos</h4>
             <ul className="space-y-2">
@@ -33,7 +35,7 @@ export function LandingFooter() {
                   <motion.a
                     whileHover={{ x: 5 }}
                     href="#"
-                    className="text-purple-300 hover:text-purple-200 text-sm transition-colors"
+                    className="text-purple-300 hover:text-purple-200 text-sm"
                   >
                     {link}
                   </motion.a>
@@ -48,13 +50,22 @@ export function LandingFooter() {
             <ul className="space-y-2">
               {["Documentação", "API", "Suporte", "Blog"].map((link) => (
                 <li key={link}>
-                  <motion.a
-                    whileHover={{ x: 5 }}
-                    href="#"
-                    className="text-purple-300 hover:text-purple-200 text-sm transition-colors"
-                  >
-                    {link}
-                  </motion.a>
+                  {link === "Suporte" ? (
+                    <button
+                      onClick={onSupportClick}
+                      className="text-purple-300 hover:text-purple-200 text-sm"
+                    >
+                      {link}
+                    </button>
+                  ) : (
+                    <motion.a
+                      whileHover={{ x: 5 }}
+                      href="#"
+                      className="text-purple-300 hover:text-purple-200 text-sm"
+                    >
+                      {link}
+                    </motion.a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -66,40 +77,25 @@ export function LandingFooter() {
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-purple-300 text-sm">
                 <Mail className="h-4 w-4" />
-                <span>contato@termoguard.com</span>
+                contato@termoguard.com
               </li>
               <li className="flex items-center gap-2 text-purple-300 text-sm">
                 <Phone className="h-4 w-4" />
-                <span>(11) 9999-9999</span>
+                (11) 9999-9999
               </li>
               <li className="flex items-center gap-2 text-purple-300 text-sm">
                 <MapPin className="h-4 w-4" />
-                <span>São Paulo, SP</span>
+                São Paulo, SP
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="pt-8 border-t border-purple-500/30 text-center"
-        >
+        <div className="pt-8 border-t border-purple-500/30 text-center">
           <p className="text-purple-400 text-sm">
             © 2026 TermoGuard. Todos os direitos reservados.
           </p>
-        </motion.div>
-      </div>
-
-      {/* Background decoration */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10">
-        <motion.div
-          className="absolute -bottom-1/2 left-1/4 w-96 h-96 bg-purple-600/5 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 8, repeat: Infinity }}
-        />
+        </div>
       </div>
     </footer>
   );
