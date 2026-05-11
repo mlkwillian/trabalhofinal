@@ -1,308 +1,390 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import Chatbot from "@/components/Chatbot"
+import Chatbot from '@/components/Chatbot'
 import {
-  ShieldCheck,
+  Users,
+  MapPin,
   Plus,
-  Search,
   Pencil,
   Trash2,
+  Search,
+  ShieldCheck,
+  X,
   User,
-  X
+  Fingerprint,
+  Mail,
+  Lock
 } from "lucide-react"
 
 export default function AdminPage() {
-  const [usuarios, setUsuarios] = useState([])
-  const [search, setSearch] = useState("")
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editando, setEditando] = useState(null)
+  const [activeTab, setActiveTab] = useState("usuarios")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const [form, setForm] = useState({
-    nome: "",
-    email: "",
-    senha: "",
-    tipo_usuario: "gestor"
-  })
+  const [usuarios, setUsuarios] = useState([
+    { id: 1, nome: "Admin Thermo", email: "admin@guard.com", cpf: "123.456.789-00", cargo: "Administrador" },
+    { id: 2, nome: "João Silva", email: "joao@empresa.com", cpf: "987.654.321-11", cargo: "Operador" },
+  ])
 
-  async function carregarUsuarios() {
-    const token = localStorage.getItem("token")
+  const [ambientes, setAmbientes] = useState([
+    { id: 1, nome: "Almoxarifado Principal", status: "Monitorado" },
+    { id: 2, nome: "Laboratório Químico", status: "Monitorado" },
+  ])
 
-    const res = await fetch("http://localhost:3000/api/usuarios", {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+  const handleDeleteUser = (id) => setUsuarios(usuarios.filter(u => u.id !== id))
+  const handleDeleteAmbiente = (id) => setAmbientes(ambientes.filter(a => a.id !== id))
 
-    const data = await res.json()
-    setUsuarios(data)
-  }
-
-  useEffect(() => {
-    carregarUsuarios()
-  }, [])
-
-  function abrirModal(usuario = null) {
-    if (usuario) {
-      setEditando(usuario)
-      setForm(usuario)
-    } else {
-      setEditando(null)
-      setForm({ nome: "", email: "", senha: "", tipo_usuario: "gestor" })
-    }
-    setModalOpen(true)
-  }
-
-  async function salvar() {
-    const token = localStorage.getItem("token")
-
-    if (editando) {
-      await fetch(`http://localhost:3000/api/usuarios/${editando.id_usuario}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(form)
-      })
-    } else {
-      await fetch("http://localhost:3000/api/usuarios", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
-      })
-    }
-
-    setModalOpen(false)
-    carregarUsuarios()
-  }
-
-  async function deletar(id) {
-    const token = localStorage.getItem("token")
-
-    await fetch(`http://localhost:3000/api/usuarios/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` }
-    })
-
-    carregarUsuarios()
-  }
-
-  const filtrados = usuarios.filter(u =>
-    u.nome.toLowerCase().includes(search.toLowerCase())
+  const filteredUsuarios = usuarios.filter(u =>
+    u.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    u.email.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+  const filteredAmbientes = ambientes.filter(a =>
+    a.nome.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   return (
     <div
-      className="p-8 min-h-screen flex flex-col items-center"
-      style={{ background: "var(--bg)", color: "var(--text)" }}
+      className="min-h-screen text-white flex flex-col items-center px-4 py-8"
+      style={{ background: "#080516", fontFamily: "'Inter', sans-serif" }}
     >
-      <div className="w-full max-w-6xl">
+      {/* Google Fonts */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap');
 
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <ShieldCheck style={{ color: "var(--purple)" }} />
-              Painel Administrativo
-            </h1>
-            <p style={{ color: "var(--text-sub)" }}>
-              Gerencie usuários do sistema
-            </p>
+        .tg-glass {
+          background: rgba(255, 255, 255, 0.03);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(124, 58, 237, 0.25);
+          border-radius: 16px;
+        }
+        .tg-glass-header {
+          background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(15,15,30,0.8));
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(124, 58, 237, 0.25);
+          border-radius: 16px;
+          position: relative;
+          overflow: hidden;
+        }
+        .tg-glass-header::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, #a855f7, transparent);
+        }
+        .tg-btn {
+          background: linear-gradient(135deg, #be50e6 0%, #7c3aed 100%);
+          transition: all 0.2s;
+          box-shadow: 0 4px 20px rgba(124,58,237,0.3);
+        }
+        .tg-btn:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 6px 28px rgba(124,58,237,0.5);
+        }
+        .tg-tab-active {
+          color: #a855f7;
+          border-bottom: 2px solid #a855f7;
+        }
+        .tg-row:hover {
+          background: rgba(124,58,237,0.04);
+        }
+        .tg-logo {
+          font-family: 'Orbitron', monospace;
+          font-weight: 700;
+          background: linear-gradient(135deg, #a855f7, #c084fc);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          letter-spacing: 1px;
+        }
+      `}</style>
+
+      <div className="w-full max-w-5xl flex flex-col gap-6">
+
+        {/* ── HEADER ── */}
+        <div className="tg-glass-header flex flex-col md:flex-row justify-between items-center gap-4 px-6 py-4">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-lg"
+              style={{
+                background: "linear-gradient(135deg, #7c3aed, #a855f7)",
+                boxShadow: "0 0 16px rgba(124,58,237,0.4)"
+              }}
+            >
+              🌡️
+            </div>
+            <div>
+              <div className="tg-logo text-lg">TERMOGUARD</div>
+              <div className="text-[10px] text-slate-400 tracking-[2px] uppercase">Painel Administrativo</div>
+            </div>
           </div>
 
+          {/* Title + desc */}
+          <div className="text-center flex-1 hidden md:block">
+            <h1 className="text-base font-semibold flex items-center justify-center gap-2 text-slate-200">
+              <ShieldCheck size={18} className="text-purple-400" />
+              Gestão de Usuários e Ambientes
+            </h1>
+            <p className="text-xs text-purple-200/40 mt-0.5">Acesso restrito ao administrador</p>
+          </div>
+
+          {/* Add button */}
           <button
-            onClick={() => abrirModal()}
-            className="px-5 py-2 rounded-xl flex items-center gap-2 text-white font-medium"
-            style={{
-              background: "linear-gradient(135deg, var(--purple), var(--purple-l))",
-              boxShadow: "var(--shadow)"
-            }}
+            onClick={() => setIsModalOpen(true)}
+            className="tg-btn px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2 text-sm"
           >
             <Plus size={18} />
-            Novo Usuário
+            {activeTab === "usuarios" ? "Novo Usuário" : "Novo Ambiente"}
           </button>
         </div>
 
-        {/* SEARCH */}
-        <div
-          className="flex items-center gap-3 p-3 rounded-xl mb-6"
-          style={{
-            background: "var(--card)",
-            border: "1px solid var(--border-soft)"
-          }}
-        >
-          <Search size={18} style={{ color: "var(--muted)" }} />
-          <input
-            placeholder="Buscar usuário..."
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full outline-none bg-transparent"
-          />
+        {/* ── STATS ROW ── */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { label: "Total Usuários", value: usuarios.length, icon: <Users size={18} />, color: "#a855f7" },
+            { label: "Administradores", value: usuarios.filter(u => u.cargo === "Administrador").length, icon: <ShieldCheck size={18} />, color: "#7c3aed" },
+            { label: "Ambientes", value: ambientes.length, icon: <MapPin size={18} />, color: "#c084fc" },
+            { label: "Monitorados", value: ambientes.filter(a => a.status === "Monitorado").length, icon: <Fingerprint size={18} />, color: "#10b981" },
+          ].map((stat, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.07 }}
+              className="tg-glass p-4 flex items-center gap-3"
+            >
+              <div
+                className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ background: `${stat.color}22`, color: stat.color }}
+              >
+                {stat.icon}
+              </div>
+              <div>
+                <div className="text-xl font-bold" style={{ color: stat.color }}>{stat.value}</div>
+                <div className="text-[11px] text-slate-400">{stat.label}</div>
+              </div>
+            </motion.div>
+          ))}
         </div>
 
-        {/* TABELA */}
-        <div
-          className="rounded-xl overflow-hidden"
-          style={{
-            background: "var(--card)",
-            border: "1px solid var(--border-soft)"
-          }}
-        >
-          <table className="w-full">
+        {/* ── NAV + SEARCH ── */}
+        <div className="tg-glass flex flex-col md:flex-row justify-between items-center gap-4 px-5 py-3">
+          {/* Tabs */}
+          <div className="flex gap-6">
+            {[
+              { key: "usuarios", label: "Usuários", icon: <Users size={15} /> },
+              { key: "ambientes", label: "Ambientes", icon: <MapPin size={15} /> },
+            ].map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`pb-1 font-medium text-sm flex items-center gap-1.5 transition-all ${
+                  activeTab === tab.key ? "tg-tab-active" : "text-slate-500 hover:text-slate-300"
+                }`}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-            <thead style={{ background: "var(--surface)" }}>
-              <tr style={{ color: "var(--text-sub)" }}>
-                <th className="p-4 text-left">Usuário</th>
-                <th className="p-4 text-left">Email</th>
-                <th className="p-4 text-left">Tipo</th>
-                <th className="p-4 text-right">Ações</th>
+          {/* Search */}
+          <div className="relative w-full md:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400/50" size={16} />
+            <input
+              type="text"
+              placeholder="Pesquisar registro..."
+              className="w-full text-sm rounded-lg py-2 pl-9 pr-4 outline-none transition-all"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(124,58,237,0.2)",
+                color: "#e2e8f0",
+              }}
+              onFocus={e => e.target.style.borderColor = "rgba(168,85,247,0.5)"}
+              onBlur={e => e.target.style.borderColor = "rgba(124,58,237,0.2)"}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* ── TABLE ── */}
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
+          className="tg-glass overflow-x-auto"
+        >
+          <table className="w-full text-left min-w-[560px]">
+            <thead style={{ background: "rgba(124,58,237,0.07)" }}>
+              <tr className="text-[11px] uppercase tracking-wider text-purple-300/60">
+                {activeTab === "usuarios" ? (
+                  <>
+                    <th className="px-6 py-4 font-semibold w-16 text-center">Avatar</th>
+                    <th className="px-6 py-4 font-semibold">Nome / CPF</th>
+                    <th className="px-6 py-4 font-semibold">E-mail</th>
+                    <th className="px-6 py-4 font-semibold">Cargo</th>
+                    <th className="px-6 py-4 font-semibold text-right">Ações</th>
+                  </>
+                ) : (
+                  <>
+                    <th className="px-6 py-4 font-semibold">Ambiente</th>
+                    <th className="px-6 py-4 font-semibold">Status</th>
+                    <th className="px-6 py-4 font-semibold text-right">Ações</th>
+                  </>
+                )}
               </tr>
             </thead>
+            <tbody style={{ borderTop: "1px solid rgba(124,58,237,0.1)" }}>
+              <AnimatePresence>
+                {activeTab === "usuarios"
+                  ? filteredUsuarios.map((u, idx) => (
+                      <motion.tr
+                        key={u.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ delay: idx * 0.04 }}
+                        className="tg-row transition-colors text-sm"
+                        style={{ borderBottom: "1px solid rgba(124,58,237,0.07)" }}
+                      >
+                        <td className="px-6 py-4">
+                          <div
+                            className="w-9 h-9 rounded-full flex items-center justify-center mx-auto"
+                            style={{
+                              background: "rgba(168,85,247,0.15)",
+                              border: "1px solid rgba(168,85,247,0.3)",
+                              color: "#a855f7"
+                            }}
+                          >
+                            <User size={17} />
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="font-medium text-slate-200">{u.nome}</div>
+                          <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+                            <Fingerprint size={11} /> {u.cpf}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-slate-400 flex items-center gap-1.5">
+                            <Mail size={13} className="text-purple-400/50" />
+                            {u.email}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider"
+                            style={
+                              u.cargo === "Administrador"
+                                ? { background: "rgba(124,58,237,0.15)", color: "#c084fc", border: "1px solid rgba(124,58,237,0.3)" }
+                                : { background: "rgba(59,130,246,0.1)", color: "#60a5fa", border: "1px solid rgba(59,130,246,0.2)" }
+                            }
+                          >
+                            {u.cargo}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end gap-1">
+                            <button
+                              className="p-2 rounded-lg transition-colors text-blue-400"
+                              style={{ background: "transparent" }}
+                              onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
+                              onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                            >
+                              <Pencil size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(u.id)}
+                              className="p-2 rounded-lg transition-colors text-red-400"
+                              style={{ background: "transparent" }}
+                              onMouseEnter={e => e.currentTarget.style.background = "rgba(239,68,68,0.1)"}
+                              onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))
+                  : filteredAmbientes.map((amb, idx) => (
+                      <motion.tr
+                        key={amb.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ delay: idx * 0.04 }}
+                        className="tg-row transition-colors text-sm"
+                        style={{ borderBottom: "1px solid rgba(124,58,237,0.07)" }}
+                      >
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                              style={{ background: "rgba(168,85,247,0.12)", color: "#a855f7" }}
+                            >
+                              <MapPin size={15} />
+                            </div>
+                            <span className="font-medium text-slate-200">{amb.nome}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider"
+                            style={{
+                              background: "rgba(16,185,129,0.1)",
+                              color: "#10b981",
+                              border: "1px solid rgba(16,185,129,0.2)"
+                            }}
+                          >
+                            ● {amb.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end gap-1">
+                            <button
+                              className="p-2 rounded-lg transition-colors text-blue-400"
+                              style={{ background: "transparent" }}
+                              onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
+                              onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                            >
+                              <Pencil size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteAmbiente(amb.id)}
+                              className="p-2 rounded-lg transition-colors text-red-400"
+                              style={{ background: "transparent" }}
+                              onMouseEnter={e => e.currentTarget.style.background = "rgba(239,68,68,0.1)"}
+                              onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))}
+              </AnimatePresence>
 
-            <tbody>
-              {filtrados.map(u => (
-                <tr
-                  key={u.id_usuario}
-                  style={{ borderTop: "1px solid var(--border-soft)" }}
-                >
-                  <td className="p-4 flex items-center gap-3">
-                    <div
-                      className="w-9 h-9 rounded-full flex items-center justify-center"
-                      style={{ background: "var(--purple-dim)" }}
-                    >
-                      <User size={16} />
-                    </div>
-                    {u.nome}
-                  </td>
-
-                  <td className="p-4">{u.email}</td>
-
-                  <td className="p-4">
-                    <span
-                      className="px-2 py-1 rounded-full text-xs"
-                      style={{
-                        background: "var(--accent-soft)",
-                        color: "var(--green)"
-                      }}
-                    >
-                      {u.tipo_usuario}
-                    </span>
-                  </td>
-
-                  <td className="p-4 text-right">
-                    <button
-                      onClick={() => abrirModal(u)}
-                      className="mr-2"
-                      style={{ color: "var(--blue)" }}
-                    >
-                      <Pencil size={18} />
-                    </button>
-
-                    <button
-                      onClick={() => deletar(u.id_usuario)}
-                      style={{ color: "var(--red)" }}
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-
-              {filtrados.length === 0 && (
+              {/* Empty state */}
+              {((activeTab === "usuarios" && filteredUsuarios.length === 0) ||
+                (activeTab === "ambientes" && filteredAmbientes.length === 0)) && (
                 <tr>
-                  <td colSpan="4" className="text-center p-6">
-                    Nenhum usuário encontrado
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500 text-sm">
+                    Nenhum registro encontrado.
                   </td>
                 </tr>
               )}
             </tbody>
-
           </table>
+        </motion.div>
+
+        {/* ── FOOTER ── */}
+        <div className="text-center text-[11px] mt-4" style={{ color: "rgba(168,85,247,0.3)", fontFamily: "'Orbitron', monospace", letterSpacing: "1px" }}>
+          © 2026 TERMOGUARD — ACESSO RESTRITO AO ADMINISTRADOR
         </div>
       </div>
-
-      {/* MODAL BONITO */}
-      <AnimatePresence>
-        {modalOpen && (
-          <motion.div
-            className="fixed inset-0 flex items-center justify-center z-50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div
-              className="absolute inset-0 bg-black/60"
-              onClick={() => setModalOpen(false)}
-            />
-
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative p-6 rounded-xl w-full max-w-md"
-              style={{
-                background: "var(--card)",
-                border: "1px solid var(--border)"
-              }}
-            >
-              <div className="flex justify-between mb-4">
-                <h2 className="text-lg font-semibold">
-                  {editando ? "Editar" : "Novo"} Usuário
-                </h2>
-                <X onClick={() => setModalOpen(false)} className="cursor-pointer" />
-              </div>
-
-              <input
-                placeholder="Nome"
-                value={form.nome}
-                onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                className="w-full mb-2 p-2 rounded"
-                style={{ background: "var(--surface)" }}
-              />
-
-              <input
-                placeholder="Email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full mb-2 p-2 rounded"
-                style={{ background: "var(--surface)" }}
-              />
-
-              {!editando && (
-                <input
-                  type="password"
-                  placeholder="Senha"
-                  onChange={(e) => setForm({ ...form, senha: e.target.value })}
-                  className="w-full mb-2 p-2 rounded"
-                  style={{ background: "var(--surface)" }}
-                />
-              )}
-
-              <select
-                value={form.tipo_usuario}
-                onChange={(e) => setForm({ ...form, tipo_usuario: e.target.value })}
-                className="w-full mb-4 p-2 rounded"
-                style={{ background: "var(--surface)" }}
-              >
-                <option value="admin">Admin</option>
-                <option value="operador">Operador</option>
-                <option value="gestor">Gestor</option>
-                <option value="manutencao">Manutenção</option>
-                <option value="qualidade">Qualidade</option>
-              </select>
-
-              <button
-                onClick={salvar}
-                className="w-full p-2 rounded text-white font-medium"
-                style={{
-                  background: "linear-gradient(135deg, var(--purple), var(--purple-l))"
-                }}
-              >
-                Salvar
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <Chatbot />
     </div>
