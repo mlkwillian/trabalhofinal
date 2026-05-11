@@ -6,7 +6,8 @@ import TemperatureChart from "@/components/TemperatureChart";
 import { themes } from "@/theme/theme";
 import { Search, Activity, AlertTriangle, Thermometer } from "lucide-react";
 import { api } from "@/services/api";
-import Chatbot from '@/components/Chatbot'
+import Chatbot from '@/components/Chatbot';
+import { useTheme } from "@/contexts/ThemeContext"; // ✅ mesmo contexto da Sidebar
 
 export default function AmbientesPage() {
   const [salas, setSalas] = useState([]);
@@ -15,7 +16,9 @@ export default function AmbientesPage() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
 
-  const T = themes.dark;
+  // ✅ Usa o mesmo contexto de tema que a Sidebar já usa
+  const { dark } = useTheme();
+  const T = dark ? themes.dark : themes.light;
 
   // 🔥 BUSCAR SALAS DO BACKEND
   useEffect(() => {
@@ -30,7 +33,6 @@ export default function AmbientesPage() {
         }
 
         const res = await api.get("/api/salas");
-
         setSalas(res.data);
 
         if (res.data.length > 0) {
@@ -57,7 +59,7 @@ export default function AmbientesPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen text-purple-400">
+      <div className="flex items-center justify-center h-screen" style={{ color: T.purpleL }}>
         Carregando ambientes...
       </div>
     );
@@ -65,7 +67,7 @@ export default function AmbientesPage() {
 
   if (salas.length === 0) {
     return (
-      <div className="flex items-center justify-center h-screen text-purple-400">
+      <div className="flex items-center justify-center h-screen" style={{ color: T.purpleL }}>
         Nenhuma sala cadastrada
       </div>
     );
@@ -73,30 +75,42 @@ export default function AmbientesPage() {
 
   if (erro) {
     return (
-      <div className="flex items-center justify-center h-screen text-red-400">
+      <div className="flex items-center justify-center h-screen" style={{ color: T.red }}>
         {erro}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 p-6 min-h-screen bg-[#0a0910]">
+    <div
+      className="space-y-6 p-6 min-h-screen transition-colors duration-300"
+      style={{ background: T.bg }}
+    >
 
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Gestão de Ambientes</h1>
-          <p className="text-purple-500 text-sm">
+          <h1 className="text-2xl font-bold" style={{ color: T.text }}>
+            Gestão de Ambientes
+          </h1>
+          <p className="text-sm" style={{ color: T.purple }}>
             Monitoramento de salas
           </p>
         </div>
 
-        <div className="bg-[#1a1825] border border-purple-900/30 rounded-lg flex items-center px-3 py-2">
-          <Search size={18} className="text-purple-500 mr-2" />
+        <div
+          className="rounded-lg flex items-center px-3 py-2"
+          style={{
+            background: T.surface,
+            border: `1px solid ${T.border}`,
+          }}
+        >
+          <Search size={18} className="mr-2" style={{ color: T.purple }} />
           <input
             type="text"
             placeholder="Buscar sala..."
-            className="bg-transparent outline-none text-sm text-purple-200 placeholder:text-purple-700"
+            className="bg-transparent outline-none text-sm"
+            style={{ color: T.text }}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
@@ -104,27 +118,36 @@ export default function AmbientesPage() {
 
       {/* STATS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-[#1a1825] p-4 rounded-xl flex items-center gap-4">
-          <Activity className="text-purple-400" />
+        <div
+          className="p-4 rounded-xl flex items-center gap-4 transition-colors duration-300"
+          style={{ background: T.card, border: `1px solid ${T.border}` }}
+        >
+          <Activity style={{ color: T.purpleL }} />
           <div>
-            <p className="text-purple-500 text-xs">Salas</p>
-            <p className="text-white text-xl">{salas.length}</p>
+            <p className="text-xs" style={{ color: T.muted }}>Salas</p>
+            <p className="text-xl" style={{ color: T.text }}>{salas.length}</p>
           </div>
         </div>
 
-        <div className="bg-[#1a1825] p-4 rounded-xl flex items-center gap-4">
-          <AlertTriangle className="text-orange-400" />
+        <div
+          className="p-4 rounded-xl flex items-center gap-4 transition-colors duration-300"
+          style={{ background: T.card, border: `1px solid ${T.border}` }}
+        >
+          <AlertTriangle style={{ color: T.accent }} />
           <div>
-            <p className="text-purple-500 text-xs">Alertas</p>
-            <p className="text-white text-xl">--</p>
+            <p className="text-xs" style={{ color: T.muted }}>Alertas</p>
+            <p className="text-xl" style={{ color: T.text }}>--</p>
           </div>
         </div>
 
-        <div className="bg-[#1a1825] p-4 rounded-xl flex items-center gap-4">
-          <Thermometer className="text-blue-400" />
+        <div
+          className="p-4 rounded-xl flex items-center gap-4 transition-colors duration-300"
+          style={{ background: T.card, border: `1px solid ${T.border}` }}
+        >
+          <Thermometer style={{ color: T.blue }} />
           <div>
-            <p className="text-purple-500 text-xs">Faixa Média</p>
-            <p className="text-white text-xl">--</p>
+            <p className="text-xs" style={{ color: T.muted }}>Faixa Média</p>
+            <p className="text-xl" style={{ color: T.text }}>--</p>
           </div>
         </div>
       </div>
@@ -151,31 +174,36 @@ export default function AmbientesPage() {
       {selectedSala && (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
 
-          <div className="lg:col-span-3 bg-[#0f0e1a] p-4 rounded-xl">
-            <h2 className="text-white mb-4">
+          <div
+            className="lg:col-span-3 p-4 rounded-xl transition-colors duration-300"
+            style={{ background: T.surface, border: `1px solid ${T.border}` }}
+          >
+            <h2 className="mb-4" style={{ color: T.text }}>
               {selectedSala.nome_sala}
             </h2>
 
-            {/* ⚠️ AINDA MOCK (depois ligamos sensores) */}
             <TemperatureChart
               env={{
                 name: selectedSala.nome_sala,
                 minTemp: selectedSala.temperatura_min,
                 maxTemp: selectedSala.temperatura_max,
-                history: [] // depois vem do backend
+                history: []
               }}
               T={T}
             />
           </div>
 
-          <div className="bg-[#1a1825] p-4 rounded-xl">
-            <h3 className="text-white mb-3">Configuração</h3>
+          <div
+            className="p-4 rounded-xl transition-colors duration-300"
+            style={{ background: T.card, border: `1px solid ${T.border}` }}
+          >
+            <h3 className="mb-3" style={{ color: T.text }}>Configuração</h3>
 
-            <p className="text-sm text-purple-400">
+            <p className="text-sm" style={{ color: T.textSub }}>
               Mín: {selectedSala.temperatura_min}°C
             </p>
 
-            <p className="text-sm text-purple-400">
+            <p className="text-sm" style={{ color: T.textSub }}>
               Máx: {selectedSala.temperatura_max}°C
             </p>
           </div>
@@ -183,7 +211,7 @@ export default function AmbientesPage() {
         </div>
       )}
 
-<Chatbot />
+      <Chatbot />
     </div>
   );
 }
