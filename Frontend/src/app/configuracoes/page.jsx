@@ -7,7 +7,6 @@ import {
   Lock,
   Bell,
   User,
-  Save,
   Eye,
   ChevronRight,
 } from "lucide-react";
@@ -34,7 +33,7 @@ export default function ConfiguracoesSistema() {
 
   return (
     <div className="min-h-screen bg-[#05010b] text-white flex overflow-hidden">
-      
+     
       <aside
         className="
           w-[340px]
@@ -47,7 +46,7 @@ export default function ConfiguracoesSistema() {
           flex-col
         "
       >
-      
+        
         <div className="flex flex-col items-center">
           <div
             className="
@@ -72,9 +71,7 @@ export default function ConfiguracoesSistema() {
             Admin Thermo
           </h2>
 
-          <p className="mt-2 text-purple-400 tracking-[4px] text-sm font-semibold">
-            ENTERPRISE ADMIN
-          </p>
+          
 
           <div className="w-full border-t border-purple-900/30 mt-10 pt-8">
             <div className="flex justify-between text-sm">
@@ -99,7 +96,7 @@ export default function ConfiguracoesSistema() {
           </div>
         </div>
 
-        {/* MENU */}
+        
         <div className="mt-12 flex flex-col gap-3">
           <button
             onClick={() => scrollToSection(perfilRef)}
@@ -148,7 +145,7 @@ export default function ConfiguracoesSistema() {
             <div className="flex items-center gap-4">
               <Globe size={20} />
               <span className="text-lg">
-                Idioma 
+                Idioma
               </span>
             </div>
 
@@ -253,26 +250,26 @@ export default function ConfiguracoesSistema() {
           </div>
 
           <button
-          className="
-            bg-gradient-to-r
-            from-purple-500
-            to-purple-700
-            hover:scale-105
-            transition-all
-            duration-300
-            px-3
-            py-2
-            rounded-xl
-            flex
-            items-center
-            gap-2
-            text-sm
-            font-semibold
-            shadow-[0_0_20px_rgba(168,85,247,0.35)]
-          "
-        >
-          Salvar Alterações
-        </button>
+            className="
+              bg-gradient-to-r
+              from-purple-500
+              to-purple-700
+              hover:scale-105
+              transition-all
+              duration-300
+              px-3
+              py-2
+              rounded-xl
+              flex
+              items-center
+              gap-2
+              text-sm
+              font-semibold
+              shadow-[0_0_20px_rgba(168,85,247,0.35)]
+            "
+          >
+            Salvar Alterações
+          </button>
         </div>
 
         {/* PERFIL */}
@@ -364,7 +361,7 @@ export default function ConfiguracoesSistema() {
               />
 
               <h2 className="text-3xl font-bold">
-                Idioma 
+                Idioma
               </h2>
             </div>
 
@@ -416,7 +413,7 @@ export default function ConfiguracoesSistema() {
           </div>
         </section>
 
-       
+        {/* SEGURANÇA */}
         <section
           ref={segurancaRef}
           className="mt-10"
@@ -483,38 +480,30 @@ export default function ConfiguracoesSistema() {
               </button>
             </div>
 
-            <div
-              className="
-                mt-8
-                bg-[#140520]
-                border
-                border-purple-900/40
-                rounded-2xl
-                p-6
-                flex
-                items-center
-                justify-between
-              "
-            >
-              <div>
-                <h3 className="font-bold text-lg">
-                  Autenticação em Dois Fatores
-                </h3>
-
-                <p className="text-gray-400 mt-2">
-                  Adicione uma camada extra de
-                  segurança.
-                </p>
-              </div>
-
-              <button className="text-purple-400 font-bold hover:text-purple-300">
-                ATIVAR
+            <div className="mt-8">
+              <button
+                className="
+                  bg-gradient-to-r
+                  from-purple-500
+                  to-purple-700
+                  hover:scale-[1.02]
+                  transition-all
+                  duration-300
+                  px-6
+                  py-3
+                  rounded-2xl
+                  text-sm
+                  font-semibold
+                  shadow-[0_0_20px_rgba(168,85,247,0.35)]
+                "
+              >
+                Alterar Senha
               </button>
             </div>
           </div>
         </section>
 
-       
+        {/* NOTIFICAÇÕES */}
         <section
           ref={notificacoesRef}
           className="mt-10 pb-20"
