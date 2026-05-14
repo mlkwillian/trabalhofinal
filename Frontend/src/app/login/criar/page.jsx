@@ -22,6 +22,8 @@ export default function CreateAccountPage() {
   const [nome, setNome] = useState("")
   const [email, setEmail] = useState("")
   const [senha, setSenha] = useState("")
+  const [tipoUsuario, setTipoUsuario] = useState("qualidade")
+
   const [showPassword, setShowPassword] = useState(false)
 
   const [loading, setLoading] = useState(false)
@@ -60,7 +62,7 @@ export default function CreateAccountPage() {
         nome,
         email,
         senha,
-        tipo_usuario: "usuario"
+        tipo_usuario: tipoUsuario
       })
 
       console.log(response.data)
@@ -139,6 +141,11 @@ export default function CreateAccountPage() {
 
         .input-field::placeholder {
           color: rgba(255,255,255,0.3);
+        }
+
+        select option {
+          background: #12091f;
+          color: white;
         }
       `}</style>
 
@@ -262,6 +269,44 @@ export default function CreateAccountPage() {
                       setEmail(e.target.value)
                     }
                   />
+
+                </div>
+              </div>
+
+              {/* tipo usuario */}
+              <div className="space-y-1.5">
+
+                <label className="text-[12px] text-purple-200/80 font-medium">
+                  Tipo de usuário
+                </label>
+
+                <div className="relative">
+
+                  <User
+                    size={15}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-500/70"
+                  />
+
+                  <select
+                    className="input-field appearance-none"
+                    value={tipoUsuario}
+                    onChange={(e) =>
+                      setTipoUsuario(e.target.value)
+                    }
+                  >
+                    <option value="gestor">
+                      Gestor
+                    </option>
+
+                    <option value="manutencao">
+                      Manutenção
+                    </option>
+
+                    <option value="qualidade">
+                      Qualidade
+                    </option>
+
+                  </select>
 
                 </div>
               </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   Shield,
   Globe,
@@ -8,20 +8,46 @@ import {
   Bell,
   User,
   Eye,
+  EyeOff,
   ChevronRight,
+  Save,
 } from "lucide-react";
+import { api } from "@/services/api";
 
 export default function ConfiguracoesSistema() {
+  // USER
+  const [usuario, setUsuario] = useState(null);
+
   // STATES
   const [idioma, setIdioma] = useState("pt-BR");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
+
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+
+  const [salvando, setSalvando] = useState(false);
+  const [mensagem, setMensagem] = useState("");
 
   // REFS
   const perfilRef = useRef(null);
   const idiomaRef = useRef(null);
   const segurancaRef = useRef(null);
   const notificacoesRef = useRef(null);
+
+  // PEGAR USUARIO
+  useEffect(() => {
+    const usuarioStorage = localStorage.getItem("usuario");
+
+    if (usuarioStorage) {
+      const dados = JSON.parse(usuarioStorage);
+
+      setUsuario(dados);
+
+      setNome(dados.nome || "");
+      setEmail(dados.email || "");
+    }
+  }, []);
 
   // SCROLL
   const scrollToSection = (ref) => {
@@ -31,9 +57,75 @@ export default function ConfiguracoesSistema() {
     });
   };
 
+  const salvarAlteracoes = async () => {
+    try {
+      setSalvando(true);
+      setMensagem("");
+  
+      const token = localStorage.getItem("token");
+  
+      const usuarioStorage = localStorage.getItem("usuario");
+  
+      if (!usuarioStorage) {
+        setMensagem("Usuário não encontrado");
+        return;
+      }
+  
+      const usuarioAtual = JSON.parse(usuarioStorage);
+  
+      console.log("USUARIO:", usuarioAtual);
+  
+      const response = await api.put(
+        `/auth/usuarios/${usuarioAtual.id}`,
+        {
+          nome,
+          email,
+          senha: senha || undefined,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      console.log(response.data);
+  
+      // atualizar localstorage
+      const usuarioAtualizado = {
+        ...usuarioAtual,
+        nome,
+        email,
+      };
+  
+      localStorage.setItem(
+        "usuario",
+        JSON.stringify(usuarioAtualizado)
+      );
+  
+      setUsuario(usuarioAtualizado);
+  
+      setMensagem("Alterações salvas com sucesso!");
+  
+      setSenha("");
+  
+    } catch (err) {
+      console.error(err);
+  
+      setMensagem(
+        err.response?.data?.mensagem ||
+        err.response?.data?.erro ||
+        "Erro ao salvar alterações"
+      );
+  
+    } finally {
+      setSalvando(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#05010b] text-white flex overflow-hidden">
-     
+      {/* SIDEBAR */}
       <aside
         className="
           w-[340px]
@@ -46,7 +138,7 @@ export default function ConfiguracoesSistema() {
           flex-col
         "
       >
-        
+        {/* PERFIL */}
         <div className="flex flex-col items-center">
           <div
             className="
@@ -64,14 +156,16 @@ export default function ConfiguracoesSistema() {
               shadow-[0_0_50px_rgba(168,85,247,0.45)]
             "
           >
-            AT
+            {nome?.charAt(0)?.toUpperCase() || "U"}
           </div>
 
-          <h2 className="mt-6 text-4xl font-bold">
-            Admin Thermo
+          <h2 className="mt-6 text-4xl font-bold text-center">
+            {nome || "Usuário"}
           </h2>
 
-          
+          <p className="text-purple-300 mt-2 text-sm">
+            {usuario?.tipo || "comum"}
+          </p>
 
           <div className="w-full border-t border-purple-900/30 mt-10 pt-8">
             <div className="flex justify-between text-sm">
@@ -80,7 +174,7 @@ export default function ConfiguracoesSistema() {
               </span>
 
               <span className="font-semibold">
-                Hoje, 09:14
+                Hoje
               </span>
             </div>
 
@@ -96,7 +190,7 @@ export default function ConfiguracoesSistema() {
           </div>
         </div>
 
-        
+        {/* MENU */}
         <div className="mt-12 flex flex-col gap-3">
           <button
             onClick={() => scrollToSection(perfilRef)}
@@ -213,9 +307,9 @@ export default function ConfiguracoesSistema() {
         </div>
       </aside>
 
-      
+      {/* CONTEÚDO */}
       <main className="flex-1 overflow-y-auto px-14 py-10">
-        
+        {/* HEADER */}
         <div className="flex items-start justify-between">
           <div className="flex gap-5">
             <div
@@ -243,13 +337,14 @@ export default function ConfiguracoesSistema() {
               </h1>
 
               <p className="text-gray-400 text-lg mt-3">
-                Ajuste suas preferências de conta e
-                monitoramento.
+                Ajuste suas preferências da conta.
               </p>
             </div>
           </div>
 
           <button
+            onClick={salvarAlteracoes}
+            disabled={salvando}
             className="
               bg-gradient-to-r
               from-purple-500
@@ -257,8 +352,8 @@ export default function ConfiguracoesSistema() {
               hover:scale-105
               transition-all
               duration-300
-              px-3
-              py-2
+              px-5
+              py-3
               rounded-xl
               flex
               items-center
@@ -268,9 +363,30 @@ export default function ConfiguracoesSistema() {
               shadow-[0_0_20px_rgba(168,85,247,0.35)]
             "
           >
-            Salvar Alterações
+            <Save size={16} />
+
+            {salvando
+              ? "Salvando..."
+              : "Salvar Alterações"}
           </button>
         </div>
+
+        {mensagem && (
+          <div
+            className="
+              mt-6
+              bg-purple-500/10
+              border
+              border-purple-500/30
+              text-purple-300
+              px-5
+              py-4
+              rounded-2xl
+            "
+          >
+            {mensagem}
+          </div>
+        )}
 
         {/* PERFIL */}
         <section
@@ -298,7 +414,10 @@ export default function ConfiguracoesSistema() {
 
                 <input
                   type="text"
-                  placeholder="Admin Thermo"
+                  value={nome}
+                  onChange={(e) =>
+                    setNome(e.target.value)
+                  }
                   className="
                     mt-3
                     w-full
@@ -321,7 +440,10 @@ export default function ConfiguracoesSistema() {
 
                 <input
                   type="email"
-                  placeholder="admin@thermo.com"
+                  value={email}
+                  onChange={(e) =>
+                    setEmail(e.target.value)
+                  }
                   className="
                     mt-3
                     w-full
@@ -340,7 +462,7 @@ export default function ConfiguracoesSistema() {
           </div>
         </section>
 
-        
+        {/* IDIOMA */}
         <section
           ref={idiomaRef}
           className="mt-10"
@@ -388,24 +510,15 @@ export default function ConfiguracoesSistema() {
                   focus:border-purple-500
                 "
               >
-                <option
-                  value="pt-BR"
-                  className="bg-[#140520]"
-                >
+                <option value="pt-BR">
                   Português (Brasil)
                 </option>
 
-                <option
-                  value="en-US"
-                  className="bg-[#140520]"
-                >
+                <option value="en-US">
                   English
                 </option>
 
-                <option
-                  value="es"
-                  className="bg-[#140520]"
-                >
+                <option value="es">
                   Español
                 </option>
               </select>
@@ -444,12 +557,16 @@ export default function ConfiguracoesSistema() {
               </label>
 
               <input
-                type={mostrarSenha ? "text" : "password"}
+                type={
+                  mostrarSenha
+                    ? "text"
+                    : "password"
+                }
                 value={senha}
                 onChange={(e) =>
                   setSenha(e.target.value)
                 }
-                placeholder="••••••••"
+                placeholder="Digite uma nova senha"
                 className="
                   mt-3
                   w-full
@@ -459,6 +576,7 @@ export default function ConfiguracoesSistema() {
                   rounded-2xl
                   px-5
                   py-4
+                  pr-14
                   outline-none
                   focus:border-purple-500
                 "
@@ -476,28 +594,11 @@ export default function ConfiguracoesSistema() {
                   hover:text-purple-400
                 "
               >
-                <Eye size={20} />
-              </button>
-            </div>
-
-            <div className="mt-8">
-              <button
-                className="
-                  bg-gradient-to-r
-                  from-purple-500
-                  to-purple-700
-                  hover:scale-[1.02]
-                  transition-all
-                  duration-300
-                  px-6
-                  py-3
-                  rounded-2xl
-                  text-sm
-                  font-semibold
-                  shadow-[0_0_20px_rgba(168,85,247,0.35)]
-                "
-              >
-                Alterar Senha
+                {mostrarSenha ? (
+                  <EyeOff size={20} />
+                ) : (
+                  <Eye size={20} />
+                )}
               </button>
             </div>
           </div>
