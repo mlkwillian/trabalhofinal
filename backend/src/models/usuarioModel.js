@@ -84,45 +84,42 @@ const Usuario = {
      ATUALIZAR
   ========================= */
 
-  atualizar: (
-    id,
-    nome,
-    email,
-    tipo_usuario
-  ) => {
+  atualizar: (id, nome, email, senha, tipo_usuario) => {
 
     return new Promise((resolve, reject) => {
-
-      const query = `
+  
+      let query = `
         UPDATE usuarios
-        SET
-          nome = ?,
-          email = ?,
-          tipo_usuario = ?
-        WHERE id_usuario = ?
+        SET nome = ?, email = ?, tipo_usuario = ?
       `;
-
-      db.query(
-        query,
-        [
-          nome,
-          email,
-          tipo_usuario,
-          id
-        ],
-        (err, result) => {
-
-          if (err) {
-            reject(err);
-          } else {
-            resolve(result);
-          }
-
+  
+      const valores = [
+        nome,
+        email,
+        tipo_usuario
+      ];
+  
+      if (senha) {
+        query += `, senha = ?`;
+        valores.push(senha);
+      }
+  
+      query += ` WHERE id_usuario = ?`;
+  
+      valores.push(id);
+  
+      db.query(query, valores, (err, result) => {
+  
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
         }
-      );
-
+  
+      });
+  
     });
-
+  
   },
 
   /* =========================

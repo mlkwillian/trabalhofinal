@@ -59,39 +59,44 @@ export default function ConfiguracoesSistema() {
 
   const salvarAlteracoes = async () => {
     try {
+  
       setSalvando(true);
       setMensagem("");
   
       const token = localStorage.getItem("token");
   
-      const usuarioStorage = localStorage.getItem("usuario");
+      const usuarioStorage =
+        localStorage.getItem("usuario");
   
       if (!usuarioStorage) {
         setMensagem("Usuário não encontrado");
         return;
       }
   
-      const usuarioAtual = JSON.parse(usuarioStorage);
+      const usuarioAtual =
+        JSON.parse(usuarioStorage);
   
-      console.log("USUARIO:", usuarioAtual);
+        const response = await fetch(
+          `http://localhost:3000/api/usuarios/${usuarioAtual.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              nome,
+              email,
+              senha: senha || null,
+              tipo_usuario: usuarioAtual.tipo,
+            }),
+          }
+        );
   
-      const response = await api.put(
-        `/auth/usuarios/${usuarioAtual.id}`,
-        {
-          nome,
-          email,
-          senha: senha || undefined,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const data = await response.json();
   
-      console.log(response.data);
+      console.log(data);
   
-      // atualizar localstorage
       const usuarioAtualizado = {
         ...usuarioAtual,
         nome,
@@ -102,24 +107,28 @@ export default function ConfiguracoesSistema() {
         "usuario",
         JSON.stringify(usuarioAtualizado)
       );
-  
+      setUsuario(usuarioAtualizado);
+      window.location.reload();
       setUsuario(usuarioAtualizado);
   
-      setMensagem("Alterações salvas com sucesso!");
+      setMensagem(
+        "Alterações salvas com sucesso!"
+      );
   
       setSenha("");
   
     } catch (err) {
+  
       console.error(err);
   
       setMensagem(
-        err.response?.data?.mensagem ||
-        err.response?.data?.erro ||
         "Erro ao salvar alterações"
       );
   
     } finally {
+  
       setSalvando(false);
+  
     }
   };
 

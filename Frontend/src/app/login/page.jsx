@@ -3,9 +3,8 @@
 import React, { useState } from "react"
 import { motion, useMotionValue, useMotionTemplate } from "framer-motion"
 import { Mail, Lock, Eye, EyeOff } from "lucide-react"
-import { api } from "@/services/api"
 import { useRouter } from "next/navigation"
-
+import axios from "axios"
 
 export default function LoginPage() {
 
@@ -17,8 +16,8 @@ export default function LoginPage() {
   const [senha, setSenha] = useState("")
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState("")
-  const router = useRouter()
 
+  const router = useRouter()
 
   function handleMouseMove({ currentTarget, clientX, clientY }) {
     const { left, top } = currentTarget.getBoundingClientRect()
@@ -27,7 +26,9 @@ export default function LoginPage() {
   }
 
   const handleLogin = async (e) => {
+
     e?.preventDefault()
+
     setLoading(true)
     setErro("")
 
@@ -38,27 +39,36 @@ export default function LoginPage() {
     }
 
     try {
-      const res = await api.post("/api/login", {
-        email,
-        senha
-      })
+
+      const res = await axios.post(
+        "http://localhost:3000/api/login",
+        {
+          email,
+          senha
+        }
+      )
+
       localStorage.setItem("token", res.data.token)
-      localStorage.setItem("usuario", JSON.stringify(res.data.usuario))
+      localStorage.setItem(
+        "usuario",
+        JSON.stringify(res.data.usuario)
+      )
+
       router.push("/dashboard")
 
     } catch (err) {
+
       console.error(err)
 
-      const mensagem =
+      setErro(
         err.response?.data?.mensagem ||
-        "Email ou senha inválidos";
+        "Email ou senha inválidos"
+      )
 
-      setErro(mensagem)
     } finally {
       setLoading(false)
     }
   }
-
   return (
     <div className="relative min-h-screen flex items-center overflow-hidden bg-black">
 

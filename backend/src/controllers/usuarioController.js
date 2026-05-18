@@ -174,15 +174,23 @@ exports.atualizarUsuario = async (req, res) => {
   const {
     nome,
     email,
+    senha,
     tipo_usuario
   } = req.body;
 
   try {
 
+    let senhaHash = null;
+
+    if (senha) {
+      senhaHash = await bcrypt.hash(senha, 10);
+    }
+
     await Usuario.atualizar(
       id,
       nome,
       email,
+      senhaHash,
       tipo_usuario
     );
 

@@ -11,8 +11,8 @@ import {
   EyeOff
 } from "lucide-react"
 
-import { api } from "@/services/api"
 import { useRouter } from "next/navigation"
+import axios from "axios"
 
 export default function CreateAccountPage() {
 
@@ -36,6 +36,7 @@ export default function CreateAccountPage() {
     clientX,
     clientY
   }) {
+
     const { left, top } =
       currentTarget.getBoundingClientRect()
 
@@ -58,12 +59,15 @@ export default function CreateAccountPage() {
         return
       }
 
-      const response = await api.post("/api/usuarios", {
-        nome,
-        email,
-        senha,
-        tipo_usuario: tipoUsuario
-      })
+      const response = await axios.post(
+        "http://localhost:3000/api/usuarios",
+        {
+          nome,
+          email,
+          senha,
+          tipo_usuario: tipoUsuario
+        }
+      )
 
       console.log(response.data)
 

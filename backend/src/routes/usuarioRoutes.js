@@ -13,8 +13,18 @@ router.post("/usuarios", usuarioController.criarUsuario);
 /* login */
 router.post("/login", usuarioController.login);
 
+/* atualizar usuario */
+router.put(
+  "/usuarios/:id",
+  auth,
+  usuarioController.atualizarUsuario
+);
 
-router.put("/usuarios/:id", auth, usuarioController.atualizarUsuario);
-router.delete("/usuarios/:id",auth, usuarioController.deletarUsuario);
+/* deletar usuario */
+router.delete(
+  "/usuarios/:id",
+  auth,
+  usuarioController.deletarUsuario
+);
 
 module.exports = router;

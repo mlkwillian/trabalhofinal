@@ -108,7 +108,7 @@ export default function Sidebar() {
       category: "Dados",
     },
 
-    ...(usuario?.tipo === "gestor"
+    ...(usuario?.tipo_usuario === "gestor"
       ? [
           {
             label: "Administração",
@@ -390,15 +390,7 @@ export default function Sidebar() {
             }}
           >
 
-            <button
-              onClick={() => router.push("/perfil")}
-              className="flex items-center gap-2 p-2 w-full text-sm rounded-md hover:bg-white/5 transition-colors"
-              style={{ color: "var(--text-sub)" }}
-            >
-              <User size={14} />
-              Perfil
-            </button>
-
+          
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 p-2 w-full text-sm rounded-md transition-colors pt-2"
