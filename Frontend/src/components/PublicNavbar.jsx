@@ -36,17 +36,7 @@ export default function PublicNavbar() {
       {/* Ações */}
       <div className="flex items-center gap-3">
         
-        {/* Tema */}
-        <button
-          onClick={() => setDark(!dark)}
-          className="p-2 rounded-lg bg-purple-600/10 hover:bg-purple-600/20 transition"
-        >
-          {dark ? (
-            <Sun size={18} className="text-purple-300" />
-          ) : (
-            <Moon size={18} className="text-purple-300" />
-          )}
-        </button>
+        
 
         {/* Login */}
         <Link
@@ -58,7 +48,7 @@ export default function PublicNavbar() {
 
         {/* CTA */}
         <Link
-          href="/register"
+          href="login/criar"
           className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 transition text-white text-sm font-medium"
         >
           Criar conta

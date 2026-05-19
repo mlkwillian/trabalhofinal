@@ -1,6 +1,8 @@
 "use client";
 import Navbar from "@/components/Navbar";
 import { useState, useRef, useEffect } from "react";
+import {  ArrowLeft } from "lucide-react"
+import { useRouter } from "next/navigation";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -254,7 +256,9 @@ function PlanCard({ plan }) {
 
   return (
     
+    
     <div
+    
     
       style={{
 
@@ -617,8 +621,10 @@ function FAQItem({ item }) {
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function PlansPage() {
+  const router = useRouter();
   return (
     <main
+    
       style={{
         background: "#0a0010",
         minHeight: "100vh",
@@ -627,6 +633,31 @@ export default function PlansPage() {
         color: "#fff",
       }}
     >
+      <button
+  onClick={() => router.push("/")}
+  style={{
+    position: "fixed",
+    top: 24,
+    left: 24,
+    zIndex: 999,
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "10px 16px",
+    borderRadius: 12,
+    border: "1px solid rgba(124,58,237,0.35)",
+    background: "rgba(20,10,35,0.75)",
+    backdropFilter: "blur(10px)",
+    color: "#fff",
+    cursor: "pointer",
+    transition: "all 0.25s ease",
+    fontSize: 14,
+    fontWeight: 600,
+  }}
+>
+  <ArrowLeft size={18} />
+  Voltar
+</button>
       {/* ── SECTION 1: Plans ── */}
       <section style={{ padding: "80px 24px" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>

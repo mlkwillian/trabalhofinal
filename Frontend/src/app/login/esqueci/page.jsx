@@ -118,6 +118,27 @@ export default function ForgotPasswordPage() {
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black text-white">
 
+      <button
+        onClick={() => router.push("/")}
+        className="absolute top-6 left-6 z-20 flex items-center gap-2 px-4 py-2 rounded-xl text-white transition-all duration-300"
+        style={{
+          background: "rgba(15, 10, 30, 0.55)",
+          backdropFilter: "blur(10px)",
+          border: "1px solid rgba(190,80,230,0.25)",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "rgba(30, 20, 50, 0.75)"
+          e.currentTarget.style.border = "1px solid rgba(190,80,230,0.5)"
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "rgba(15, 10, 30, 0.55)"
+          e.currentTarget.style.border = "1px solid rgba(190,80,230,0.25)"
+        }}
+      >
+        <ArrowLeft size={18} />
+        <span className="text-sm font-medium">Voltar</span>
+      </button>
+
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap');
 

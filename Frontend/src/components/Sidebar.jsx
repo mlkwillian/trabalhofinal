@@ -90,7 +90,7 @@ export default function Sidebar() {
       label: "Alertas",
       href: "/alertas",
       icon: "bell",
-      badge: 2,
+     
       category: "Monitoramento",
     },
 
