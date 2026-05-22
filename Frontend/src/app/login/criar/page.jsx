@@ -8,7 +8,8 @@ import {
   User,
   ArrowLeft,
   Eye,
-  EyeOff
+  EyeOff,
+  CheckCircle2
 } from "lucide-react"
 
 import { useRouter } from "next/navigation"
@@ -28,6 +29,8 @@ export default function CreateAccountPage() {
 
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState("")
+
+  const [showSuccess, setShowSuccess] = useState(false)
 
   const router = useRouter()
 
@@ -71,9 +74,11 @@ export default function CreateAccountPage() {
 
       console.log(response.data)
 
-      alert("Conta criada com sucesso!")
+      setShowSuccess(true)
 
-      router.push("/login")
+      setTimeout(() => {
+        router.push("/login")
+      }, 2500)
 
     } catch (err) {
 
@@ -92,26 +97,28 @@ export default function CreateAccountPage() {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
-<button
-  onClick={() => router.push("/")}
-  className="absolute top-6 left-6 z-20 flex items-center gap-2 px-4 py-2 rounded-xl text-white transition-all duration-300"
-  style={{
-    background: "rgba(15, 10, 30, 0.55)",
-    backdropFilter: "blur(10px)",
-    border: "1px solid rgba(190,80,230,0.25)",
-  }}
-  onMouseEnter={(e) => {
-    e.currentTarget.style.background = "rgba(30, 20, 50, 0.75)"
-    e.currentTarget.style.border = "1px solid rgba(190,80,230,0.5)"
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.background = "rgba(15, 10, 30, 0.55)"
-    e.currentTarget.style.border = "1px solid rgba(190,80,230,0.25)"
-  }}
->
-  <ArrowLeft size={18} />
-  <span className="text-sm font-medium">Voltar</span>
-</button>
+
+      <button
+        onClick={() => router.push("/")}
+        className="absolute top-6 left-6 z-20 flex items-center gap-2 px-4 py-2 rounded-xl text-white transition-all duration-300"
+        style={{
+          background: "rgba(15, 10, 30, 0.55)",
+          backdropFilter: "blur(10px)",
+          border: "1px solid rgba(190,80,230,0.25)",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "rgba(30, 20, 50, 0.75)"
+          e.currentTarget.style.border = "1px solid rgba(190,80,230,0.5)"
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "rgba(15, 10, 30, 0.55)"
+          e.currentTarget.style.border = "1px solid rgba(190,80,230,0.25)"
+        }}
+      >
+        <ArrowLeft size={18} />
+        <span className="text-sm font-medium">Voltar</span>
+      </button>
+
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap');
 
@@ -205,7 +212,8 @@ export default function CreateAccountPage() {
 
           {/* glow */}
           <motion.div
-            className="absolute -inset-px opacity-0 group-hover:opacity-100 transition duration-500 rounded-2xl"
+          
+  className="absolute -inset-px opacity-0 group-hover:opacity-100 transition duration-500 rounded-2xl pointer-events-none"
             style={{
               background: useMotionTemplate`
                 radial-gradient(
@@ -417,6 +425,88 @@ export default function CreateAccountPage() {
         </motion.div>
 
       </div>
+
+      {/* modal sucesso */}
+      {showSuccess && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 pointer-events-auto"
+        >
+          <motion.div
+            initial={{ scale: 0.7, opacity: 0, y: 30 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.45,
+              ease: [0.22, 1, 0.36, 1]
+            }}
+            className="relative w-full max-w-sm rounded-3xl overflow-hidden"
+            style={{
+              background: "rgba(10, 6, 25, 0.95)",
+              border: "1px solid rgba(190,80,230,0.25)",
+              boxShadow: "0 0 60px rgba(124,58,237,0.35)"
+            }}
+          >
+
+            {/* glow */}
+            <div
+              className="absolute inset-0 opacity-40"
+              style={{
+                background:
+                  "radial-gradient(circle at top, rgba(190,80,230,0.35), transparent 70%)"
+              }}
+            />
+
+            <div className="relative z-10 px-8 py-10 text-center">
+
+              {/* ícone */}
+              <div className="flex justify-center mb-5">
+                <div
+                  className="w-20 h-20 rounded-full flex items-center justify-center"
+                  style={{
+                    background:
+                      "linear-gradient(135deg,#be50e6,#7c3aed)",
+                    boxShadow:
+                      "0 0 35px rgba(190,80,230,0.55)"
+                  }}
+                >
+                  <CheckCircle2
+                    size={42}
+                    className="text-white"
+                  />
+                </div>
+              </div>
+
+              {/* título */}
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Conta criada!
+              </h2>
+
+              {/* texto */}
+              <p className="text-purple-200/70 text-sm leading-relaxed">
+                Sua conta foi criada com sucesso.
+                Você será redirecionado para o login.
+              </p>
+
+              {/* barrinha */}
+              <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mt-6">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 2.3 }}
+                  className="h-full rounded-full"
+                  style={{
+                    background:
+                      "linear-gradient(90deg,#be50e6,#7c3aed)"
+                  }}
+                />
+              </div>
+
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
 
       {/* footer */}
       <div className="absolute bottom-6 w-full text-center text-purple-400/50 text-[12px] z-10">
