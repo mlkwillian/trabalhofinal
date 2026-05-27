@@ -6,13 +6,12 @@ const salaRoutes = require("./routes/salaRoutes");
 const incidenteRoutes = require("./routes/incidenteRoutes");
 const usuarioRoutes = require("./routes/usuarioRoutes");
 
+// ===== MQTT =====
+require("./src/MQTT");
+
 const app = express();
 
 const PORT = process.env.PORT || 3000;
-
-
-
-
 
 app.use(cors());
 app.use(express.json());
