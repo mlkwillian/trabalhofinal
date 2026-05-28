@@ -114,7 +114,7 @@ export default function DashboardPage() {
       accentColor: "#f97316",
     },
     {
-      label: "SLA de Resposta",
+      label: "SALA de Resposta",
       value: `${complianceScore}%`,
       icon: CheckCircle2,
       accentColor: "#3b82f6",
