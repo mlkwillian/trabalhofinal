@@ -2,12 +2,47 @@ const db = require("../config/db");
 
 /* listar todas as salas */
 exports.listarSalas = (req, res) => {
-  const query = "SELECT * FROM salas";
+
+  const query = `
+  SELECT 
+    s.id_sala,
+    s.nome_sala,
+    s.temperatura_min,
+    s.temperatura_max,
+
+    se.id_sensor,
+
+    l.temperatura,
+    l.umidade,
+    l.data_leitura
+
+  FROM salas s
+
+  LEFT JOIN sensores se
+    ON se.id_sala = s.id_sala
+
+  LEFT JOIN leituras l
+    ON l.id_leitura = (
+
+      SELECT l2.id_leitura
+      FROM leituras l2
+      WHERE l2.id_sensor = se.id_sensor
+      ORDER BY l2.data_leitura DESC
+      LIMIT 1
+    )
+
+  ORDER BY s.id_sala ASC
+`;
 
   db.query(query, (err, result) => {
+
     if (err) {
+
       console.error(err);
-      return res.status(500).json({ erro: "Erro ao buscar salas" });
+
+      return res.status(500).json({
+        erro: "Erro ao buscar salas"
+      });
     }
 
     res.json(result);
