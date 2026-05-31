@@ -7,7 +7,7 @@ const incidenteRoutes = require("./routes/incidenteRoutes");
 const usuarioRoutes = require("./routes/usuarioRoutes");
 
 // ===== MQTT =====
-require("./src/MQTT");
+require("./MQTT");
 
 const app = express();
 
