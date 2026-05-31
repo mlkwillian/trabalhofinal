@@ -125,15 +125,43 @@ export default function Chatbot() {
     <>
       {/* BOTÃO FLUTUANTE */}
       <button
-        onClick={() => setOpen(prev => !prev)}
-        className="fixed bottom-6 right-6 z-[9999] bg-purple-600 hover:bg-purple-700 text-white p-4 rounded-full shadow-lg"
-      >
-        💬
-      </button>
+  onClick={() => setOpen((prev) => !prev)}
+  className="
+    fixed bottom-6 right-6 z-[9999]
+    flex items-center gap-3
+    px-5 py-3
+    rounded-2xl
+    bg-zinc-900/95
+    backdrop-blur-xl
+    border border-zinc-700
+    shadow-2xl
+    hover:border-purple-500
+    hover:shadow-purple-500/20
+    hover:-translate-y-1
+    transition-all duration-300
+  "
+>
+  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-violet-500 overflow-hidden">
+  <img
+    src="https://play-lh.googleusercontent.com/qh6Pnf73m0fLjAYwyokuT73d_LB6sdXkfaCCSGgpIU1EneH15dUgBLV31X-2QkXsNQ"
+    alt="Assistente IA"
+    className="w-6 h-6 object-contain"
+  />
+</div>
+
+  <div className="text-left">
+    <p className="text-white text-sm font-semibold">
+      Assistente IA
+    </p>
+    <p className="text-zinc-400 text-xs">
+      Como posso ajudar?
+    </p>
+  </div>
+</button>
 
       {/* CHAT */}
       {open && (
-        <div className="fixed bottom-20 right-6 w-80 h-[430px] z-[9999] bg-black border border-purple-500 rounded-xl flex flex-col shadow-2xl">
+        <div className="fixed bottom-30 right-6 w-80 h-[430px] z-[9999] bg-black border border-purple-500 rounded-xl flex flex-col shadow-2xl">
 
           {/* HEADER */}
           <div className="bg-purple-600 text-white p-3 rounded-t-xl font-semibold">
