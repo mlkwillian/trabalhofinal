@@ -23,7 +23,9 @@ export default function TemperatureChart({ env, T }) {
 
     async function loadLeituras() {
       try {
-        const res = await api.get(`/api/leituras?sala_id=${env.id}`);
+        const res = await api.get(
+          `/api/leituras?sala=${encodeURIComponent(env.name)}`
+        );;
 
         // 🔥 transforma dados pro formato do gráfico
         const formatted = res.data.map((item) => ({
@@ -41,6 +43,23 @@ export default function TemperatureChart({ env, T }) {
     }
 
     loadLeituras();
+  }, [env]);
+
+  useEffect(() => {
+    if (!env?.history) return;
+
+    const formatted = env.history.map(item => ({
+      time: new Date(item.data).toLocaleTimeString(
+        "pt-BR",
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+        }
+      ),
+      temp: Number(item.temperatura),
+    }));
+
+    setData(formatted);
   }, [env]);
 
   const CustomTooltip = ({ active, payload, label }) => {
@@ -78,6 +97,35 @@ export default function TemperatureChart({ env, T }) {
       </div>
     );
   };
+
+  async function loadLeituras() {
+    try {
+      console.log("Buscando leituras da sala:", env);
+
+      const res = await api.get(
+        `/api/leituras?sala_id=${env.id}`
+      );
+
+      console.log("RES LEITURAS", res.data);
+
+      const formatted = res.data.map((item) => ({
+        time: new Date(item.data_leitura).toLocaleTimeString(
+          "pt-BR",
+          {
+            hour: "2-digit",
+            minute: "2-digit",
+          }
+        ),
+        temp: Number(item.temperatura),
+      }));
+
+      console.log("FORMATADO", formatted);
+
+      setData(formatted);
+    } catch (err) {
+      console.error("Erro ao buscar leituras", err);
+    }
+  }
 
   return (
     <div

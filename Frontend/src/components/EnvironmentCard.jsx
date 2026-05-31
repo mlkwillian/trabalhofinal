@@ -2,41 +2,47 @@
 
 import { useRef } from "react";
 import { WifiOff } from "lucide-react";
-import { ResponsiveContainer, AreaChart, Area } from "recharts";
 import { useSnowEffect } from "@/hooks/useSnowEffect";
 import { PulsingDot } from "@/components/PulsingDot";
 import { envIcon } from "@/utils/envIcon";
 
-export default function EnvironmentCard({ env, selected, onClick, T }) {
+export default function EnvironmentCard({
+  env,
+  selected,
+  onClick,
+  T,
+}) {
   const isCold = env?.icon === "snowflake";
   const canvasRef = useRef(null);
 
   useSnowEffect(canvasRef, selected && isCold);
 
-  const isAlert = env?.status === "alert" || env?.status === "danger";
+  const isAlert =
+    env?.status === "alert" ||
+    env?.status === "danger";
 
   const tempColor =
     selected && isCold
       ? T.cold.text
       : isAlert
-      ? T.accent
-      : T.purpleL;
+        ? T.accent
+        : T.purpleL;
 
   const borderColor =
     selected && isCold
       ? T.cold.border
       : selected
-      ? T.purple
-      : isAlert
-      ? T.accentDim
-      : T.border;
+        ? T.purple
+        : isAlert
+          ? T.accentDim
+          : T.border;
 
   const bgColor =
     selected && isCold
       ? T.cold.bg
       : selected
-      ? T.cardHover
-      : T.card;
+        ? T.cardHover
+        : T.card;
 
   const boxShadow = selected
     ? isCold
@@ -44,16 +50,44 @@ export default function EnvironmentCard({ env, selected, onClick, T }) {
       : `0 0 0 1.5px ${T.purple}60, 0 12px 40px rgba(124,58,237,0.15)`
     : T.shadow;
 
-  const history = env?.history?.slice(-14) || [];
-  const hasTemp = env?.temp !== null && env?.temp !== undefined;
+const temperature =
+  env?.temp ??
+  env?.currentTemp;
+
+const humidity =
+  env?.humidity ??
+  env?.currentHumidity;
+
+const hasTemp =
+  temperature !== null &&
+  temperature !== undefined;
 
   let pct = 0;
   let inRange = true;
 
-  if (hasTemp && env?.maxTemp !== env?.minTemp) {
-    const range = env.maxTemp - env.minTemp;
-    pct = Math.min(100, Math.max(0, ((env.temp - env.minTemp) / range) * 100));
-    inRange = env.temp >= env.minTemp && env.temp <= env.maxTemp;
+  if (
+    hasTemp &&
+    env?.maxTemp !== undefined &&
+    env?.minTemp !== undefined &&
+    env.maxTemp !== env.minTemp
+  ) {
+    const range =
+      Number(env.maxTemp) -
+      Number(env.minTemp);
+
+    pct = Math.min(
+      100,
+      Math.max(
+        0,
+        ((Number(temperature) - Number(env.minTemp)) / range)
+           *
+          100
+      )
+    );
+
+    inRange =
+  Number(temperature) >= Number(env.minTemp) &&
+  Number(temperature) <= Number(env.maxTemp);
   }
 
   return (
@@ -66,11 +100,10 @@ export default function EnvironmentCard({ env, selected, onClick, T }) {
         boxShadow,
         position: "relative",
         overflow: "hidden",
-        transition: "all 0.35s cubic-bezier(0.4,0,0.2,1)",
+        transition:
+          "all 0.35s cubic-bezier(0.4,0,0.2,1)",
       }}
     >
-
-      {/* ❄️ neve */}
       {isCold && (
         <canvas
           ref={canvasRef}
@@ -84,9 +117,13 @@ export default function EnvironmentCard({ env, selected, onClick, T }) {
         />
       )}
 
-      <div style={{ position: "relative", zIndex: 2 }}>
-
-        {/* topo */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 2,
+        }}
+      >
+        {/* TOPO */}
         <div className="flex justify-between mb-3">
           <div
             className="h-10 w-10 rounded-xl flex items-center justify-center"
@@ -96,7 +133,7 @@ export default function EnvironmentCard({ env, selected, onClick, T }) {
             }}
           >
             <span style={{ color: tempColor }}>
-              {envIcon?.(env?.icon) || "?"}
+              {envIcon?.(env?.icon) || "🌡️"}
             </span>
           </div>
 
@@ -104,14 +141,23 @@ export default function EnvironmentCard({ env, selected, onClick, T }) {
             {env?.online ? (
               <>
                 <PulsingDot color={tempColor} />
-                <span className="text-[9px]" style={{ color: T.muted }}>
+                <span
+                  className="text-[9px]"
+                  style={{ color: T.muted }}
+                >
                   online
                 </span>
               </>
             ) : (
               <>
-                <WifiOff className="h-3 w-3" style={{ color: T.faint }} />
-                <span className="text-[9px]" style={{ color: T.faint }}>
+                <WifiOff
+                  className="h-3 w-3"
+                  style={{ color: T.faint }}
+                />
+                <span
+                  className="text-[9px]"
+                  style={{ color: T.faint }}
+                >
                   offline
                 </span>
               </>
@@ -119,56 +165,62 @@ export default function EnvironmentCard({ env, selected, onClick, T }) {
           </div>
         </div>
 
-        {/* nome */}
-        <p className="text-[10px] uppercase truncate" style={{ color: T.muted }}>
+        {/* NOME */}
+        <p
+          className="text-[10px] uppercase truncate"
+          style={{ color: T.muted }}
+        >
           {env?.name}
         </p>
 
-        {/* temperatura */}
-        <p className="text-4xl font-black mt-1" style={{ color: tempColor }}>
-          {hasTemp ? `${env.temp}°` : "—"}
+        {/* TEMPERATURA */}
+        <p
+          className="text-4xl font-black mt-1"
+          style={{ color: tempColor }}
+        >
+          {hasTemp ? `${temperature}°C` : "—"}
         </p>
 
-        {/* barra */}
+        {/* UMIDADE */}
+        {env?.humidity !== undefined && (
+          <p
+            className="text-xs mt-1"
+            style={{ color: T.muted }}
+          >
+            Umidade: {humidity}%
+          </p>
+        )}
+
+        {/* BARRA */}
         <div className="mt-3">
-          <div className="h-1 rounded-full overflow-hidden" style={{ background: T.borderSoft }}>
+          <div
+            className="h-1 rounded-full overflow-hidden"
+            style={{
+              background: T.borderSoft,
+            }}
+          >
             {hasTemp && (
               <div
                 className="h-full rounded-full"
                 style={{
                   width: `${pct}%`,
-                  background: inRange ? T.blue : T.accent,
+                  background: inRange
+                    ? T.blue
+                    : T.accent,
                 }}
               />
             )}
           </div>
         </div>
 
-        {/* 📊 gráfico CORRIGIDO */}
-        {history.length > 0 && (
-          <div className="mt-3 h-[80px] min-h-[80px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={history}>
-                <defs>
-                  <linearGradient id={`sg${env?.id}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={tempColor} stopOpacity={0.4} />
-                    <stop offset="100%" stopColor={tempColor} stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-
-                <Area
-                  type="monotone"
-                  dataKey="temp"
-                  stroke={tempColor}
-                  strokeWidth={1.5}
-                  fill={`url(#sg${env?.id})`}
-                  dot={false}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-
+        {/* LIMITES */}
+        <div
+          className="flex justify-between mt-2 text-[10px]"
+          style={{ color: T.muted }}
+        >
+          <span>{env.minTemp}°C</span>
+          <span>{env.maxTemp}°C</span>
+        </div>
       </div>
     </button>
   );

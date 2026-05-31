@@ -32,11 +32,34 @@ export default function AmbientesPage() {
           return;
         }
 
-        const res = await api.get("/api/salas");
-        setSalas(res.data);
+        const [salasRes, leiturasRes] = await Promise.all([
+          api.get("/api/salas"),
+          api.get("/api/leituras/ultimas"),
+        ]);
 
-        if (res.data.length > 0) {
-          setSelectedSala(res.data[0]);
+        const salasComDados = salasRes.data.map((sala) => {
+
+          const leitura = leiturasRes.data.find(
+            l => l.sala === sala.nome_sala
+          );
+
+          return {
+            ...sala,
+
+            currentTemp: leitura
+              ? Number(leitura.temperatura)
+              : null,
+
+            currentHumidity: leitura
+              ? Number(leitura.umidade)
+              : null,
+          };
+        });
+        console.log("SALAS COM DADOS", salasComDados);
+        setSalas(salasComDados);
+
+        if (salasRes.data.length > 0) {
+          setSelectedSala(salasComDados[0]);
         }
 
       } catch (err) {
@@ -160,8 +183,11 @@ export default function AmbientesPage() {
             env={{
               id: sala.id_sala,
               name: sala.nome_sala,
-              minTemp: sala.temperatura_min,
-              maxTemp: sala.temperatura_max,
+              temp: sala.currentTemp,          // <-- ADICIONE
+              humidity: sala.currentHumidity,  // <-- ADICIONE
+              minTemp: Number(sala.temperatura_min),
+              maxTemp: Number(sala.temperatura_max),
+              online: sala.currentTemp !== null,
             }}
             T={T}
             selected={selectedSala?.id_sala === sala.id_sala}

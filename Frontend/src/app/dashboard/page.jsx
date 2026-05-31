@@ -43,28 +43,82 @@ export default function DashboardPage() {
     async function loadData() {
       try {
         setLoading(true);
-        const [salasRes, incidentesRes] = await Promise.all([
-          api.get("/api/salas"),
-          api.get("/api/incidentes").catch(() => ({ data: [] })),
-        ]);
-        const mappedSalas = (salasRes.data || []).map((sala) => ({
-          id: sala.id_sala,
-          name: sala.nome_sala,
-          minTemp: sala.temperatura_min,
-          maxTemp: sala.temperatura_max,
-          online: true,
-          history: [],
+
+        const [salasRes, leiturasRes, alertasRes] =
+          await Promise.all([
+            api.get("/api/salas"),
+            api.get("/api/leituras/ultimas"),
+            api.get("/api/alertas"),
+          ]);
+
+        const salas = salasRes.data || [];
+        const leituras = leiturasRes.data || [];
+        const alertas = alertasRes.data || [];
+
+        console.log("SALAS", salas);
+        console.log("LEITURAS", leituras);
+        console.log("ALERTAS", alertas);
+
+        const ambientes = salas.map((sala) => {
+          const ultimaLeitura = leituras.find(
+            (l) => l.sala === sala.nome_sala
+          );
+
+          return {
+            id: sala.id_sala,
+            name: sala.nome_sala,
+
+            currentTemp: ultimaLeitura
+              ? Number(ultimaLeitura.temperatura)
+              : 0,
+
+            currentHumidity: ultimaLeitura
+              ? Number(ultimaLeitura.umidade)
+              : 0,
+
+            minTemp: Number(sala.temperatura_min),
+            maxTemp: Number(sala.temperatura_max),
+
+            online: !!ultimaLeitura,
+
+            history: leituras
+              .filter(
+                (l) => l.sala === sala.nome_sala
+              )
+              .map((l) => ({
+                temperatura: Number(l.temperatura),
+                data: l.data_leitura,
+              })),
+          };
+        });
+
+        const alertasFormatados = alertas.map((a) => ({
+          id_incidente: a.id_incidente,
+          room: a.sala,
+          msg: `Temperatura fora da faixa em ${a.sala}`,
+          severity: "high",
+          verified: false,
+          data_inicio: a.data_inicio,
         }));
-        setEnvs(mappedSalas);
-        setAlertsData(incidentesRes.data || []);
-        if (mappedSalas.length > 0) setSelectedEnv(mappedSalas[0]);
+
+        setEnvs(ambientes);
+        setAlertsData(alertasFormatados);
+
+        if (ambientes.length > 0) {
+          setSelectedEnv(ambientes[0]);
+        }
       } catch (err) {
-        console.error("Erro ao carregar dashboard", err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
     }
+
     loadData();
+
+    const interval = setInterval(loadData, 30000);
+
+    return () => clearInterval(interval);
   }, []);
 
   // ✅ Fix 1: handleVerify agora está corretamente fechado com };
@@ -114,7 +168,7 @@ export default function DashboardPage() {
       accentColor: "#f97316",
     },
     {
-      label: "SALA de Resposta",
+      label: "Conformidade",
       value: `${complianceScore}%`,
       icon: CheckCircle2,
       accentColor: "#3b82f6",
@@ -129,6 +183,14 @@ export default function DashboardPage() {
       </div>
     );
   }
+
+  const alertaCritico = alertsData.find(
+    a => !a.verified
+  );
+
+
+
+
 
   return (
     <div
@@ -167,7 +229,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ALERT BANNER */}
-        {showBanner && (
+        {showBanner && alertaCritico && (
           <div
             className="tg-banner flex items-center gap-3 px-4 py-3 rounded-xl border"
             style={{
@@ -177,16 +239,17 @@ export default function DashboardPage() {
             }}
           >
             <span className="text-xl">🚨</span>
+
             <p
               className="flex-1 text-[13px]"
               style={{ color: "#fca5a5" }}
             >
               <strong style={{ color: "var(--tg-red)" }}>
-                ALERTA CRÍTICO!{" "}
-              </strong>
-              Sensor S-04 (Câmara Frigorífica B) atingiu{" "}
-              <strong>-32.1°C</strong> — limite inferior excedido.
+                ALERTA CRÍTICO!
+              </strong>{" "}
+              {alertaCritico.msg}
             </p>
+
             <button
               onClick={() => setShowBanner(false)}
               className="text-lg"
@@ -217,29 +280,28 @@ export default function DashboardPage() {
                 style={
                   isActive
                     ? {
-                        background: isAlertsAndCrit
-                          ? "linear-gradient(135deg,rgba(239,68,68,0.4),rgba(239,68,68,0.2))"
-                          : "linear-gradient(135deg,rgba(124,58,237,0.4),rgba(168,85,247,0.25))",
-                        color: isAlertsAndCrit
-                          ? "var(--tg-red)"
-                          : "var(--tg-purple3)",
-                        border: `1px solid ${
-                          isAlertsAndCrit
-                            ? "rgba(239,68,68,0.5)"
-                            : "rgba(124,58,237,0.3)"
+                      background: isAlertsAndCrit
+                        ? "linear-gradient(135deg,rgba(239,68,68,0.4),rgba(239,68,68,0.2))"
+                        : "linear-gradient(135deg,rgba(124,58,237,0.4),rgba(168,85,247,0.25))",
+                      color: isAlertsAndCrit
+                        ? "var(--tg-red)"
+                        : "var(--tg-purple3)",
+                      border: `1px solid ${isAlertsAndCrit
+                        ? "rgba(239,68,68,0.5)"
+                        : "rgba(124,58,237,0.3)"
                         }`,
-                        boxShadow: isAlertsAndCrit
-                          ? "0 0 16px rgba(239,68,68,0.2)"
-                          : "0 0 16px rgba(124,58,237,0.2)",
-                      }
+                      boxShadow: isAlertsAndCrit
+                        ? "0 0 16px rgba(239,68,68,0.2)"
+                        : "0 0 16px rgba(124,58,237,0.2)",
+                    }
                     : isAlertsAndCrit
-                    ? {
+                      ? {
                         background:
                           "linear-gradient(135deg,rgba(239,68,68,0.3),rgba(239,68,68,0.15))",
                         color: "var(--tg-red)",
                         border: "1px solid rgba(239,68,68,0.4)",
                       }
-                    : { color: "var(--tg-muted)" }
+                      : { color: "var(--tg-muted)" }
                 }
               >
                 {t.label}
