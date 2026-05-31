@@ -6,38 +6,20 @@ import {
   BarChart3, TrendingUp, ArrowLeft, Filter, ChevronDown
 } from "lucide-react";
 import Chatbot from '@/components/Chatbot'
-const dados = [
-  { ambiente: "Almoxarifado Principal",  total: 174, conformes: 139, atencao: 28, criticos: 7 },
-  { ambiente: "Cozinha Industrial",      total: 174, conformes: 142, atencao: 24, criticos: 8 },
-  { ambiente: "Laboratório de Análises", total: 174, conformes: 137, atencao: 25, criticos: 12 },
-];
+import { api } from "@/services/api";
 
-const historico = [
-  { dt: "02/07/2025 14:00", env: "Câmara Fria A",    temp: "-17.8°C", faixa: "-22°C a -15°C", status: "conforme" },
-  { dt: "02/07/2025 14:00", env: "Câmara Fria B",    temp: "-13.9°C", faixa: "-22°C a -15°C", status: "crítico"  },
-  { dt: "02/07/2025 14:00", env: "Sala de Vacinas",  temp:   "5.1°C", faixa:   "2°C a 8°C",  status: "conforme" },
-  { dt: "02/07/2025 14:00", env: "Estufa 01",        temp:  "38.2°C", faixa: "35°C a 40°C",  status: "conforme" },
-  { dt: "02/07/2025 08:00", env: "Câmara Fria A",    temp: "-21.1°C", faixa: "-22°C a -15°C", status: "atenção"  },
-  { dt: "02/07/2025 08:00", env: "Lab. de Análises", temp:  "22.0°C", faixa: "18°C a 25°C",  status: "conforme" },
-];
-
-const totalLeituras = dados.reduce((s, d) => s + d.total, 0);
-const totalConf     = dados.reduce((s, d) => s + d.conformes, 0);
-const totalAtenc    = dados.reduce((s, d) => s + d.atencao, 0);
-const totalCrit     = dados.reduce((s, d) => s + d.criticos, 0);
-const taxa          = ((totalConf / totalLeituras) * 100).toFixed(1);
 
 function taxaClasses(pct) {
   const n = parseFloat(pct);
   if (n >= 85) return { text: "text-emerald-400", bar: "bg-emerald-400" };
-  if (n >= 75) return { text: "text-amber-400",   bar: "bg-amber-400"   };
-  return         { text: "text-red-400",           bar: "bg-red-400"     };
+  if (n >= 75) return { text: "text-amber-400", bar: "bg-amber-400" };
+  return { text: "text-red-400", bar: "bg-red-400" };
 }
 
 const STATUS_CFG = {
   conforme: { cls: "text-emerald-400 bg-emerald-400/10 border-emerald-400/30", Icon: CheckCircle2 },
-  atenção:  { cls: "text-amber-400   bg-amber-400/10   border-amber-400/30",   Icon: AlertTriangle },
-  crítico:  { cls: "text-red-400     bg-red-400/10     border-red-400/30",     Icon: XCircle },
+  atenção: { cls: "text-amber-400   bg-amber-400/10   border-amber-400/30", Icon: AlertTriangle },
+  crítico: { cls: "text-red-400     bg-red-400/10     border-red-400/30", Icon: XCircle },
 };
 
 function StatusBadge({ status }) {
@@ -59,7 +41,124 @@ function Pill({ value, cls }) {
   );
 }
 
+
 export default function RelatorioAuditoria() {
+
+  const [dados, setDados] = React.useState([]);
+  const [historico, setHistorico] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    carregarDados();
+
+    const interval = setInterval(() => {
+      carregarDados();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  async function carregarDados() {
+    try {
+      setLoading(true);
+
+      const [salasRes, leiturasRes] = await Promise.all([
+        api.get("/api/salas"),
+        api.get("/api/leituras/ultimas"),
+      ]);
+
+      const salas = salasRes.data || [];
+      const leituras = leiturasRes.data || [];
+
+      const historicoFormatado = leituras.map(item => {
+        let status = "conforme";
+
+        if (
+          item.temperatura < item.temperatura_min ||
+          item.temperatura > item.temperatura_max
+        ) {
+          status = "crítico";
+        }
+
+        return {
+          dt: new Date(item.data_leitura).toLocaleString("pt-BR"),
+          env: item.sala,
+          temp: `${item.temperatura}°C`,
+          faixa: `${item.temperatura_min}°C a ${item.temperatura_max}°C`,
+          status,
+        };
+      });
+
+      setHistorico(historicoFormatado);
+
+      const resumo = salas.map(sala => {
+        const leiturasSala = leituras.filter(
+          l => l.sala === sala.nome_sala
+        );
+
+        let conformes = 0;
+        let atencao = 0;
+        let criticos = 0;
+
+        leiturasSala.forEach(l => {
+          const temp = Number(l.temperatura);
+
+          if (
+            temp >= sala.temperatura_min &&
+            temp <= sala.temperatura_max
+          ) {
+            conformes++;
+          } else if (
+            temp >= sala.temperatura_min - 2 &&
+            temp <= sala.temperatura_max + 2
+          ) {
+            atencao++;
+          } else {
+            criticos++;
+          }
+        });
+
+        return {
+          ambiente: sala.nome_sala,
+          total: leiturasSala.length,
+          conformes,
+          atencao,
+          criticos,
+        };
+      });
+
+      setDados(resumo);
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+
+  const totalLeituras = dados.reduce((s, d) => s + d.total, 0);
+
+  const totalConf = dados.reduce(
+    (s, d) => s + d.conformes,
+    0
+  );
+
+  const totalAtenc = dados.reduce(
+    (s, d) => s + d.atencao,
+    0
+  );
+
+  const totalCrit = dados.reduce(
+    (s, d) => s + d.criticos,
+    0
+  );
+
+  const taxa =
+    totalLeituras > 0
+      ? ((totalConf / totalLeituras) * 100).toFixed(1)
+      : "0.0";
+
   const exportarCSV = () => {
     const header = ["Ambiente", "Total", "Conformes", "Atenção", "Críticos", "Conformidade (%)"];
     const rows = dados.map(d => [
@@ -76,6 +175,34 @@ export default function RelatorioAuditoria() {
     URL.revokeObjectURL(url);
   };
 
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      carregarDados();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: "var(--bg)" }}
+      >
+        <div
+          className="px-6 py-4 rounded-xl font-mono"
+          style={{
+            background: "var(--card)",
+            border: "1px solid var(--border)",
+            color: "var(--text)"
+          }}
+        >
+          Carregando relatório...
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen px-6 py-8 space-y-6" style={{ background: "var(--bg)" }}>
 
@@ -146,11 +273,11 @@ export default function RelatorioAuditoria() {
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {[
-            { label: "Total de Leituras",    value: totalLeituras, Icon: BarChart3,     tc: "text-violet-400",  hi: false },
-            { label: "Conformes",            value: totalConf,     Icon: CheckCircle2,  tc: "text-emerald-400", hi: false },
-            { label: "Atenção",              value: totalAtenc,    Icon: AlertTriangle, tc: "text-amber-400",   hi: false },
-            { label: "Críticos",             value: totalCrit,     Icon: XCircle,       tc: "text-red-400",     hi: false },
-            { label: "Taxa de Conformidade", value: `${taxa}%`,   Icon: TrendingUp,    tc: "text-sky-400",     hi: true  },
+            { label: "Total de Leituras", value: totalLeituras, Icon: BarChart3, tc: "text-violet-400", hi: false },
+            { label: "Conformes", value: totalConf, Icon: CheckCircle2, tc: "text-emerald-400", hi: false },
+            { label: "Atenção", value: totalAtenc, Icon: AlertTriangle, tc: "text-amber-400", hi: false },
+            { label: "Críticos", value: totalCrit, Icon: XCircle, tc: "text-red-400", hi: false },
+            { label: "Taxa de Conformidade", value: `${taxa}%`, Icon: TrendingUp, tc: "text-sky-400", hi: true },
           ].map(({ label, value, Icon, tc, hi }) => (
             <div
               key={label}
@@ -192,7 +319,10 @@ export default function RelatorioAuditoria() {
               </thead>
               <tbody>
                 {dados.map((d, i) => {
-                  const pct = ((d.conformes / d.total) * 100).toFixed(1);
+                  const pct =
+                    d.total > 0
+                      ? ((d.conformes / d.total) * 100).toFixed(1)
+                      : "0.0";
                   const { text, bar } = taxaClasses(pct);
                   return (
                     <tr
@@ -251,8 +381,8 @@ export default function RelatorioAuditoria() {
                 {historico.map((r, i) => {
                   const tempCls =
                     r.status === "crítico" ? "text-red-400" :
-                    r.status === "atenção" ? "text-amber-400" :
-                    "text-emerald-400";
+                      r.status === "atenção" ? "text-amber-400" :
+                        "text-emerald-400";
                   return (
                     <tr
                       key={i}
