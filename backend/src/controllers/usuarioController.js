@@ -26,6 +26,36 @@ exports.listarUsuarios = (req, res) => {
 
 };
 
+exports.me = (req, res) => {
+
+  Usuario.buscarPorId(req.usuario.id, (err, result) => {
+
+    if (err) {
+      return res.status(500).json({
+        erro: "Erro ao buscar usuário"
+      });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({
+        erro: "Usuário não encontrado"
+      });
+    }
+
+    const usuario = result[0];
+
+    res.json({
+      id: usuario.id_usuario,
+      nome: usuario.nome,
+      email: usuario.email,
+      tipo_usuario: usuario.tipo_usuario
+    });
+
+  });
+
+};
+
+
 /* =========================
    CRIAR USUÁRIO
 ========================= */
@@ -235,34 +265,5 @@ exports.deletarUsuario = async (req, res) => {
     });
 
   }
-
-exports.me = (req, res) => {
-
-  Usuario.buscarPorId(req.usuario.id, (err, result) => {
-
-    if (err) {
-      return res.status(500).json({
-        erro: "Erro ao buscar usuário"
-      });
-    }
-
-    if (result.length === 0) {
-      return res.status(404).json({
-        erro: "Usuário não encontrado"
-      });
-    }
-
-    const usuario = result[0];
-
-    res.json({
-      id: usuario.id_usuario,
-      nome: usuario.nome,
-      email: usuario.email,
-      tipo_usuario: usuario.tipo_usuario
-    });
-
-  });
-
-};
 
 };
