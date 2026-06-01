@@ -10,6 +10,8 @@ router.get("/usuarios", auth, usuarioController.listarUsuarios);
 /* criar usuario */
 router.post("/usuarios", usuarioController.criarUsuario);
 
+router.get("/me", auth, usuarioController.me);
+
 /* login */
 router.post("/login", usuarioController.login);
 

@@ -21,6 +21,22 @@ const Usuario = {
 
   },
 
+  buscarPorId: (id, callback) => {
+
+  const query = `
+    SELECT
+      id_usuario,
+      nome,
+      email,
+      tipo_usuario
+    FROM usuarios
+    WHERE id_usuario = ?
+  `;
+
+  db.query(query, [id], callback);
+
+},
+
   /* =========================
      CRIAR
   ========================= */
@@ -152,6 +168,8 @@ const Usuario = {
     });
 
   }
+
+  
 
 };
 
