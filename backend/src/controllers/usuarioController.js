@@ -295,9 +295,4 @@ exports.deletarUsuario = async (req, res) => {
 
   }
 
-<<<<<<< Updated upstream
-=======
-
-
->>>>>>> Stashed changes
 };
