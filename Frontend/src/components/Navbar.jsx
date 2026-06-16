@@ -290,7 +290,7 @@ export default function Navbar() {
         {/* Logo */}
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-purple-400" />
-          <h1 className="text-white font-bold text-lg">ThermoGuard</h1>
+          <h1 className="text-white font-bold text-lg">TermoGuard</h1>
         </div>
 
         {/* Ações */}
