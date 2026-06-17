@@ -163,7 +163,7 @@ export default function Sidebar() {
               className="font-bold leading-none"
               style={{ color: "var(--text)" }}
             >
-              ThermoGuard
+              TermoGuard
             </span>
 
             <span

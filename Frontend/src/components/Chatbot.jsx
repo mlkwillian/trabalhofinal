@@ -53,9 +53,8 @@ export default function Chatbot() {
 
         return {
           sala: s.sala,
-          texto: `🌡️ ${s.sala}: ${temp}°C ${
-            fora ? '🔴 FORA DO PADRÃO' : '🟢 OK'
-          }`,
+          texto: `🌡️ ${s.sala}: ${temp}°C ${fora ? '🔴 FORA DO PADRÃO' : '🟢 OK'
+            }`,
           fora
         }
       })
@@ -125,8 +124,8 @@ export default function Chatbot() {
     <>
       {/* BOTÃO FLUTUANTE */}
       <button
-  onClick={() => setOpen((prev) => !prev)}
-  className="
+        onClick={() => setOpen((prev) => !prev)}
+        className="
     fixed bottom-6 right-6 z-[9999]
     flex items-center gap-3
     px-5 py-3
@@ -140,24 +139,24 @@ export default function Chatbot() {
     hover:-translate-y-1
     transition-all duration-300
   "
->
-  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-violet-500 overflow-hidden">
-  <img
-    src="https://play-lh.googleusercontent.com/qh6Pnf73m0fLjAYwyokuT73d_LB6sdXkfaCCSGgpIU1EneH15dUgBLV31X-2QkXsNQ"
-    alt="Assistente IA"
-    className="w-6 h-6 object-contain"
-  />
-</div>
+      >
+        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-violet-500 overflow-hidden">
+          <img
+            src="https://play-lh.googleusercontent.com/qh6Pnf73m0fLjAYwyokuT73d_LB6sdXkfaCCSGgpIU1EneH15dUgBLV31X-2QkXsNQ"
+            alt="Assistente IA"
+            className="w-6 h-6 object-contain"
+          />
+        </div>
 
-  <div className="text-left">
-    <p className="text-white text-sm font-semibold">
-      Assistente IA
-    </p>
-    <p className="text-zinc-400 text-xs">
-      Como posso ajudar?
-    </p>
-  </div>
-</button>
+        <div className="text-left">
+          <p className="text-white text-sm font-semibold">
+            Assistente IA
+          </p>
+          <p className="text-zinc-400 text-xs">
+            Como posso ajudar?
+          </p>
+        </div>
+      </button>
 
       {/* CHAT */}
       {open && (
@@ -181,11 +180,10 @@ export default function Chatbot() {
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`p-2 rounded-lg max-w-[80%] ${
-                  msg.from === 'user'
+                className={`p-2 rounded-lg max-w-[80%] ${msg.from === 'user'
                     ? 'bg-purple-500 ml-auto text-white'
                     : 'bg-gray-800 text-gray-200'
-                }`}
+                  }`}
               >
                 {msg.text}
               </div>

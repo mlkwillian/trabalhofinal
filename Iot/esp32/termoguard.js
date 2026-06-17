@@ -31,7 +31,7 @@ wifi.on("connected", function () {
   console.log("✅ WiFi conectado");
 
   lcd.clear();
-  lcd.setCursor(0,0);
+  lcd.setCursor(0, 0);
   lcd.print("WiFi Conectado");
 
   mqtt.connect();
@@ -41,7 +41,7 @@ wifi.on("disconnected", function () {
   console.log("❌ WiFi desconectado... reconectando");
 
   lcd.clear();
-  lcd.setCursor(0,0);
+  lcd.setCursor(0, 0);
   lcd.print("WiFi OFF");
 
   wifi.connect(WIFI_SSID);
@@ -51,7 +51,7 @@ wifi.on("disconnected", function () {
 mqtt.on("connected", function () {
   console.log("✅ MQTT conectado");
 
-  lcd.setCursor(0,1);
+  lcd.setCursor(0, 1);
   lcd.print("MQTT ON       ");
 
   mqtt.subscribe("termoguard/led");
@@ -60,7 +60,7 @@ mqtt.on("connected", function () {
 mqtt.on("disconnected", function () {
   console.log("❌ MQTT desconectado... reconectando");
 
-  lcd.setCursor(0,1);
+  lcd.setCursor(0, 1);
   lcd.print("MQTT OFF      ");
 
   mqtt.connect();
@@ -93,7 +93,7 @@ setInterval(function () {
     console.log("❌ Erro leitura DHT");
 
     lcd.clear();
-    lcd.setCursor(0,0);
+    lcd.setCursor(0, 0);
     lcd.print("Erro Sensor");
 
     return;
@@ -124,10 +124,10 @@ setInterval(function () {
   // ===== LCD =====
   lcd.clear();
 
-  lcd.setCursor(0,0);
+  lcd.setCursor(0, 0);
   lcd.print("T:" + temperatura + "C U:" + umidade + "%");
 
-  lcd.setCursor(0,1); 
+  lcd.setCursor(0, 1);
   lcd.print("Status:" + ledStatus);
 
   // ===== ENVIO MQTT =====

@@ -6,6 +6,7 @@ import { Sun, Moon, Plus, X, Thermometer, Building2, CheckCircle, AlertCircle } 
 import { useTheme } from "@/contexts/ThemeContext";
 import { useRouter } from "next/navigation";
 import { api } from "@/services/api";
+import BotaoConexao from "./BotaoConexao";
 
 // ─── MODAL em Portal (renderiza direto no <body>, fora de qualquer overflow) ───
 function NovoAmbienteModal({ onClose, onSuccess }) {
@@ -204,7 +205,24 @@ function NovoAmbienteModal({ onClose, onSuccess }) {
             </div>
           </div>
 
-          {/* Feedback sucesso / erro */}
+          {/* Conexão do dispositivo */}
+          <div>
+            <label
+              style={{
+                color: "#c4b5fd",
+                fontSize: "12px",
+                fontWeight: 500,
+                display: "block",
+                marginBottom: "6px",
+              }}
+            >
+              Conexão do Dispositivo
+            </label>
+
+            <BotaoConexao/>
+          </div>
+
+            {/* Feedback sucesso / erro */ }
           {feedback && (
             <div style={{
               display: "flex", alignItems: "center", gap: "8px",
@@ -290,7 +308,7 @@ export default function Navbar() {
         {/* Logo */}
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-purple-400" />
-          <h1 className="text-white font-bold text-lg">ThermoGuard</h1>
+          <h1 className="text-white font-bold text-lg">TermoGuard</h1>
         </div>
 
         {/* Ações */}

@@ -192,13 +192,38 @@ O que você quer saber? 😉`
     <>
       {/* BOTÃO */}
       <button
-        onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full 
-        bg-gradient-to-r from-purple-600 to-fuchsia-500 
-        text-white shadow-xl flex items-center justify-center text-xl 
-        hover:scale-110 transition"
+        onClick={() => setOpen((prev) => !prev)}
+        className="
+    fixed bottom-6 right-6 z-[9999]
+    flex items-center gap-3
+    px-5 py-3
+    rounded-2xl
+    bg-zinc-900/95
+    backdrop-blur-xl
+    border border-zinc-700
+    shadow-2xl
+    hover:border-purple-500
+    hover:shadow-purple-500/20
+    hover:-translate-y-1
+    transition-all duration-300
+  "
       >
-        💬
+        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-violet-500 overflow-hidden">
+          <img
+            src="https://play-lh.googleusercontent.com/qh6Pnf73m0fLjAYwyokuT73d_LB6sdXkfaCCSGgpIU1EneH15dUgBLV31X-2QkXsNQ"
+            alt="Assistente IA"
+            className="w-6 h-6 object-contain"
+          />
+        </div>
+
+        <div className="text-left">
+          <p className="text-white text-sm font-semibold">
+            Assistente IA
+          </p>
+          <p className="text-zinc-400 text-xs">
+            Como posso ajudar?
+          </p>
+        </div>
       </button>
 
       {/* CHAT */}
@@ -221,11 +246,10 @@ O que você quer saber? 😉`
                 {msg.type === 'text' && (
                   <div className={`flex ${msg.from === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div
-                      className={`px-4 py-3 rounded-2xl text-sm max-w-[75%] whitespace-pre-line ${
-                        msg.from === 'user'
+                      className={`px-4 py-3 rounded-2xl text-sm max-w-[75%] whitespace-pre-line ${msg.from === 'user'
                           ? 'bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white'
                           : 'bg-[#11111A] border border-[#1F1F2E] text-gray-200'
-                      }`}
+                        }`}
                     >
                       {msg.text}
                     </div>
@@ -250,9 +274,8 @@ O que você quer saber? 😉`
                         </button>
 
                         <div
-                          className={`px-4 text-sm text-gray-400 transition-all duration-300 ${
-                            accordionOpen === index ? 'max-h-40 py-2' : 'max-h-0 overflow-hidden'
-                          }`}
+                          className={`px-4 text-sm text-gray-400 transition-all duration-300 ${accordionOpen === index ? 'max-h-40 py-2' : 'max-h-0 overflow-hidden'
+                            }`}
                         >
                           {item.a}
                         </div>
